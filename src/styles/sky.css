@@ -1,0 +1,252 @@
+/* ---------------------------------------------------------------------------
+   The sky system. One continuous sky behind everything, in three z-layers:
+
+     0  .sky-base   fixed  — the horizontal seam gradient, exactly the colours
+                             of the top row of sky-clouds.jpg
+     0  .sky-wash   scrolls — the deep-blue vertical wash, anchored to the top
+                             of the document so it pales away as you descend
+                             and never tints the join with the photo
+     1  .sky-drift  fixed  — far + mid clouds and the faint high wind
+     2  .cloudbank  document bottom
+     3  .content
+--------------------------------------------------------------------------- */
+
+.sky-base,
+.sky-drift {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.sky-base {
+  z-index: 0;
+  background: linear-gradient(
+    to right,
+    var(--sky-seam-left),
+    var(--sky-seam-right)
+  );
+}
+
+.sky-wash {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 190vh;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    var(--sky-highest) 0%,
+    var(--sky-high) 16%,
+    rgba(71, 168, 242, 0.5) 44%,
+    rgba(71, 168, 242, 0) 78%
+  );
+}
+
+.sky-drift {
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* Both layers are fixed, so left alone they would sit dead still while the
+   passes fall past them — which reads as wallpaper, not as distance. Against
+   the falling camera they rise, the near layer roughly three times as fast as
+   the far one. The coefficients stay small on purpose: over a 6000px page they
+   come to about 70px and 190px, enough to feel and not enough to empty the sky
+   out at the bottom. */
+.drift-far,
+.drift-mid {
+  position: absolute;
+  inset: 0;
+}
+
+.drift-far {
+  translate: 0 calc(var(--sy, 0px) * -0.012);
+}
+
+.drift-mid {
+  translate: 0 calc(var(--sy, 0px) * -0.032);
+}
+
+/* --- clouds --------------------------------------------------------------- */
+.cloud-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.cloud {
+  position: absolute;
+  width: var(--w);
+  animation: drift var(--dur, 40s) ease-in-out var(--delay, 0s) infinite
+    alternate;
+  will-change: transform;
+}
+
+.cloud svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  transform: scaleX(var(--fx, 1)) scaleY(var(--fy, 1));
+}
+
+/* three depth layers: far reads hazier and bluer, near reads crisp */
+.layer-far {
+  opacity: 0.55;
+  filter: blur(2.5px) saturate(0.9);
+  z-index: 1;
+}
+
+.layer-mid {
+  opacity: 0.8;
+  filter: blur(0.8px);
+  z-index: 2;
+}
+
+.layer-near {
+  opacity: 1;
+  filter: drop-shadow(0 14px 22px rgba(40, 110, 180, 0.13));
+  z-index: 4;
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(calc(var(--travel, 26px) * -1), 0, 0);
+  }
+  to {
+    transform: translate3d(var(--travel, 26px), 6px, 0);
+  }
+}
+
+/* --- the cloud bank on the floor of the document -------------------------- */
+.cloudbank {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  padding-top: var(--cloud-ratio); /* keeps the 1920x1138 artwork aspect */
+  pointer-events: none;
+  background: url('../assets/backgrounds/sky-clouds.jpg') bottom center / 100%
+    auto no-repeat;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 160px);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 160px);
+}
+
+/* --- wind curls ----------------------------------------------------------- */
+/* Two animations, deliberately out of step with each other:
+
+     .wind      carries the curl across the sky, lifting and growing slightly as
+                it goes, and fades it in and out at the ends of that pass so
+                nothing ever pops in at the edge of the screen;
+     .wind path flows the dash along each stroke four times faster, so the line
+                looks continuously redrawn by the air rather than towed through
+                it. pathLength="1000" on every path means one dash rule governs
+                strokes of wildly different real lengths.
+
+   Every stroke is painted twice — a wide faint halo under a crisp line — which
+   feathers the ends instead of stopping them dead in a round cap. */
+.wind {
+  position: absolute;
+  width: var(--w, 260px);
+  opacity: 0;
+  animation: wind-travel var(--dur, 26s) linear var(--delay, 0s) infinite;
+  will-change: transform, opacity;
+}
+
+.wind svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  transform: scale(var(--fx, 1), var(--fy, 1));
+}
+
+.wind path {
+  fill: none;
+  stroke: #ffffff;
+  stroke-linecap: round;
+  animation: wind-flow calc(var(--dur, 26s) / 7) linear var(--delay, 0s)
+    infinite;
+}
+
+.wind-halo path {
+  stroke-width: 13;
+  stroke-opacity: 0.3;
+  stroke-dasharray: 840 160;
+}
+
+.wind-line path {
+  stroke-width: 3.6;
+  stroke-opacity: 1;
+  stroke-dasharray: 700 300;
+}
+
+/* the two shorter wisps run a little ahead of the lead line */
+.wind-line path:nth-child(2) {
+  animation-duration: calc(var(--dur, 26s) / 5.5);
+  stroke-width: 2.5;
+}
+
+.wind-line path:nth-child(3) {
+  animation-duration: calc(var(--dur, 26s) / 9);
+  stroke-width: 2.1;
+  stroke-opacity: 0.7;
+}
+
+.wind-halo path:nth-child(2) {
+  animation-duration: calc(var(--dur, 26s) / 5.5);
+  stroke-width: 9;
+}
+
+.wind-halo path:nth-child(3) {
+  animation-duration: calc(var(--dur, 26s) / 9);
+  stroke-width: 8;
+}
+
+@keyframes wind-flow {
+  to {
+    stroke-dashoffset: -1000;
+  }
+}
+
+@keyframes wind-travel {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.86);
+  }
+  14% {
+    opacity: var(--op, 0.45);
+    transform: translate3d(
+        calc(var(--travel, 60vw) * 0.14),
+        calc(var(--rise, -34px) * 0.14),
+        0
+      )
+      scale(0.89);
+  }
+  70% {
+    opacity: var(--op, 0.45);
+    transform: translate3d(
+        calc(var(--travel, 60vw) * 0.7),
+        calc(var(--rise, -34px) * 0.7),
+        0
+      )
+      scale(1.02);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--travel, 60vw), var(--rise, -34px), 0)
+      scale(1.08);
+  }
+}
+
+/* With motion switched off the curls would simply never appear, since their
+   fade-in lives in the keyframes. Show them, still, at their travelled-in
+   opacity. */
+@media (prefers-reduced-motion: reduce) {
+  .wind {
+    opacity: var(--op, 0.45);
+  }
+}

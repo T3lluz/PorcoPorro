@@ -1,0 +1,338 @@
+/* ---------------------------------------------------------------------------
+   The hero, and the parallax beat that opens the page.
+
+   .hero-pin is exactly twice the hero's height and .hero is sticky inside it,
+   so the sky holds still for one viewport of scrolling while <main> — pulled
+   back up by one hero (see base.css) — slides its cloud panels over the top.
+   At one viewport the pin runs out, the hero lets go, and the page scrolls
+   normally from there.
+
+   The rig itself: --plane-w drives everything. Plane plus towed banner is
+   2.405x the plane's width, so --plane-w is capped at 40vw to keep the banner
+   on screen at every width. It still reaches the intended 620px above 1550px.
+--------------------------------------------------------------------------- */
+
+.hero-pin {
+  position: relative;
+  z-index: 1;
+  height: calc(var(--hero-h) * 2);
+}
+
+.hero {
+  --plane-w: clamp(240px, 40vw, 620px);
+  --rig-w: calc(var(--plane-w) * 2.405);
+
+  position: sticky;
+  top: 0;
+  height: var(--hero-h);
+  display: grid;
+  align-content: end;
+  padding-bottom: clamp(64px, 9vh, 116px);
+}
+
+.hero-stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-behind {
+  z-index: 1;
+}
+
+.hero-wind {
+  z-index: 2;
+}
+
+.hero-behind,
+.hero-wind {
+  position: absolute;
+  inset: 0;
+}
+
+/* --- plane ---------------------------------------------------------------- */
+/* Arrives from stage right on load, then hands over to the idle loops inside. */
+.plane-rig {
+  position: absolute;
+  z-index: 3;
+  top: 11%;
+  left: 50%;
+  width: var(--rig-w);
+  aspect-ratio: 2.405 / 0.4502;
+  margin-left: calc(var(--rig-w) / -2);
+  /* The camera drops away from the aeroplane while the hero is pinned, so it
+     climbs out of frame rather than simply being covered. `translate` composes
+     with the `transform` below instead of overwriting it. */
+  translate: 0 calc(var(--sy, 0px) * -0.075);
+  animation: plane-arrive 2.7s cubic-bezier(0.17, 0.72, 0.26, 1) both;
+}
+
+@keyframes plane-arrive {
+  from {
+    transform: translate3d(calc(50vw + var(--rig-w) / 2 + 60px), 34px, 0)
+      rotate(-2.5deg);
+  }
+  to {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+}
+
+.plane-drift,
+.plane-bob,
+.plane-tilt {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+
+.plane-drift {
+  animation: plane-drift 14s ease-in-out infinite alternate;
+}
+
+.plane-bob {
+  animation: plane-bob 9s ease-in-out infinite;
+}
+
+/* Rotate about the aeroplane itself, not the middle of the towed rig, so the
+   banner sweeps behind it instead of see-sawing. */
+.plane-tilt {
+  transform-origin: calc(var(--plane-w) * 0.5) 50%;
+  animation: plane-tilt 11s ease-in-out infinite;
+}
+
+@keyframes plane-drift {
+  from {
+    transform: translate3d(-18px, 0, 0);
+  }
+  to {
+    transform: translate3d(18px, 0, 0);
+  }
+}
+
+@keyframes plane-bob {
+  0%,
+  100% {
+    transform: translate3d(0, 22px, 0);
+  }
+  50% {
+    transform: translate3d(0, -22px, 0);
+  }
+}
+
+@keyframes plane-tilt {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+}
+
+.plane-img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--plane-w);
+  height: auto;
+  filter: drop-shadow(0 18px 26px rgba(20, 80, 150, 0.28));
+}
+
+/* --- the towed banner ----------------------------------------------------- */
+/* The nose points left, so the banner tows behind it, to the right. A towed
+   banner lags the aircraft, so it gets its own slower swing about the tow
+   point rather than rotating rigidly with the hull. */
+.banner-sway {
+  position: absolute;
+  left: calc(var(--plane-w) * 0.955);
+  top: 0;
+  width: calc(var(--plane-w) * 1.45);
+  transform-origin: 2% 44%;
+  will-change: transform;
+  animation:
+    banner-arrive 2.7s cubic-bezier(0.17, 0.72, 0.26, 1) both,
+    banner-swing 13s ease-in-out 2.7s infinite;
+}
+
+@keyframes banner-arrive {
+  from {
+    transform: rotate(7deg);
+  }
+  to {
+    transform: rotate(-1.6deg);
+  }
+}
+
+@keyframes banner-swing {
+  0%,
+  100% {
+    transform: rotate(-1.6deg);
+  }
+  50% {
+    transform: rotate(1.9deg);
+  }
+}
+
+.banner {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 12px 18px rgba(20, 80, 150, 0.18));
+}
+
+/* tow rope and the two bridle legs onto the pole */
+.banner-rope {
+  fill: none;
+  stroke: var(--rosso-deep);
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  opacity: 0.82;
+}
+
+/* one path, filled and edged in the same pass */
+.banner-cloth {
+  fill: url(#cloth-shade);
+  stroke: var(--rosso);
+  stroke-width: 6;
+  stroke-linejoin: round;
+}
+
+/* the rigid leading edge the cloth is laced to */
+.banner-pole {
+  fill: none;
+  stroke: var(--rosso-deep);
+  stroke-width: 9;
+  stroke-linecap: round;
+}
+
+.banner-text {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 62px;
+  letter-spacing: 5px;
+  fill: var(--rosso);
+}
+
+/* --- hero type ------------------------------------------------------------ */
+/* Sinks a little slower than the page falls, so the passes rise past it. */
+.hero-type {
+  position: relative;
+  z-index: 6;
+  text-align: center;
+  color: var(--ink);
+  translate: 0 calc(var(--sy, 0px) * 0.14);
+  text-shadow: 0 0 38px rgba(255, 255, 255, 0.6);
+}
+
+.hero-names {
+  display: grid;
+  justify-items: center;
+  font-family: var(--display);
+  font-weight: 300;
+  line-height: 0.84;
+}
+
+/* Two ceilings, not one: the vw clamp sizes it to the page and the vh cap keeps
+   the whole block clear of the rig on a short, wide window. */
+.hn-name {
+  font-size: min(clamp(62px, 12vw, 152px), 13.5vh);
+  letter-spacing: 0.012em;
+}
+
+.hn-two {
+  font-style: italic;
+}
+
+/* The ampersand is the hinge between the two names — small, crimson, and the
+   only warm mark in the lettering. */
+.hn-amp {
+  font-style: italic;
+  font-size: min(clamp(26px, 4.4vw, 56px), 5.2vh);
+  line-height: 1;
+  color: var(--rosso);
+  margin-block: clamp(6px, 1.1vw, 18px);
+}
+
+.hero-stamp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(14px, 2.6vw, 32px);
+  margin-top: clamp(18px, 2.8vh, 36px);
+  font-family: var(--ui);
+  font-weight: 500;
+  font-size: clamp(13px, 1.7vw, 18px);
+  letter-spacing: 0.4em;
+  text-indent: 0.4em; /* the trailing letter-space would push it off centre */
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.stamp-rule {
+  flex: none;
+  width: clamp(32px, 9vw, 128px);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--ink-2), transparent);
+  opacity: 0.6;
+}
+
+.hero-place {
+  margin-top: clamp(10px, 1.7vh, 20px);
+  font-family: var(--body);
+  font-style: italic;
+  font-size: min(clamp(15px, 2vw, 23px), 2.6vh);
+  color: var(--ink-2);
+}
+
+/* --- scroll cue ----------------------------------------------------------- */
+.scroll-cue {
+  position: absolute;
+  left: 50%;
+  bottom: 20px;
+  z-index: 6;
+  margin-left: -13px;
+  color: var(--ink-2);
+  opacity: 0.6;
+  animation: cue-bob 2.6s ease-in-out infinite;
+}
+
+@keyframes cue-bob {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, 9px, 0);
+  }
+}
+
+@media (max-width: 700px) {
+  .hero {
+    --plane-w: clamp(130px, 38vw, 260px);
+  }
+
+  .banner-text {
+    font-size: 70px;
+  }
+
+  .hero-stamp {
+    letter-spacing: 0.28em;
+    text-indent: 0.28em;
+  }
+}
+
+/* A short, wide window is the tight case: the rig is sized off the width and the
+   lettering off the height, so they meet in the middle. Pull the rig smaller and
+   higher rather than shrinking the names any further. */
+@media (max-height: 700px) {
+  .hero {
+    --plane-w: clamp(200px, 30vw, 400px);
+  }
+
+  .plane-rig {
+    top: 7%;
+  }
+}

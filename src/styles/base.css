@@ -1,0 +1,292 @@
+/* ---------------------------------------------------------------------------
+   Shared primitives: the page shell, the boarding pass, buttons.
+--------------------------------------------------------------------------- */
+
+.page {
+  position: relative;
+  overflow-x: clip;
+  isolation: isolate;
+}
+
+/* Everything that is not sky sits here. */
+.content {
+  position: relative;
+  z-index: 3;
+}
+
+/* Pulled back up over the pinned hero by exactly one hero, so the passes are
+   already waiting just below the fold and the first flick of the wheel slides
+   them over it. See .hero-pin in hero.css. */
+main {
+  position: relative;
+  z-index: 2;
+  margin-top: calc(var(--hero-h) * -1);
+}
+
+.wrap {
+  width: min(100% - 44px, var(--wrap));
+  margin-inline: auto;
+}
+
+.wrap-wide {
+  width: min(100% - 36px, 1120px);
+  margin-inline: auto;
+}
+
+/* Open sky between the passes. */
+.gap {
+  position: relative;
+  height: var(--gap-sky);
+}
+
+.gap-sm {
+  height: 130px;
+}
+
+/* --- the boarding pass ---------------------------------------------------- */
+/* The camera is falling and these are loose paper falling with it, so nothing
+   here is upright. Each pass carries a small --tilt of its own; the parallax
+   engine adds --s on top, which tips the card towards the lens on its way up
+   the frame and away again on its way out, and --c swells it very slightly as
+   it passes dead centre.
+
+   perspective() is the first function in the list rather than a `perspective`
+   property on the wrapper, because the wrapper needs to stay a plain box —
+   giving it a filter or a perspective would make it a containing block and take
+   the card's shadow with it. */
+.pass-outer {
+  position: relative;
+}
+
+.pass {
+  --tear: 78px;
+
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--tear) 1fr;
+  background: var(--panel);
+  border-radius: 15px;
+  box-shadow:
+    0 32px 60px -24px rgba(12, 50, 84, 0.5),
+    0 5px 14px rgba(12, 50, 84, 0.12),
+    inset 0 1px 0 #fff;
+  transform: perspective(1700px)
+    translate3d(0, calc(var(--s, 0) * var(--drift, 44px)), 0)
+    rotateX(calc(var(--s, 0) * -7deg))
+    rotate(calc(var(--tilt, 0deg) + var(--s, 0) * var(--sway, 1.5deg)))
+    scale(calc(1 + var(--c, 0) * 0.028));
+  will-change: transform;
+}
+
+/* --- the stub ------------------------------------------------------------- */
+.pass-stub {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 0;
+  border-radius: 15px 0 0 15px;
+  background: linear-gradient(180deg, #f4fafd, #e0eef7);
+}
+
+/* The tear is a column of punched holes, not a drawn line — a dashed rule reads
+   as decoration, a row of holes reads as something you are meant to tear. */
+.pass-stub::after {
+  content: '';
+  position: absolute;
+  top: 16px;
+  bottom: 16px;
+  right: -3px;
+  width: 6px;
+  background: radial-gradient(
+    circle 2.6px at 3px 7.5px,
+    rgba(20, 62, 92, 0.22) 2.6px,
+    transparent 3.1px
+  );
+  background-size: 6px 15px;
+}
+
+.pass-mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--rosso);
+  color: #fff;
+  font-family: var(--ui);
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  box-shadow: 0 5px 12px rgba(206, 52, 25, 0.32);
+}
+
+/* set bottom-to-top, the way a real stub reads when the card is upright */
+.pass-eyebrow {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-family: var(--ui);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--ink-2);
+}
+
+.pass-code {
+  flex: none;
+  font-family: var(--ui);
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  font-variant-numeric: tabular-nums;
+  color: var(--sky-1);
+}
+
+/* --- the body ------------------------------------------------------------- */
+.pass-body {
+  position: relative;
+  min-width: 0; /* so a wide child cannot force the grid column open */
+  padding: 42px 46px 44px;
+}
+
+.pass-title {
+  color: var(--ink);
+  margin-bottom: 26px;
+}
+
+/* --- scroll reveal -------------------------------------------------------- */
+/* Opacity only. The movement is the camera's job now, and a second transform
+   here would fight the one on .pass. */
+.reveal {
+  opacity: 0;
+  transition: opacity 520ms ease;
+}
+
+.reveal.is-in {
+  opacity: 1;
+}
+
+/* --- buttons -------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--ui);
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 13px 26px;
+  border-radius: 999px;
+  border: 0;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
+}
+
+.btn-rosso {
+  background: var(--rosso);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(206, 52, 25, 0.26);
+}
+
+.btn-rosso:hover {
+  background: var(--rosso-lit);
+  transform: translateY(-2px);
+}
+
+.btn svg {
+  flex: none;
+}
+
+/* --- responsive ----------------------------------------------------------- */
+@media (max-width: 860px) {
+  .pass-body {
+    padding: 34px 32px 36px;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --gap-sky: 140px;
+  }
+
+  /* The stub rotates a quarter turn into a header band, and the punched holes
+     go with it. */
+  .pass {
+    grid-template-columns: 1fr;
+    border-radius: 13px;
+  }
+
+  .pass-stub {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 14px;
+    padding: 12px 18px;
+    border-radius: 13px 13px 0 0;
+  }
+
+  .pass-stub::after {
+    top: auto;
+    bottom: -3px;
+    left: 18px;
+    right: 18px;
+    width: auto;
+    height: 6px;
+    background: radial-gradient(
+      circle 2.6px at 7.5px 3px,
+      rgba(20, 62, 92, 0.22) 2.6px,
+      transparent 3.1px
+    );
+    background-size: 15px 6px;
+  }
+
+  .pass-mark {
+    width: 28px;
+    height: 28px;
+    font-size: 9px;
+  }
+
+  .pass-eyebrow {
+    writing-mode: horizontal-tb;
+    transform: none;
+    font-size: 10.5px;
+  }
+
+  .pass-code {
+    margin-left: auto;
+  }
+
+  .pass-body {
+    padding: 28px 22px 30px;
+  }
+
+  .pass-title {
+    margin-bottom: 20px;
+  }
+
+  .gap-sm {
+    height: 100px;
+  }
+}
+
+/* --- motion budget -------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+  }
+
+  /* Nothing registers with the parallax engine under reduced motion, so --s and
+     --c never arrive — but --tilt would still lean every card. Sit them flat. */
+  .pass {
+    transform: none;
+  }
+}

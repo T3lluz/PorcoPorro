@@ -1,0 +1,716 @@
+/* ---------------------------------------------------------------------------
+   Everything that rides on a boarding pass, plus the ground it all lands on.
+--------------------------------------------------------------------------- */
+
+/* --- Velkommen ------------------------------------------------------------ */
+.welcome .pass-body {
+  text-align: center;
+  padding-block: 54px;
+}
+
+.welcome .pass-title {
+  margin-bottom: 18px;
+}
+
+.welcome p {
+  max-width: 62ch;
+  margin-inline: auto;
+  font-size: 19px;
+  line-height: 1.8;
+}
+
+/* --- Hvor ----------------------------------------------------------------- */
+.venue-name {
+  margin-bottom: 4px;
+}
+
+.venue-address {
+  font-family: var(--ui);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.venue-blurb {
+  margin-top: 14px;
+  max-width: 58ch;
+}
+
+.map-frame {
+  position: relative;
+  margin-top: 26px;
+  border-radius: 14px;
+  overflow: hidden;
+  height: 320px;
+  background: var(--cloud-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.map-frame iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  /* enough tint to sit in the palette without becoming unreadable */
+  filter: saturate(0.75) hue-rotate(-8deg);
+  pointer-events: none;
+}
+
+/* The map is a picture. This sits over the embed and eats every click, drag and
+   two-finger scroll before it can pan, zoom, or trap the page scroll on a
+   phone. «Veibeskrivelse» underneath is the interactive part. */
+.map-shield {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  cursor: default;
+}
+
+.map-pin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border-radius: 50%;
+  background: var(--rosso);
+  box-shadow: 0 0 0 4px rgba(206, 52, 25, 0.22);
+  pointer-events: none;
+}
+
+.map-pin::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2px solid var(--rosso);
+  opacity: 0;
+  animation: pin-pulse 2.8s ease-out infinite;
+}
+
+@keyframes pin-pulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.75;
+  }
+  70% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.map-actions {
+  margin-top: 22px;
+}
+
+.travel {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  margin-top: 40px;
+  padding-top: 34px;
+  border-top: 1px solid var(--line);
+}
+
+.travel-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 14px;
+  border-radius: 13px;
+  background: rgba(206, 52, 25, 0.09);
+  color: var(--rosso);
+}
+
+.travel-card h4 {
+  font-family: var(--display);
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+
+.travel-card p {
+  font-size: 15.5px;
+  color: var(--ink-2);
+  line-height: 1.7;
+}
+
+/* --- Naar ----------------------------------------------------------------- */
+.timeline {
+  position: relative;
+  margin-top: 6px;
+  list-style: none;
+}
+
+/* the dotted spine — same rhythm as the pass perforation */
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 103px;
+  top: 14px;
+  bottom: 22px;
+  width: 3px;
+  border-radius: 2px;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--line) 0 4px,
+    transparent 4px 12px
+  );
+}
+
+.tl-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 92px 32px 1fr;
+  align-items: baseline;
+  padding: 15px 0;
+}
+
+.tl-time {
+  font-family: var(--ui);
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  padding-top: 3px;
+}
+
+.tl-dot {
+  position: relative;
+  align-self: start;
+  margin-top: 11px;
+  justify-self: center;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--rosso);
+  box-shadow: 0 0 0 5px var(--panel);
+}
+
+.tl-title {
+  font-family: var(--display);
+  font-size: 23px;
+  font-weight: 500;
+  line-height: 1.24;
+}
+
+.tl-where {
+  font-family: var(--ui);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--rosso);
+  margin-top: 3px;
+}
+
+.tl-note {
+  font-size: 15.5px;
+  color: var(--ink-2);
+  margin-top: 5px;
+  line-height: 1.65;
+}
+
+/* --- Svar ----------------------------------------------------------------- */
+/* The widest pass, and the one nearest the lens: it leans furthest, drifts
+   furthest and drops the most shadow. */
+.rsvp .pass {
+  --drift: 58px;
+  --sway: 2.2deg;
+
+  box-shadow:
+    0 46px 78px -26px rgba(12, 50, 84, 0.55),
+    0 6px 16px rgba(12, 50, 84, 0.14),
+    inset 0 1px 0 #fff;
+}
+
+.pennant {
+  position: absolute;
+  top: -16px;
+  left: 8px;
+  z-index: 2;
+  background: var(--rosso);
+  color: #fff;
+  font-family: var(--ui);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 10px 20px 18px;
+  clip-path: polygon(0 0, 100% 0, 100% 66%, 50% 100%, 0 66%);
+  box-shadow: 0 6px 16px rgba(206, 52, 25, 0.28);
+}
+
+/* The route line the whole pass is issued for. */
+.route {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px 18px;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.route-name,
+.route-date {
+  font-family: var(--ui);
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.route-rule {
+  flex: 1 1 60px;
+  height: 2px;
+  background: repeating-linear-gradient(
+    to right,
+    var(--cloud-shade) 0 4px,
+    transparent 4px 12px
+  );
+}
+
+.stamp {
+  transform: rotate(-7deg);
+  border: 2px solid var(--rosso);
+  border-radius: 7px;
+  color: var(--rosso);
+  font-family: var(--ui);
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  opacity: 0.92;
+}
+
+.route-blurb {
+  max-width: 62ch;
+  color: var(--ink-2);
+}
+
+.form-frame {
+  margin-top: 26px;
+  background: var(--cloud-2);
+  border-radius: 16px;
+  padding: 22px;
+}
+
+.form-inner {
+  background: #fff;
+  border-radius: 11px;
+  padding: 14px;
+  box-shadow: 0 2px 10px rgba(23, 60, 76, 0.06);
+  overflow: hidden;
+}
+
+.form-inner iframe {
+  width: 100%;
+  height: 1100px;
+  border: 0;
+}
+
+.form-placeholder {
+  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+  padding: 34px 24px;
+  border: 2px dashed var(--line);
+  border-radius: 10px;
+  color: var(--ink-2);
+}
+
+.placeholder-mark {
+  width: 52px;
+  height: 52px;
+  color: var(--sky-3);
+}
+
+.form-placeholder strong {
+  font-family: var(--display);
+  font-size: 25px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.form-placeholder p {
+  max-width: 46ch;
+  font-size: 15.5px;
+}
+
+.form-placeholder code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12.5px;
+  background: var(--cloud-2);
+  border-radius: 5px;
+  padding: 2px 7px;
+}
+
+.form-fallback {
+  margin-top: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+.form-fallback p {
+  flex: 1 1 260px;
+  font-size: 15px;
+  color: var(--ink-2);
+}
+
+/* --- Praktisk: the pinboard ----------------------------------------------- */
+/* Every answer is already on the wall. Notes are laid out in columns rather
+   than a grid so a long note and a short one can sit side by side without
+   dragging a whole row taller. */
+.board {
+  border-radius: 14px;
+  padding: 30px 22px 12px;
+  background:
+    radial-gradient(
+        circle at 18% 16%,
+        rgba(255, 255, 255, 0.72),
+        transparent 62%
+      ),
+    linear-gradient(160deg, var(--cloud-2), #d8e8f2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.notes {
+  columns: 3;
+  column-gap: 22px;
+  list-style: none;
+}
+
+/* Each note hangs from its tape, and both of its motions pivot there.
+   On the way down the page the board's --s swings it — every note at its own
+   rate, so the wall ripples instead of turning as one sheet. */
+.note {
+  position: relative;
+  break-inside: avoid;
+  margin-bottom: 24px;
+  perspective: 900px;
+  transform-origin: 50% 6px;
+  transform: rotate(calc(var(--tilt, 0deg) + var(--s, 0) * var(--sway, 3deg)));
+}
+
+/* On hover only the far edge peels up — the taped edge is the hinge, so it
+   stays exactly where it is stuck. */
+.note-paper {
+  position: relative;
+  padding: 32px 22px 22px;
+  border-radius: 2px;
+  background: var(--note-1);
+  box-shadow:
+    0 10px 20px -7px rgba(23, 60, 76, 0.32),
+    0 1px 2px rgba(23, 60, 76, 0.12);
+  transform-origin: 50% 0;
+  transform: rotateX(var(--lift, 0deg)) translateZ(var(--pop, 0px));
+  transition:
+    transform 300ms cubic-bezier(0.2, 0.85, 0.25, 1),
+    box-shadow 300ms ease;
+}
+
+.note:hover .note-paper,
+.note:focus-within .note-paper {
+  --lift: -13deg;
+  --pop: 16px;
+  box-shadow:
+    0 30px 38px -14px rgba(23, 60, 76, 0.36),
+    0 2px 5px rgba(23, 60, 76, 0.14);
+}
+
+.note-tape {
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  z-index: 2;
+  width: 78px;
+  height: 24px;
+  margin-left: -39px;
+  transform: rotate(-2deg);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.74),
+    rgba(255, 255, 255, 0.48)
+  );
+  border-left: 1px solid rgba(255, 255, 255, 0.9);
+  border-right: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 6px rgba(23, 60, 76, 0.16);
+  pointer-events: none;
+}
+
+/* Paper tone cycles on a 4, tilt on a 5 and sway on a 3 — coprime, so the
+   pattern never lines up into visible rows. */
+.tone-1 .note-paper {
+  background: var(--note-2);
+}
+.tone-2 .note-paper {
+  background: var(--note-3);
+}
+.tone-3 .note-paper {
+  background: var(--note-4);
+}
+
+.note-q {
+  font-family: var(--hand);
+  font-size: 27px;
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.note-a {
+  font-family: var(--hand);
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1.42;
+  color: #3c5c69;
+}
+
+/* --- the ground ----------------------------------------------------------- */
+/* The end of the fall. The island slides against the drop and the type settles
+   a beat late, so the last stretch reads as ground coming up to meet the lens.
+   The horizon edge itself never moves — a gap between it and the sea would
+   show sky through the floor. */
+.footer {
+  position: relative;
+  z-index: 3;
+  margin-top: 200px;
+  min-height: clamp(540px, 60vw, 900px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.horizon {
+  position: relative;
+}
+
+.horizon-edge {
+  display: block;
+  width: 100%;
+  height: clamp(44px, 6vw, 78px);
+  color: var(--sea);
+  margin-bottom: -1px;
+}
+
+.sea {
+  position: relative;
+  background: var(--sea);
+  color: #fff;
+  padding: 18px 0 38px;
+  overflow: hidden;
+}
+
+/* the light on the water where it meets the shore */
+.sea::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.45), transparent);
+  pointer-events: none;
+}
+
+.isle {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: clamp(190px, 26vw, 380px);
+  color: var(--isle);
+  opacity: 0.92;
+  pointer-events: none;
+  translate: calc(var(--s, 0) * -32px) 0;
+}
+
+.footer-inner {
+  position: relative;
+  z-index: 1;
+  translate: 0 calc(var(--s, 0) * -16px);
+}
+
+.arrival {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  transform: rotate(-5deg);
+  margin-bottom: 30px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 9px;
+  padding: 9px 16px;
+  font-family: var(--ui);
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.contacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 56px;
+  padding-bottom: 26px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.contact-role {
+  font-family: var(--ui);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.contact-name {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.contact-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 2px;
+  font-family: var(--ui);
+  font-size: 13.5px;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.contact-phone:hover {
+  border-bottom-color: #fff;
+}
+
+.smallprint {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+  padding-top: 20px;
+  font-family: var(--ui);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* --- responsive ----------------------------------------------------------- */
+@media (max-width: 900px) {
+  .travel {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .notes {
+    columns: 2;
+  }
+}
+
+@media (max-width: 640px) {
+  .welcome .pass-body {
+    padding-block: 38px;
+  }
+
+  .welcome p {
+    font-size: 17.5px;
+  }
+
+  .map-frame {
+    height: 240px;
+    margin-top: 20px;
+  }
+
+  .pennant {
+    left: 14px;
+  }
+
+  .form-frame {
+    padding: 12px;
+  }
+
+  .form-inner {
+    padding: 8px;
+  }
+
+  .form-inner iframe {
+    height: 1250px;
+  }
+
+  .board {
+    padding: 24px 14px 4px;
+  }
+
+  .notes {
+    columns: 1;
+  }
+
+  .footer {
+    margin-top: 120px;
+  }
+}
+
+@media (max-width: 560px) {
+  .timeline::before {
+    left: 5px;
+  }
+
+  .tl-row {
+    grid-template-columns: 32px 1fr;
+    gap: 0 4px;
+    padding: 13px 0;
+  }
+
+  .tl-time {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: 13px;
+    padding-top: 0;
+    color: var(--ink-2);
+  }
+
+  .tl-dot {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+    margin-top: 8px;
+  }
+
+  .tl-body {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .tl-title {
+    font-size: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .note {
+    transform: none;
+  }
+}
