@@ -5,44 +5,44 @@
 /* --- Velkommen ------------------------------------------------------------ */
 .welcome .pass-body {
   text-align: center;
-  padding-block: 54px;
+  padding-block: 32px;
 }
 
 .welcome .pass-title {
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 .welcome p {
-  max-width: 62ch;
+  max-width: 56ch;
   margin-inline: auto;
-  font-size: 19px;
-  line-height: 1.8;
+  font-size: 16px;
+  line-height: 1.72;
 }
 
 /* --- Hvor ----------------------------------------------------------------- */
 .venue-name {
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 
 .venue-address {
   font-family: var(--ui);
-  font-size: 12px;
-  letter-spacing: 0.14em;
+  font-size: 11.5px;
+  letter-spacing: 0.13em;
   text-transform: uppercase;
   color: var(--ink-2);
 }
 
 .venue-blurb {
-  margin-top: 14px;
-  max-width: 58ch;
+  margin-top: 11px;
+  max-width: 56ch;
 }
 
 .map-frame {
   position: relative;
-  margin-top: 26px;
-  border-radius: 14px;
+  margin-top: 16px;
+  border-radius: 11px;
   overflow: hidden;
-  height: 320px;
+  height: clamp(170px, 26vw, 215px);
   background: var(--cloud-2);
   box-shadow: inset 0 0 0 1px var(--line);
 }
@@ -71,9 +71,9 @@
   left: 50%;
   top: 50%;
   z-index: 2;
-  width: 16px;
-  height: 16px;
-  margin: -8px 0 0 -8px;
+  width: 15px;
+  height: 15px;
+  margin: -7.5px 0 0 -7.5px;
   border-radius: 50%;
   background: var(--rosso);
   box-shadow: 0 0 0 4px rgba(206, 52, 25, 0.22);
@@ -105,47 +105,47 @@
 }
 
 .map-actions {
-  margin-top: 22px;
+  margin-top: 16px;
 }
 
 .travel {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 30px;
-  margin-top: 40px;
-  padding-top: 34px;
+  gap: 18px;
+  margin-top: 22px;
+  padding-top: 19px;
   border-top: 1px solid var(--line);
 }
 
 .travel-icon {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
-  margin-bottom: 14px;
-  border-radius: 13px;
+  width: 33px;
+  height: 33px;
+  margin-bottom: 9px;
+  border-radius: 10px;
   background: rgba(206, 52, 25, 0.09);
   color: var(--rosso);
 }
 
 .travel-card h4 {
   font-family: var(--display);
-  font-size: 21px;
+  font-size: 17px;
   font-weight: 500;
   line-height: 1.2;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .travel-card p {
-  font-size: 15.5px;
+  font-size: 14px;
   color: var(--ink-2);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 /* --- Naar ----------------------------------------------------------------- */
 .timeline {
   position: relative;
-  margin-top: 6px;
+  margin-top: 2px;
   list-style: none;
 }
 
@@ -153,9 +153,9 @@
 .timeline::before {
   content: '';
   position: absolute;
-  left: 103px;
-  top: 14px;
-  bottom: 22px;
+  left: 74px;
+  top: 10px;
+  bottom: 14px;
   width: 3px;
   border-radius: 2px;
   background: repeating-linear-gradient(
@@ -168,16 +168,16 @@
 .tl-row {
   position: relative;
   display: grid;
-  grid-template-columns: 92px 32px 1fr;
+  grid-template-columns: 64px 24px 1fr;
   align-items: baseline;
-  padding: 15px 0;
+  padding: 8px 0;
 }
 
 .tl-time {
   font-family: var(--ui);
   font-weight: 500;
-  font-size: 14px;
-  letter-spacing: 0.12em;
+  font-size: 13px;
+  letter-spacing: 0.1em;
   font-variant-numeric: tabular-nums;
   color: var(--ink);
   padding-top: 3px;
@@ -186,10 +186,10 @@
 .tl-dot {
   position: relative;
   align-self: start;
-  margin-top: 11px;
+  margin-top: 9px;
   justify-self: center;
-  width: 11px;
-  height: 11px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: var(--rosso);
   box-shadow: 0 0 0 5px var(--panel);
@@ -197,53 +197,53 @@
 
 .tl-title {
   font-family: var(--display);
-  font-size: 23px;
+  font-size: 18px;
   font-weight: 500;
-  line-height: 1.24;
+  line-height: 1.22;
 }
 
 .tl-where {
   font-family: var(--ui);
-  font-size: 11px;
-  letter-spacing: 0.18em;
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--rosso);
-  margin-top: 3px;
+  margin-top: 2px;
 }
 
 .tl-note {
-  font-size: 15.5px;
+  font-size: 14px;
   color: var(--ink-2);
-  margin-top: 5px;
-  line-height: 1.65;
+  margin-top: 3px;
+  line-height: 1.56;
 }
 
 /* --- Svar ----------------------------------------------------------------- */
 /* The widest pass, and the one nearest the lens: it leans furthest, drifts
    furthest and drops the most shadow. */
 .rsvp .pass {
-  --drift: 58px;
-  --sway: 2.2deg;
+  --drift: 74px;
+  --sway: 2deg;
 
   box-shadow:
-    0 46px 78px -26px rgba(12, 50, 84, 0.55),
-    0 6px 16px rgba(12, 50, 84, 0.14),
+    0 34px 60px -24px rgba(12, 50, 84, 0.5),
+    0 5px 13px rgba(12, 50, 84, 0.12),
     inset 0 1px 0 #fff;
 }
 
 .pennant {
   position: absolute;
-  top: -16px;
+  top: -14px;
   left: 8px;
   z-index: 2;
   background: var(--rosso);
   color: #fff;
   font-family: var(--ui);
   font-weight: 500;
-  font-size: 11px;
-  letter-spacing: 0.16em;
+  font-size: 10.5px;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  padding: 10px 20px 18px;
+  padding: 9px 17px 16px;
   clip-path: polygon(0 0, 100% 0, 100% 66%, 50% 100%, 0 66%);
   box-shadow: 0 6px 16px rgba(206, 52, 25, 0.28);
 }
@@ -253,9 +253,9 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 14px 18px;
-  padding-bottom: 20px;
-  margin-bottom: 20px;
+  gap: 11px 15px;
+  padding-bottom: 15px;
+  margin-bottom: 15px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -263,14 +263,14 @@
 .route-date {
   font-family: var(--ui);
   font-weight: 500;
-  font-size: 12px;
-  letter-spacing: 0.18em;
+  font-size: 11.5px;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink);
 }
 
 .route-rule {
-  flex: 1 1 60px;
+  flex: 1 1 40px;
   height: 2px;
   background: repeating-linear-gradient(
     to right,
@@ -286,29 +286,29 @@
   color: var(--rosso);
   font-family: var(--ui);
   font-weight: 500;
-  font-size: 12px;
-  letter-spacing: 0.18em;
+  font-size: 11px;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  padding: 8px 14px;
+  padding: 7px 12px;
   opacity: 0.92;
 }
 
 .route-blurb {
-  max-width: 62ch;
+  max-width: 60ch;
   color: var(--ink-2);
 }
 
 .form-frame {
-  margin-top: 26px;
+  margin-top: 18px;
   background: var(--cloud-2);
-  border-radius: 16px;
-  padding: 22px;
+  border-radius: 12px;
+  padding: 12px;
 }
 
 .form-inner {
   background: #fff;
-  border-radius: 11px;
-  padding: 14px;
+  border-radius: 10px;
+  padding: 12px;
   box-shadow: 0 2px 10px rgba(23, 60, 76, 0.06);
   overflow: hidden;
 }
@@ -320,66 +320,72 @@
 }
 
 .form-placeholder {
-  min-height: 380px;
+  min-height: 230px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: 12px;
   text-align: center;
-  padding: 34px 24px;
+  padding: 28px 20px;
   border: 2px dashed var(--line);
-  border-radius: 10px;
+  border-radius: 9px;
   color: var(--ink-2);
 }
 
 .placeholder-mark {
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   color: var(--sky-3);
 }
 
 .form-placeholder strong {
   font-family: var(--display);
-  font-size: 25px;
+  font-size: 23px;
   font-weight: 500;
   color: var(--ink);
 }
 
 .form-placeholder p {
-  max-width: 46ch;
-  font-size: 15.5px;
+  max-width: 44ch;
+  font-size: 15px;
 }
 
 .form-placeholder code {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12.5px;
+  font-size: 12px;
   background: var(--cloud-2);
   border-radius: 5px;
-  padding: 2px 7px;
+  padding: 2px 6px;
+  /* a path is one long unbreakable token; let it wrap rather than push the
+     card open on a phone */
+  overflow-wrap: anywhere;
 }
 
 .form-fallback {
-  margin-top: 22px;
+  margin-top: 18px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 
 .form-fallback p {
-  flex: 1 1 260px;
-  font-size: 15px;
+  flex: 1 1 240px;
+  font-size: 14.5px;
   color: var(--ink-2);
 }
 
 /* --- Praktisk: the pinboard ----------------------------------------------- */
-/* Every answer is already on the wall. Notes are laid out in columns rather
-   than a grid so a long note and a short one can sit side by side without
-   dragging a whole row taller. */
+/* A grid, not columns. Multi-column fragments its children, and an absolutely
+   positioned tape inside a fragmented box gets clipped at the top of a column
+   and drawn a second time at the bottom of one — which is exactly the ghost
+   tape this used to have. A grid has no fragmentation, so the bug cannot occur.
+   The stagger below buys back the uneven, pinned-by-hand rhythm that columns
+   were there for in the first place. */
 .board {
-  border-radius: 14px;
-  padding: 30px 22px 12px;
+  border-radius: 12px;
+  padding: 18px 15px 16px;
   background:
     radial-gradient(
         circle at 18% 16%,
@@ -391,57 +397,85 @@
 }
 
 .notes {
-  columns: 3;
-  column-gap: 22px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: start;
+  gap: 22px 16px;
   list-style: none;
 }
 
-/* Each note hangs from its tape, and both of its motions pivot there.
-   On the way down the page the board's --s swings it — every note at its own
-   rate, so the wall ripples instead of turning as one sheet. */
-.note {
-  position: relative;
-  break-inside: avoid;
-  margin-bottom: 24px;
-  perspective: 900px;
-  transform-origin: 50% 6px;
-  transform: rotate(calc(var(--tilt, 0deg) + var(--s, 0) * var(--sway, 3deg)));
+/* nobody pins a board in straight rows */
+.note:nth-child(3n + 2) {
+  margin-top: 17px;
 }
 
-/* On hover only the far edge peels up — the taped edge is the hinge, so it
-   stays exactly where it is stuck. */
-.note-paper {
+.note:nth-child(3n) {
+  margin-top: 8px;
+}
+
+/* The note itself only ever holds the angle it was pinned at. It used to swing
+   on the camera as well, which turned the whole wall as the page moved and read
+   as the board rotating rather than as paper. */
+.note {
   position: relative;
-  padding: 32px 22px 22px;
+  padding-top: 12px; /* head-room for the tape, which used to get clipped */
+  perspective: 900px;
+  transform: rotate(var(--tilt, 0deg));
+}
+
+/* The wind, instead. Each note is taped along its top edge, so the only thing
+   the air can do to it is lift the free bottom edge — which is exactly what
+   hovering one does, and it is the better gesture, so the camera now does it
+   too. --c is 1 when the note is dead centre in the frame and 0 at either edge,
+   so a note peels up as it comes into the middle of the screen and settles back
+   down as it leaves. Every note reads the camera itself and each has its own
+   --gust, so the wall ripples across rather than lifting as one sheet.
+
+   The transition is doing double duty: it carries the hover, and because the
+   value underneath it is changing every scroll frame, it also gives the lift a
+   little lag — paper catching the air a beat after the gust, not with it.
+
+   Positive rotateX about the taped top edge lifts the bottom out of the board;
+   negative would press it into the wall, which is the wrong way round. */
+.note-paper {
+  --lift: calc(var(--c, 0) * var(--gust, 13deg));
+  --pop: calc(var(--c, 0) * 7px);
+  --hoist: calc(var(--c, 0) * var(--rise, 7px) * -1);
+
+  position: relative;
+  padding: 22px 15px 15px;
   border-radius: 2px;
   background: var(--note-1);
   box-shadow:
     0 10px 20px -7px rgba(23, 60, 76, 0.32),
     0 1px 2px rgba(23, 60, 76, 0.12);
   transform-origin: 50% 0;
-  transform: rotateX(var(--lift, 0deg)) translateZ(var(--pop, 0px));
+  transform: translate3d(0, var(--hoist), 0) rotateX(var(--lift))
+    translateZ(var(--pop));
+  will-change: transform;
   transition:
-    transform 300ms cubic-bezier(0.2, 0.85, 0.25, 1),
-    box-shadow 300ms ease;
+    transform 320ms cubic-bezier(0.2, 0.85, 0.25, 1),
+    box-shadow 320ms ease;
 }
 
 .note:hover .note-paper,
 .note:focus-within .note-paper {
-  --lift: -13deg;
-  --pop: 16px;
+  --lift: 16deg;
+  --pop: 11px;
+  --hoist: -6px;
   box-shadow:
-    0 30px 38px -14px rgba(23, 60, 76, 0.36),
+    0 32px 40px -14px rgba(23, 60, 76, 0.38),
     0 2px 5px rgba(23, 60, 76, 0.14);
 }
 
 .note-tape {
   position: absolute;
-  top: -9px;
+  top: 3px;
   left: 50%;
   z-index: 2;
-  width: 78px;
-  height: 24px;
-  margin-left: -39px;
+  width: 68px;
+  height: 20px;
+  margin-left: -34px;
   transform: rotate(-2deg);
   background: linear-gradient(
     180deg,
@@ -454,7 +488,7 @@
   pointer-events: none;
 }
 
-/* Paper tone cycles on a 4, tilt on a 5 and sway on a 3 — coprime, so the
+/* Paper tone cycles on a 4, tilt on a 5 and gust on a 3 — coprime, so the
    pattern never lines up into visible rows. */
 .tone-1 .note-paper {
   background: var(--note-2);
@@ -468,18 +502,18 @@
 
 .note-q {
   font-family: var(--hand);
-  font-size: 27px;
+  font-size: 21px;
   font-weight: 600;
-  line-height: 1.15;
+  line-height: 1.14;
   color: var(--ink);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .note-a {
   font-family: var(--hand);
-  font-size: 19px;
+  font-size: 16px;
   font-weight: 500;
-  line-height: 1.42;
+  line-height: 1.38;
   color: #3c5c69;
 }
 
@@ -491,8 +525,8 @@
 .footer {
   position: relative;
   z-index: 3;
-  margin-top: 200px;
-  min-height: clamp(540px, 60vw, 900px);
+  margin-top: clamp(180px, 26vh, 380px);
+  min-height: clamp(360px, 46vw, 760px);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -502,19 +536,50 @@
   position: relative;
 }
 
+/* The haze, and the reason it is here.
+
+   Behind the footer is the painted cloud bank, and the painted cloud bank is
+   white right down to its last row of pixels. It met the sea head-on: a hard
+   pale line across the page directly above the footer, which is not a horizon,
+   it is a seam. A real horizon on a bright day is a band, not an edge — the
+   cloud dissolves into haze, the haze cools into water colour, and only then
+   does the water start. That is what this is: it sits behind the wave and the
+   sea both, and it is what the last of the photo fades into. */
+.horizon::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: calc(clamp(150px, 22vh, 300px) * -1);
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(236, 248, 252, 0) 0%,
+    rgba(236, 248, 252, 0.72) 40%,
+    rgba(206, 235, 246, 0.94) 66%,
+    rgba(140, 197, 222, 1) 88%,
+    var(--sea) 100%
+  );
+}
+
 .horizon-edge {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 100%;
-  height: clamp(44px, 6vw, 78px);
+  height: clamp(40px, 6vw, 78px);
   color: var(--sea);
   margin-bottom: -1px;
 }
 
 .sea {
   position: relative;
+  z-index: 1;
   background: var(--sea);
   color: #fff;
-  padding: 18px 0 38px;
+  padding: 16px 0 max(32px, env(safe-area-inset-bottom));
   overflow: hidden;
 }
 
@@ -525,8 +590,8 @@
   left: 0;
   right: 0;
   top: 0;
-  height: 12px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.45), transparent);
+  height: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), transparent);
   pointer-events: none;
 }
 
@@ -534,7 +599,7 @@
   position: absolute;
   left: 0;
   bottom: 0;
-  width: clamp(190px, 26vw, 380px);
+  width: clamp(170px, 26vw, 380px);
   color: var(--isle);
   opacity: 0.92;
   pointer-events: none;
@@ -552,14 +617,14 @@
   align-items: center;
   gap: 9px;
   transform: rotate(-5deg);
-  margin-bottom: 30px;
+  margin-bottom: 26px;
   border: 2px solid rgba(255, 255, 255, 0.5);
   border-radius: 9px;
-  padding: 9px 16px;
+  padding: 8px 15px;
   font-family: var(--ui);
   font-weight: 500;
-  font-size: 12px;
-  letter-spacing: 0.22em;
+  font-size: 11.5px;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.86);
 }
@@ -567,22 +632,22 @@
 .contacts {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px 56px;
-  padding-bottom: 26px;
+  gap: 14px 52px;
+  padding-bottom: 22px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.22);
 }
 
 .contact-role {
   font-family: var(--ui);
-  font-size: 11px;
-  letter-spacing: 0.2em;
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.68);
 }
 
 .contact-name {
   font-family: var(--display);
-  font-size: 22px;
+  font-size: 21px;
   font-weight: 400;
   line-height: 1.3;
 }
@@ -593,7 +658,7 @@
   gap: 7px;
   margin-top: 2px;
   font-family: var(--ui);
-  font-size: 13.5px;
+  font-size: 13px;
   letter-spacing: 0.08em;
   font-variant-numeric: tabular-nums;
   color: #fff;
@@ -610,46 +675,72 @@
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 8px 24px;
-  padding-top: 20px;
+  padding-top: 18px;
   font-family: var(--ui);
-  font-size: 11px;
-  letter-spacing: 0.16em;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.72);
 }
 
 /* --- responsive ----------------------------------------------------------- */
 @media (max-width: 900px) {
+  .note:nth-child(3n + 2),
+  .note:nth-child(3n) {
+    margin-top: 0;
+  }
+
+  .note:nth-child(even) {
+    margin-top: 16px;
+  }
+
   .travel {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: 20px;
   }
 
   .notes {
-    columns: 2;
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 700px) {
   .welcome .pass-body {
-    padding-block: 38px;
+    padding-block: 30px;
   }
 
   .welcome p {
-    font-size: 17.5px;
+    font-size: 16px;
   }
 
   .map-frame {
-    height: 240px;
-    margin-top: 20px;
+    height: 200px;
+    margin-top: 15px;
   }
 
   .pennant {
-    left: 14px;
+    left: 12px;
+    top: -12px;
+    font-size: 10px;
+    padding: 8px 14px 15px;
+  }
+
+  /* The date has nowhere to go on a narrow card, so give the route line two
+     rows of its own rather than letting the dotted rule squeeze it. */
+  .route {
+    gap: 10px 12px;
+  }
+
+  .route-rule {
+    display: none;
+  }
+
+  .stamp {
+    margin-left: auto;
   }
 
   .form-frame {
-    padding: 12px;
+    padding: 9px;
   }
 
   .form-inner {
@@ -661,15 +752,44 @@
   }
 
   .board {
-    padding: 24px 14px 4px;
+    padding: 15px 12px 14px;
   }
 
   .notes {
-    columns: 1;
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .note:nth-child(even) {
+    margin-top: 0;
+  }
+
+  /* No hover on a touch screen, and no room for a swinging wall either — the
+     gust stays, but half of it. */
+  .note-paper {
+    --gust: 9deg;
   }
 
   .footer {
-    margin-top: 120px;
+    margin-top: 96px;
+    min-height: 300px;
+  }
+
+  .horizon::before {
+    top: -110px;
+  }
+
+  .arrival {
+    margin-bottom: 20px;
+  }
+
+  .contacts {
+    gap: 16px 34px;
+  }
+
+  .smallprint {
+    justify-content: flex-start;
+    gap: 5px 20px;
   }
 }
 
@@ -679,15 +799,15 @@
   }
 
   .tl-row {
-    grid-template-columns: 32px 1fr;
+    grid-template-columns: 30px 1fr;
     gap: 0 4px;
-    padding: 13px 0;
+    padding: 11px 0;
   }
 
   .tl-time {
     grid-column: 2;
     grid-row: 1;
-    font-size: 13px;
+    font-size: 12.5px;
     padding-top: 0;
     color: var(--ink-2);
   }
@@ -696,7 +816,7 @@
     grid-column: 1;
     grid-row: 1;
     justify-self: start;
-    margin-top: 8px;
+    margin-top: 7px;
   }
 
   .tl-body {
@@ -705,12 +825,28 @@
   }
 
   .tl-title {
-    font-size: 20px;
+    font-size: 19px;
+  }
+
+  /* Full width, because at this size a button that is not is a button people
+     miss. */
+  .map-actions .btn,
+  .form-fallback .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .form-fallback p {
+    flex: 1 1 100%;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .note {
+    transform: none;
+  }
+
+  .note-paper {
     transform: none;
   }
 }

@@ -4,9 +4,9 @@ import { register, stillCamera } from '../lib/parallax.js'
 /* ---------------------------------------------------------------------------
    A boarding pass.
 
-   Every section of the page is one: a stub down the left with the section's
-   name set vertically, a column of punched holes where you would tear it, and
-   the content on the larger half.
+   Every section of the page is one: a stub down the left carrying the section's
+   name set large and vertically, a column of punched holes where you would tear
+   it, and the content on the larger half.
 
    The card is not upright. Each one is handed a small base `tilt`, and the
    camera's --s adds to it as the card rises through the frame — so the passes
@@ -63,9 +63,6 @@ export default function Panel({
     >
       <article className="pass">
         <div className="pass-stub">
-          <span className="pass-mark" aria-hidden="true">
-            S&amp;S
-          </span>
           <span className="pass-eyebrow">{eyebrow}</span>
           <span className="pass-code" aria-hidden="true">
             {code}

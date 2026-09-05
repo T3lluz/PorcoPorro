@@ -7,9 +7,18 @@
    At one viewport the pin runs out, the hero lets go, and the page scrolls
    normally from there.
 
+   Everything in here clears out on --fall, and clears out *early*. The hero is
+   still physically there for a whole viewport after it has stopped being the
+   picture, and the gaps between the boarding passes are real open sky — so
+   anything still painted at 40% of a viewport surfaces again in the gap between
+   the first and the second card. Hence the steep multipliers below: names,
+   stamp, place, rig and prop-wash are all gone by roughly a third of the way
+   through the pin, long before the first gap arrives.
+
    The rig itself: --plane-w drives everything. Plane plus towed banner is
-   2.405x the plane's width, so --plane-w is capped at 40vw to keep the banner
-   on screen at every width. It still reaches the intended 620px above 1550px.
+   2.405x the width of the plane, so --plane-w is capped at 40vw to keep the
+   banner on screen at every width. It still reaches the intended 620px above
+   1550px.
 --------------------------------------------------------------------------- */
 
 .hero-pin {
@@ -27,7 +36,7 @@
   height: var(--hero-h);
   display: grid;
   align-content: end;
-  padding-bottom: clamp(64px, 9vh, 116px);
+  padding-bottom: clamp(56px, 9svh, 116px);
 }
 
 .hero-stage {
@@ -37,18 +46,12 @@
   pointer-events: none;
 }
 
-.hero-behind {
-  z-index: 1;
-}
-
-.hero-wind {
-  z-index: 2;
-}
-
-.hero-behind,
+/* The prop-wash belongs to the aeroplane, so it leaves with it. */
 .hero-wind {
   position: absolute;
   inset: 0;
+  z-index: 2;
+  opacity: calc(1 - var(--fall, 0) * 2.6);
 }
 
 /* --- plane ---------------------------------------------------------------- */
@@ -62,9 +65,16 @@
   aspect-ratio: 2.405 / 0.4502;
   margin-left: calc(var(--rig-w) / -2);
   /* The camera drops away from the aeroplane while the hero is pinned, so it
-     climbs out of frame rather than simply being covered. `translate` composes
-     with the `transform` below instead of overwriting it. */
-  translate: 0 calc(var(--sy, 0px) * -0.075);
+     climbs out of frame rather than being caught by the boarding passes coming
+     up at it — a towed banner has no business colliding with a stack of cards.
+     A viewport and a quarter of climb over one --fall, faded out over the first
+     third of it, so the sky above the first card is empty before that card is
+     anywhere near the top of the frame. --fall rather than --sy, so the climb
+     stops the moment the hero lets go instead of running on for the length of
+     the page. `translate` composes with the `transform` below instead of
+     overwriting it. */
+  translate: 0 calc(var(--fall, 0) * -125svh);
+  opacity: calc(1 - var(--fall, 0) * 3);
   animation: plane-arrive 2.7s cubic-bezier(0.17, 0.72, 0.26, 1) both;
 }
 
@@ -216,13 +226,18 @@
 }
 
 /* --- hero type ------------------------------------------------------------ */
-/* Sinks a little slower than the page falls, so the passes rise past it. */
+/* Sinks a little slower than the page falls, so the passes rise past it — and
+   is fully gone by the time the first card is a quarter of the way up the
+   frame. It has to be: the hero stays put until the pin runs out, and the open
+   sky between two cards would otherwise let the names surface again further
+   down the page. */
 .hero-type {
   position: relative;
   z-index: 6;
   text-align: center;
   color: var(--ink);
-  translate: 0 calc(var(--sy, 0px) * 0.14);
+  translate: 0 calc(var(--fall, 0) * 150px);
+  opacity: calc(1 - var(--fall, 0) * 4);
   text-shadow: 0 0 38px rgba(255, 255, 255, 0.6);
 }
 
@@ -234,10 +249,10 @@
   line-height: 0.84;
 }
 
-/* Two ceilings, not one: the vw clamp sizes it to the page and the vh cap keeps
-   the whole block clear of the rig on a short, wide window. */
+/* Two ceilings, not one: the vw clamp sizes it to the page and the svh cap
+   keeps the whole block clear of the rig on a short, wide window. */
 .hn-name {
-  font-size: min(clamp(62px, 12vw, 152px), 13.5vh);
+  font-size: min(clamp(52px, 12vw, 152px), 13.5svh);
   letter-spacing: 0.012em;
 }
 
@@ -249,7 +264,7 @@
    only warm mark in the lettering. */
 .hn-amp {
   font-style: italic;
-  font-size: min(clamp(26px, 4.4vw, 56px), 5.2vh);
+  font-size: min(clamp(24px, 4.4vw, 56px), 5.2svh);
   line-height: 1;
   color: var(--rosso);
   margin-block: clamp(6px, 1.1vw, 18px);
@@ -259,31 +274,33 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(14px, 2.6vw, 32px);
-  margin-top: clamp(18px, 2.8vh, 36px);
+  gap: clamp(10px, 2.6vw, 32px);
+  margin-top: clamp(14px, 2.8svh, 36px);
   font-family: var(--ui);
   font-weight: 500;
-  font-size: clamp(13px, 1.7vw, 18px);
+  font-size: clamp(12px, 1.7vw, 18px);
   letter-spacing: 0.4em;
   text-indent: 0.4em; /* the trailing letter-space would push it off centre */
   text-transform: uppercase;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
   color: var(--ink);
 }
 
+/* Shrinkable, not fixed: on a narrow phone the date has to win the row. */
 .stamp-rule {
-  flex: none;
-  width: clamp(32px, 9vw, 128px);
+  flex: 0 1 clamp(20px, 9vw, 128px);
+  min-width: 0;
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--ink-2), transparent);
   opacity: 0.6;
 }
 
 .hero-place {
-  margin-top: clamp(10px, 1.7vh, 20px);
+  margin-top: clamp(9px, 1.7svh, 20px);
   font-family: var(--body);
   font-style: italic;
-  font-size: min(clamp(15px, 2vw, 23px), 2.6vh);
+  font-size: min(clamp(14px, 2vw, 23px), 2.6svh);
   color: var(--ink-2);
 }
 
@@ -291,11 +308,11 @@
 .scroll-cue {
   position: absolute;
   left: 50%;
-  bottom: 20px;
+  bottom: max(18px, env(safe-area-inset-bottom));
   z-index: 6;
   margin-left: -13px;
   color: var(--ink-2);
-  opacity: 0.6;
+  opacity: calc(0.6 - var(--fall, 0) * 3);
   animation: cue-bob 2.6s ease-in-out infinite;
 }
 
@@ -309,30 +326,66 @@
   }
 }
 
+/* --- phone ---------------------------------------------------------------- */
 @media (max-width: 700px) {
   .hero {
-    --plane-w: clamp(130px, 38vw, 260px);
+    --plane-w: clamp(126px, 37vw, 260px);
   }
 
+  /* Half the curls. Six sets of flowing dashes is real work for a phone, and at
+     this width they crowd the lettering rather than reading as air. */
+  .hero-wind .wind:nth-child(n + 4) {
+    display: none;
+  }
+
+  /* The viewBox is unchanged but it is now a third of the size on screen, so
+     the lettering has to grow inside it to stay legible. */
   .banner-text {
-    font-size: 70px;
+    font-size: 74px;
+    letter-spacing: 3px;
   }
 
   .hero-stamp {
-    letter-spacing: 0.28em;
-    text-indent: 0.28em;
+    letter-spacing: 0.26em;
+    text-indent: 0.26em;
+  }
+}
+
+@media (max-width: 430px) {
+  .hero-stamp {
+    gap: 9px;
+    letter-spacing: 0.2em;
+    text-indent: 0.2em;
   }
 }
 
 /* A short, wide window is the tight case: the rig is sized off the width and the
    lettering off the height, so they meet in the middle. Pull the rig smaller and
    higher rather than shrinking the names any further. */
-@media (max-height: 700px) {
+@media (min-width: 701px) and (max-height: 700px) {
   .hero {
     --plane-w: clamp(200px, 30vw, 400px);
   }
 
   .plane-rig {
     top: 7%;
+  }
+}
+
+/* A phone on its side has almost no height at all. Lift the rig clear of the
+   type and drop the cue — there is no room for a hint that the page scrolls
+   when the whole page is one thumb-flick tall. */
+@media (orientation: landscape) and (max-height: 540px) {
+  .hero {
+    --plane-w: clamp(150px, 22vw, 300px);
+    padding-bottom: 26px;
+  }
+
+  .plane-rig {
+    top: 3%;
+  }
+
+  .scroll-cue {
+    display: none;
   }
 }

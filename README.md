@@ -112,20 +112,29 @@ den — og først når heroen er dekket, slipper den taket og siden ruller norma
 ### Det fallende kameraet
 
 `lib/parallax.js` animerer ingenting selv. Én rAF-strupet scroll-runde skriver
-fire tall og lar CSS bestemme hva de betyr:
+seks tall og lar CSS bestemme hva de betyr:
 
-| Variabel | Hvor          | Hva den er                                              |
-| -------- | ------------- | ------------------------------------------------------- |
-| `--sy`   | `:root`       | Hvor langt siden har falt, i piksler                    |
-| `--p`    | per element   | 0 når overkanten kommer inn nederst, 1 når underkanten går ut øverst |
-| `--s`    | per element   | Samme, fortegnet: −1 under, 0 midt i bildet, +1 over    |
-| `--c`    | per element   | `1 − abs(s)`, altså hvor midt i bildet elementet er     |
+| Variabel | Hvor        | Hva den er                                                           |
+| -------- | ----------- | -------------------------------------------------------------------- |
+| `--sy`   | `:root`     | Hvor langt siden har falt, i piksler                                 |
+| `--fall` | `:root`     | Det samme, men bare over første skjermhøyde, 0 til 1                 |
+| `--land` | `:root`     | 0 helt til siste strekning, så 0 til 1 mens bakken kommer            |
+| `--p`    | per element | 0 når overkanten kommer inn nederst, 1 når underkanten går ut øverst |
+| `--s`    | per element | Samme, fortegnet: −1 under, 0 midt i bildet, +1 over                 |
+| `--c`    | per element | `1 − abs(s)`, altså hvor midt i bildet elementet er                  |
+
+`--fall` finnes fordi heroen står fast til pinnen tar slutt: navnene synker og
+tones ut på den, og er borte før det første kortet har rukket å dekke dem — ellers
+ville de dukket opp igjen i den åpne himmelen mellom to kort. `--land` toner ut
+de drivende vektorskyene, så det malte skybildet i bunnen møtes av ren himmel i
+stedet for av enda et lag skyer oppå seg.
 
 Hvert boardingkort har sin egen lille `tilt`. Kameraet legger `--s` oppå: kortet
 vipper mot linsen på vei opp og fra den på vei ut, og `--c` gir det en knapt
-merkbar svulming når det passerer midten. Lappene på oppslagstavla svinger om
-tapen sin på samme signal — hver i sitt tempo, så veggen bølger i stedet for å
-vri seg som ett ark.
+merkbar svulming når det passerer midten. Hver lapp på oppslagstavla leser
+kameraet *selv* og ikke tavlas verdi, så en lapp nederst svinger fortsatt mens en
+øverst har lagt seg — det er det som får veggen til å bølge i stedet for å vri
+seg som ett ark.
 
 Bakken i bunnen får det samme: øya glir mot fallet og teksten legger seg til ro
 et slag for sent, så den siste strekningen leser som bakke på vei opp mot linsa.

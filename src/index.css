@@ -62,14 +62,17 @@
   --note-3: #e2eefb;
   --note-4: #fbe4e2;
 
-  --gap-sky: 190px;
-  --wrap: 1000px;
+  --gap-sky: 118px;
+  --wrap: 780px;
+  --wrap-wide: 880px;
+  --pad: 44px;
 
   /* One hero. The pin container is twice this and <main> is pulled back up by
-     exactly this, so the two always agree. Kept at the viewport height so the
-     lettering at the bottom is never pushed below the fold; the floor only
-     matters on a landscape phone. */
-  --hero-h: max(560px, 100svh);
+     exactly this, so the two always agree. Measured in svh, not vh: on a phone
+     the toolbars come and go, and svh is the height the viewport is guaranteed
+     to have, so the lettering can never be pushed under a chrome bar that
+     re-appears. The floor only matters on a landscape phone. */
+  --hero-h: max(480px, 100svh);
 }
 
 /* --- reset ---------------------------------------------------------------- */
@@ -94,8 +97,8 @@ body {
   background: var(--sky-seam-right);
   color: var(--ink);
   font-family: var(--body);
-  font-size: 16.5px;
-  line-height: 1.78;
+  font-size: 15px;
+  line-height: 1.68;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -138,24 +141,24 @@ h3 {
 }
 
 h2 {
-  font-size: clamp(30px, 4.4vw, 44px);
+  font-size: clamp(23px, 2.7vw, 30px);
   font-weight: 400;
 }
 
 h3 {
-  font-size: clamp(21px, 2.6vw, 26px);
+  font-size: clamp(17px, 1.9vw, 20px);
   font-weight: 500;
   line-height: 1.24;
 }
 
 p + p {
-  margin-top: 0.9em;
+  margin-top: 0.8em;
 }
 
 .eyebrow {
   font-family: var(--ui);
   font-weight: 500;
-  font-size: 11.5px;
+  font-size: 11px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--ink-2);
@@ -176,9 +179,22 @@ p + p {
   border: 0;
 }
 
-@media (max-width: 640px) {
+/* --- phone ---------------------------------------------------------------- */
+@media (max-width: 700px) {
+  :root {
+    --gap-sky: 84px;
+    --pad: 30px;
+  }
+
   body {
-    font-size: 16px;
+    font-size: 15.5px;
+    line-height: 1.66;
+  }
+}
+
+@media (max-width: 400px) {
+  :root {
+    --pad: 24px;
   }
 }
 

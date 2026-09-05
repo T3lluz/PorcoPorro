@@ -68,7 +68,7 @@ export const rsvp = {
   // ⚠️ Lim inn din egen Google Forms-lenke.
   // Åpne skjemaet → Send → «< >» → kopier src-URL-en (den slutter på ?embedded=true).
   embedUrl:
-    'https://docs.google.com/forms/d/e/1FAIpQLSf_PLACEHOLDER_FORM_ID/viewform?embedded=true',
+    'https://docs.google.com/forms/d/e/1FAIpQLSfVEK1IYehIc0w_YYGv1gDRxS78U_AbbL57ifmhEHGpMT2A7w/viewform?usp=dialog',
   // Samme skjema, uten ?embedded=true — brukes av knappen som åpner i ny fane.
   openUrl:
     'https://docs.google.com/forms/d/e/1FAIpQLSf_PLACEHOLDER_FORM_ID/viewform',

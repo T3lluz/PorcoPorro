@@ -44,29 +44,50 @@
   );
 }
 
+/* Faded out over the approach to the ground, and faded out early — the painted
+   cloud bank on the floor of the document has to arrive against clean sky, not
+   with a second, vector set of clouds laid over the top of it. The 1.4 is what
+   makes them gone rather than merely faint by the time the photo is in frame. */
 .sky-drift {
   z-index: 1;
   overflow: hidden;
+  opacity: calc(1 - var(--land, 0) * 1.4);
 }
 
-/* Both layers are fixed, so left alone they would sit dead still while the
-   passes fall past them — which reads as wallpaper, not as distance. Against
-   the falling camera they rise, the near layer roughly three times as fast as
-   the far one. The coefficients stay small on purpose: over a 6000px page they
-   come to about 70px and 190px, enough to feel and not enough to empty the sky
-   out at the bottom. */
+/* The parallax proper.
+
+   Both layers are fixed, so left alone they sit dead still while the passes
+   fall past them, which reads as wallpaper rather than as distance. Against
+   the falling camera they rise — and they rise *hard*: the ground below is
+   moving at the full rate of the scroll, so anything that creeps merely reads
+   as a slightly wobbly backdrop. The near layer takes 22% of the scroll and
+   the far one 9%, roughly three times what they used to.
+
+   That much travel would run the sky out of clouds, so each layer is two and a
+   half viewports of sky rather than one, hung above the fold and reaching well
+   below it. min() then caps the climb at the point where the bottom edge of the
+   layer would otherwise rise past the bottom of the screen — the sky slows to
+   the pace of the page for the last stretch instead of emptying out.
+
+     far:  spans -30svh…180svh, capped at -70svh  →  bottom never above 110svh
+     mid:  spans -40svh…220svh, capped at -110svh →  bottom never above 110svh */
 .drift-far,
 .drift-mid {
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
 }
 
 .drift-far {
-  translate: 0 calc(var(--sy, 0px) * -0.012);
+  top: -30svh;
+  height: 210svh;
+  translate: 0 calc(min(var(--sy, 0px) * 0.09, 70svh) * -1);
 }
 
 .drift-mid {
-  translate: 0 calc(var(--sy, 0px) * -0.032);
+  top: -40svh;
+  height: 260svh;
+  translate: 0 calc(min(var(--sy, 0px) * 0.22, 110svh) * -1);
 }
 
 /* --- clouds --------------------------------------------------------------- */
@@ -121,6 +142,9 @@
 }
 
 /* --- the cloud bank on the floor of the document -------------------------- */
+/* sky-clouds.jpg, pinned to the floor of the document, full bleed, at its true
+   1920x1138 aspect. The mask fades its top edge into the CSS sky over a long
+   stretch; because both are the same colour there, the seam disappears. */
 .cloudbank {
   position: absolute;
   left: 0;
@@ -131,8 +155,16 @@
   pointer-events: none;
   background: url('../assets/backgrounds/sky-clouds.jpg') bottom center / 100%
     auto no-repeat;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 160px);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 160px);
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 clamp(140px, 22svh, 260px)
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 clamp(140px, 22svh, 260px)
+  );
 }
 
 /* --- wind curls ----------------------------------------------------------- */
@@ -239,6 +271,36 @@
     opacity: 0;
     transform: translate3d(var(--travel, 60vw), var(--rise, -34px), 0)
       scale(1.08);
+  }
+}
+
+/* --- phone ---------------------------------------------------------------- */
+/* A phone GPU pays for every blurred layer separately, and there are now two
+   and a half viewports of them. Thin the sky out and drop the blur — at this
+   size the difference between a blurred cloud and a pale one is not visible
+   anyway, and the depth still reads off the parallax rates above. */
+@media (max-width: 700px) {
+  .layer-far {
+    opacity: 0.46;
+    filter: saturate(0.9);
+  }
+
+  .layer-mid {
+    opacity: 0.74;
+    filter: none;
+  }
+
+  .drift-far .cloud:nth-child(3n) {
+    display: none;
+  }
+
+  .drift-mid .cloud:nth-child(4n) {
+    display: none;
+  }
+
+  /* one high curl is atmosphere; three is a screensaver */
+  .drift-mid .wind:nth-child(n + 16) {
+    display: none;
   }
 }
 
