@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 90" width="220" height="90">
+  <!-- Small three-lobe puff. Same two-pass build as cloud-a. -->
+  <defs>
+    <linearGradient id="cb-puff" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="90">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#d7eaf9"/>
+    </linearGradient>
+    <filter id="cb-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+    <g id="cb-shape">
+      <rect x="16" y="56" width="188" height="28" rx="14"/>
+      <ellipse cx="70"  cy="58" rx="48" ry="27"/>
+      <ellipse cx="152" cy="62" rx="54" ry="23"/>
+      <ellipse cx="108" cy="40" rx="47" ry="33"/>
+      <ellipse cx="168" cy="44" rx="31" ry="23"/>
+      <ellipse cx="52"  cy="46" rx="28" ry="21"/>
+    </g>
+    <mask id="cb-mask" maskUnits="userSpaceOnUse" x="-20" y="-20" width="260" height="130">
+      <use href="#cb-shape" fill="#fff"/>
+    </mask>
+  </defs>
+
+  <use href="#cb-shape" fill="url(#cb-puff)"/>
+  <g mask="url(#cb-mask)">
+    <g filter="url(#cb-soft)">
+      <ellipse cx="110" cy="94" rx="130" ry="30" fill="#aed0ec" opacity=".6"/>
+      <ellipse cx="152" cy="74" rx="52"  ry="16" fill="#bcdaf1" opacity=".5"/>
+      <ellipse cx="106" cy="28" rx="44"  ry="20" fill="#ffffff"/>
+      <ellipse cx="58"  cy="40" rx="26"  ry="16" fill="#ffffff" opacity=".75"/>
+    </g>
+  </g>
+</svg>

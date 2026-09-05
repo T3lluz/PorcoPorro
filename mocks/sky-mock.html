@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Susan &amp; Skage — sky mock</title>
+<style>
+  :root{
+    /* sampled from the top edge of sky-clouds.jpg */
+    --sky-seam-left:  #82dbfd;
+    --sky-seam-right: #4aaef9;
+    --sky-high:       #47a8f2;
+    --sky-highest:    #1f80de;
+
+    /* natural size of sky-clouds.jpg = 1920 x 1138  ->  height is 59.27% of width */
+    --cloud-ratio: 59.27%;
+    /* how tall the whole page is; raise it freely, the sky just stretches */
+    --page-height: 3200px;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background: var(--sky-highest); font-family: system-ui, sans-serif}
+
+  /* ---- the page canvas -------------------------------------------------- */
+  .page{position:relative; min-height: var(--page-height); overflow:hidden}
+
+  /* open sky: a vertical deep-blue wash over a horizontal gradient whose
+     bottom edge is an exact colour match for the top row of the photo,
+     so the two layers meet without a seam. */
+  .sky{
+    position:absolute; inset:0;
+    background:
+      linear-gradient(to bottom,
+        var(--sky-highest) 0%,
+        var(--sky-high) 18%,
+        rgba(71,168,242,.55) 46%,
+        rgba(71,168,242,0) 80%),
+      linear-gradient(to right, var(--sky-seam-left), var(--sky-seam-right));
+  }
+
+  /* the cloud bank sits on the floor of the document, full bleed */
+  .cloudbank{
+    position:absolute; left:0; right:0; bottom:0;
+    padding-top: var(--cloud-ratio);              /* keeps the artwork aspect */
+    background: url("../src/assets/backgrounds/sky-clouds.jpg") bottom center / 100% auto no-repeat;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 160px);
+            mask-image: linear-gradient(to bottom, transparent 0, #000 160px);
+    z-index: 5;
+  }
+
+  /* ---- scattered clouds ------------------------------------------------- */
+  .sprite{position:absolute; width:0; height:0; overflow:hidden}
+
+  .cloud{
+    position:absolute;
+    width: var(--w);
+    animation: drift var(--dur, 40s) ease-in-out var(--delay, 0s) infinite alternate;
+    will-change: transform;
+  }
+  .cloud svg{display:block; width:100%; height:auto;
+              transform: scaleX(var(--fx, 1)) scaleY(var(--fy, 1))}
+
+  /* three depth layers: far reads hazier and bluer, near reads crisp */
+  .layer-far  { opacity:.55; filter: blur(2.5px) saturate(.9); z-index:1 }
+  .layer-mid  { opacity:.8;  filter: blur(.8px);               z-index:2 }
+  .layer-near { opacity:1;   filter: drop-shadow(0 14px 22px rgba(40,110,180,.13)); z-index:4 }
+
+  @keyframes drift{
+    from{ transform: translate3d(calc(var(--travel, 26px) * -1), 0, 0) }
+    to  { transform: translate3d(var(--travel, 26px), 6px, 0) }
+  }
+
+  /* ---- the plane -------------------------------------------------------- */
+  .plane{
+    position:absolute;
+    top: 22%;
+    right: 12%;
+    width: clamp(200px, 30vw, 480px);
+    transform-origin: 50% 50%;
+    animation: bob 9s ease-in-out infinite;
+    filter: drop-shadow(0 18px 26px rgba(20,80,150,.28));
+    z-index: 3;
+  }
+  .plane img{display:block; width:100%; height:auto}
+
+  @keyframes bob{
+    0%,100%{ transform: translateY(0)     rotate(-1.5deg) }
+    50%    { transform: translateY(-22px) rotate(1.5deg)  }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .plane, .cloud{animation:none}
+  }
+</style>
+</head>
+<body>
+  <div class="page">
+    <div class="sky"></div>
+
+    <!-- Cloud shapes. Each one is a silhouette (a <g> of overlapping lobes) that
+         gets painted twice: once flat with a shared vertical gradient, then again
+         with blurred shadow/highlight blobs masked back inside the same silhouette.
+         That second pass is what keeps them from reading as flat vector blobs. -->
+    <svg class="sprite" aria-hidden="true">
+      <defs>
+        <linearGradient id="puff" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="130">
+          <stop offset="0"   stop-color="#ffffff"/>
+          <stop offset=".5"  stop-color="#f6fcff"/>
+          <stop offset="1"   stop-color="#c8e0f4"/>
+        </linearGradient>
+        <linearGradient id="puff-soft" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="90">
+          <stop offset="0"   stop-color="#ffffff"/>
+          <stop offset="1"   stop-color="#d7eaf9"/>
+        </linearGradient>
+
+        <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="7"/>
+        </filter>
+        <filter id="soft-sm" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="5"/>
+        </filter>
+
+        <!-- ---- silhouettes ---- -->
+        <g id="shape-a">
+          <rect x="20" y="84" width="210" height="34" rx="17"/>
+          <rect x="150" y="90" width="156" height="28" rx="14"/>
+          <ellipse cx="80"  cy="88" rx="66" ry="34"/>
+          <ellipse cx="232" cy="92" rx="74" ry="30"/>
+          <ellipse cx="150" cy="66" rx="72" ry="50"/>
+          <ellipse cx="98"  cy="58" rx="46" ry="37"/>
+          <ellipse cx="214" cy="54" rx="52" ry="41"/>
+          <ellipse cx="262" cy="72" rx="42" ry="31"/>
+          <ellipse cx="176" cy="40" rx="34" ry="25"/>
+          <ellipse cx="44"  cy="96" rx="30" ry="22"/>
+        </g>
+        <g id="shape-b">
+          <rect x="16" y="56" width="188" height="28" rx="14"/>
+          <ellipse cx="70"  cy="58" rx="48" ry="27"/>
+          <ellipse cx="152" cy="62" rx="54" ry="23"/>
+          <ellipse cx="108" cy="40" rx="47" ry="33"/>
+          <ellipse cx="168" cy="44" rx="31" ry="23"/>
+          <ellipse cx="52"  cy="46" rx="28" ry="21"/>
+        </g>
+        <g id="shape-c">
+          <rect x="18" y="60" width="240" height="30" rx="15"/>
+          <rect x="180" y="66" width="226" height="24" rx="12"/>
+          <ellipse cx="92"  cy="64" rx="74" ry="27"/>
+          <ellipse cx="222" cy="58" rx="88" ry="33"/>
+          <ellipse cx="334" cy="68" rx="70" ry="23"/>
+          <ellipse cx="166" cy="44" rx="54" ry="29"/>
+          <ellipse cx="272" cy="38" rx="46" ry="27"/>
+          <ellipse cx="384" cy="74" rx="30" ry="16"/>
+        </g>
+
+        <mask id="mask-a" maskUnits="userSpaceOnUse" x="-20" y="-20" width="360" height="170"><use href="#shape-a" fill="#fff"/></mask>
+        <mask id="mask-b" maskUnits="userSpaceOnUse" x="-20" y="-20" width="260" height="130"><use href="#shape-b" fill="#fff"/></mask>
+        <mask id="mask-c" maskUnits="userSpaceOnUse" x="-20" y="-20" width="460" height="140"><use href="#shape-c" fill="#fff"/></mask>
+
+        <!-- A: broad cumulus -->
+        <symbol id="cloud-a" viewBox="0 0 320 130">
+          <use href="#shape-a" fill="url(#puff)"/>
+          <g mask="url(#mask-a)">
+            <g filter="url(#soft)">
+              <ellipse cx="160" cy="132" rx="180" ry="40" fill="#a6cbe8" opacity=".65"/>
+              <ellipse cx="132" cy="104" rx="74"  ry="26" fill="#b9d8ef" opacity=".5"/>
+              <ellipse cx="252" cy="108" rx="58"  ry="20" fill="#b0d2ec" opacity=".45"/>
+              <ellipse cx="118" cy="82"  rx="24"  ry="30" fill="#cde3f5" opacity=".55"/>
+              <ellipse cx="150" cy="46"  rx="62"  ry="34" fill="#ffffff"/>
+              <ellipse cx="212" cy="36"  rx="42"  ry="26" fill="#ffffff" opacity=".9"/>
+              <ellipse cx="88"  cy="48"  rx="36"  ry="24" fill="#ffffff" opacity=".8"/>
+            </g>
+          </g>
+        </symbol>
+
+        <!-- B: small three-lobe puff -->
+        <symbol id="cloud-b" viewBox="0 0 220 90">
+          <use href="#shape-b" fill="url(#puff-soft)"/>
+          <g mask="url(#mask-b)">
+            <g filter="url(#soft-sm)">
+              <ellipse cx="110" cy="94" rx="130" ry="30" fill="#aed0ec" opacity=".6"/>
+              <ellipse cx="152" cy="74" rx="52"  ry="16" fill="#bcdaf1" opacity=".5"/>
+              <ellipse cx="106" cy="28" rx="44"  ry="20" fill="#ffffff"/>
+              <ellipse cx="58"  cy="40" rx="26"  ry="16" fill="#ffffff" opacity=".75"/>
+            </g>
+          </g>
+        </symbol>
+
+        <!-- C: long, low, drawn-out bank -->
+        <symbol id="cloud-c" viewBox="0 0 420 100">
+          <use href="#shape-c" fill="url(#puff)"/>
+          <g mask="url(#mask-c)">
+            <g filter="url(#soft)">
+              <ellipse cx="210" cy="104" rx="240" ry="30" fill="#a6cbe8" opacity=".62"/>
+              <ellipse cx="120" cy="80"  rx="80"  ry="18" fill="#bcdaf1" opacity=".5"/>
+              <ellipse cx="318" cy="82"  rx="72"  ry="16" fill="#b4d5ee" opacity=".45"/>
+              <ellipse cx="196" cy="66"  rx="26"  ry="26" fill="#cde3f5" opacity=".45"/>
+              <ellipse cx="222" cy="30"  rx="76"  ry="22" fill="#ffffff"/>
+              <ellipse cx="164" cy="30"  rx="46"  ry="18" fill="#ffffff" opacity=".85"/>
+              <ellipse cx="94"  cy="50"  rx="52"  ry="16" fill="#ffffff" opacity=".7"/>
+            </g>
+          </g>
+        </symbol>
+      </defs>
+    </svg>
+
+    <!-- FAR: small, hazy, low contrast -->
+    <div class="cloud layer-far" style="--w:230px; top:4%;  left:-3%;  --dur:52s; --delay:-4s;  --travel:18px; --fx:1; --fy:1.16"><svg viewBox="0 0 320 130"><use href="#cloud-a"/></svg></div>
+    <div class="cloud layer-far" style="--w:180px; top:9%;  left:62%;  --dur:61s; --delay:-16s; --travel:22px; --fx:-1; --fy:1.07"><svg viewBox="0 0 220 90"><use href="#cloud-b"/></svg></div>
+    <div class="cloud layer-far" style="--w:250px; top:17%; left:26%;  --dur:47s; --delay:-9s;  --travel:16px; --fx:1; --fy:1.12"><svg viewBox="0 0 420 100"><use href="#cloud-c"/></svg></div>
+    <div class="cloud layer-far" style="--w:200px; top:30%; left:79%;  --dur:58s; --delay:-22s; --travel:20px; --fx:1; --fy:0.98"><svg viewBox="0 0 320 130"><use href="#cloud-a"/></svg></div>
+    <div class="cloud layer-far" style="--w:220px; top:41%; left:7%;   --dur:55s; --delay:-2s;  --travel:18px; --fx:1; --fy:1.15"><svg viewBox="0 0 220 90"><use href="#cloud-b"/></svg></div>
+    <div class="cloud layer-far" style="--w:260px; top:52%; left:54%;  --dur:64s; --delay:-30s; --travel:24px; --fx:-1; --fy:0.87"><svg viewBox="0 0 420 100"><use href="#cloud-c"/></svg></div>
+    <div class="cloud layer-far" style="--w:210px; top:63%; left:22%;  --dur:50s; --delay:-12s; --travel:18px; --fx:-1; --fy:0.99"><svg viewBox="0 0 320 130"><use href="#cloud-a"/></svg></div>
+    <div class="cloud layer-far" style="--w:190px; top:71%; left:70%;  --dur:59s; --delay:-25s; --travel:20px; --fx:-1; --fy:0.89"><svg viewBox="0 0 220 90"><use href="#cloud-b"/></svg></div>
+
+    <div class="cloud layer-far" style="--w:170px; top:24%; left:50%; --dur:57s; --delay:-7s; --travel:20px; --fx:-1; --fy:1.05"><svg viewBox="0 0 220 90"><use href="#cloud-b"/></svg></div>
+    <div class="cloud layer-far" style="--w:190px; top:37%; left:88%; --dur:62s; --delay:-18s; --travel:18px; --fx:1; --fy:0.92"><svg viewBox="0 0 220 90"><use href="#cloud-b"/></svg></div>
+    <div class="cloud layer-far" style="--w:160px; top:46%; left:32%; --dur:53s; --delay:-29s; --travel:16px; --fx:-1; --fy:1.1"><svg viewBox="0 0 220 90"><use href="#cloud-b"/></svg></div>
+    <div class="cloud layer-far" style="--w:200px; top:58%; left:12%; --dur:60s; --delay:-14s; --travel:18px; --fx:1; --fy:0.95"><svg viewBox="0 0 420 100"><use href="#cloud-c"/></svg></div>
+
+    <!-- MID -->
+    <div class="cloud layer-mid" style="--w:340px; top:7%;  left:31%;  --dur:42s; --delay:-6s;  --travel:30px; --fx:-1; --fy:0.88"><svg viewBox="0 0 320 130"><use href="#cloud-a"/></svg></div>
+    <div class="cloud layer-mid" style="--w:400px; top:20%; left:64%;  --dur:38s; --delay:-19s; --travel:34px; --fx:1; --fy:1.16"><svg viewBox="0 0 420 100"><use href="#cloud-c"/></svg></div>
+    <div class="cloud layer-mid" style="--w:360px; top:35%; left:-6%;  --dur:45s; --delay:-11s; --travel:28px; --fx:1; --fy:1.04"><svg viewBox="0 0 320 130"><use href="#cloud-a"/></svg></div>
+    <div class="cloud layer-mid" style="--w:300px; top:47%; left:41%;  --dur:40s; --delay:-27s; --travel:32px; --fx:-1; --fy:0.88"><svg viewBox="0 0 220 90"><use href="#cloud-b"/></svg></div>
+    <div class="cloud layer-mid" style="--w:380px; top:57%; left:71%;  --dur:44s; --delay:-3s;  --travel:30px; --fx:-1; --fy:0.87"><svg viewBox="0 0 420 100"><use href="#cloud-c"/></svg></div>
+    <div class="cloud layer-mid" style="--w:350px; top:67%; left:4%;   --dur:41s; --delay:-15s; --travel:28px; --fx:-1; --fy:0.95"><svg viewBox="0 0 320 130"><use href="#cloud-a"/></svg></div>
+
+    <div class="cloud layer-mid" style="--w:300px; top:12%; left:80%; --dur:43s; --delay:-21s; --travel:30px; --fx:-1; --fy:1.0"><svg viewBox="0 0 320 130"><use href="#cloud-a"/></svg></div>
+    <div class="cloud layer-mid" style="--w:330px; top:40%; left:60%; --dur:39s; --delay:-9s; --travel:32px; --fx:1; --fy:1.08"><svg viewBox="0 0 420 100"><use href="#cloud-c"/></svg></div>
+    <div class="cloud layer-mid" style="--w:310px; top:62%; left:46%; --dur:46s; --delay:-26s; --travel:28px; --fx:-1; --fy:0.9"><svg viewBox="0 0 220 90"><use href="#cloud-b"/></svg></div>
+
+    <!-- NEAR: big, crisp, some running off the edges -->
+    <div class="cloud layer-near" style="--w:560px; top:13%; left:2%;   --dur:34s; --delay:-8s;  --travel:44px; --fx:-1; --fy:1.03"><svg viewBox="0 0 320 130"><use href="#cloud-a"/></svg></div>
+    <div class="cloud layer-near" style="--w:520px; top:28%; left:47%;  --dur:31s; --delay:-20s; --travel:40px; --fx:1; --fy:1.04"><svg viewBox="0 0 420 100"><use href="#cloud-c"/></svg></div>
+    <div class="cloud layer-near" style="--w:600px; top:44%; left:-9%;  --dur:36s; --delay:-5s;  --travel:46px; --fx:-1; --fy:0.89"><svg viewBox="0 0 320 130"><use href="#cloud-a"/></svg></div>
+    <div class="cloud layer-near" style="--w:640px; top:59%; left:33%;  --dur:33s; --delay:-24s; --travel:42px; --fx:-1; --fy:0.98"><svg viewBox="0 0 420 100"><use href="#cloud-c"/></svg></div>
+    <div class="cloud layer-near" style="--w:700px; top:70%; left:58%;  --dur:37s; --delay:-13s; --travel:48px; --fx:1; --fy:1.04"><svg viewBox="0 0 320 130"><use href="#cloud-a"/></svg></div>
+
+    <div class="cloudbank"></div>
+
+    <div class="plane">
+      <img src="../src/assets/plane/plane-side.png" alt="Rødt sjøfly">
+    </div>
+  </div>
+</body>
+</html>
