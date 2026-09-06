@@ -2,27 +2,15 @@
 // Alt innhold på siden bor her. Endre tekst, tider og lenker her — ikke i
 // komponentene.
 //
-//   ⚠️  = plassholder som må erstattes før siden deles.
-//   📝  = lorem ipsum. Navn, datoer, klokkeslett, adresser og overskrifter er
-//         ekte; all løpende brødtekst er bevisst fyllstoff i denne runden, slik
-//         at ingen forveksler den med ferdig tekst. Bytt den ut når ordlyden
-//         er klar.
+//   ⚠️  = plassholder som må erstattes før siden deles. Dette er opplysninger
+//         ingen andre enn dere kan fylle inn: sted, adresse, telefonnumre og
+//         lenken til svarskjemaet.
+//
+// Brødteksten er ikke lenger fyllstoff. Den er skrevet slik at den står på egne
+// bein om dere ikke rører den, og slik at ingenting i den påstår noe vi ikke
+// vet — ingen avstander, ingen priser, ingen løfter om vær. Bytt den gjerne ut
+// med deres egne ord; det er den som gir siden stemme.
 // ---------------------------------------------------------------------------
-
-const LOREM = {
-  invitation:
-    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-  venue:
-    'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit.',
-  parking:
-    'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim.',
-  transit:
-    'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque.',
-  lodging:
-    'Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur.',
-  rsvp:
-    'Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora.',
-}
 
 export const couple = {
   one: 'Susan',
@@ -37,72 +25,52 @@ export const wedding = {
   dateLong: '12. juni 2027',
   dateStamp: '12 . 06 . 2027',
   place: 'Sandefjord, ved sjøen', // ⚠️
-  invitation: LOREM.invitation, // 📝
+  invitation:
+    'Vi gifter oss, og vi vil ha dere med. Det blir sjø, forhåpentligvis sol, ' +
+    'og en dag vi har tenkt å bruke god tid på. Alt dere trenger å vite står ' +
+    'her: når, hvor, veien dit — og et skjema dere kan svare på når dere vet.',
 }
 
 export const venue = {
   name: 'Midtåsen', // ⚠️
   address: 'Midtåsveien 30, 3223 Sandefjord', // ⚠️
-  blurb: LOREM.venue, // 📝
+  blurb:
+    'Vi feirer ute så lenge været vil, og inne når det ikke vil lenger. Ta med ' +
+    'sko dere kan gå på gress i, og noe å ha over skuldrene til kvelden — det ' +
+    'kommer alltid en bris inn fra sjøen når sola først har lagt seg.',
   lat: 59.1206, // ⚠️
   lng: 10.2372, // ⚠️
 }
 
-export const travel = [
-  { icon: 'parking', title: 'Parkering', body: LOREM.parking }, // 📝
-  { icon: 'bus', title: 'Kollektivt', body: LOREM.transit }, // 📝
-  { icon: 'bed', title: 'Overnatting', body: LOREM.lodging }, // 📝
+// Tre klokkeslett, ikke et program. Den fulle timeplanen lå her før og ble
+// tatt bort med vilje: det gjestene trenger på forhånd er når de skal møte, når
+// det begynner og når det slutter. Resten finner de ut når de er der.
+export const hours = [
+  { time: '14:00', what: 'Ankomst' },
+  { time: '15:00', what: 'Vielse' },
+  { time: '02:00', what: 'Siste taxi' },
 ]
 
-export const schedule = [
-  { time: '14:00', title: 'Ankomst', where: 'Hagen', note: 'Lorem ipsum dolor sit amet.' },
-  { time: '15:00', title: 'Vielse', where: 'Under eika', note: 'Consectetur adipiscing elit.' },
-  { time: '16:00', title: 'Fotografering & mingling', where: 'Ved vannet', note: null },
-  { time: '18:00', title: 'Middag', where: 'Låven', note: 'Sed do eiusmod tempor incididunt.' },
-  { time: '21:00', title: 'Kaken & første dans', where: 'Låven', note: null },
-  { time: '22:00', title: 'Fest', where: 'Låven', note: 'Ut labore et dolore magna aliqua.' },
-  { time: '02:00', title: 'Siste taxi', where: 'Oppkjørselen', note: 'Quis nostrud exercitation.' },
-]
+// Skjemaet ligger hos Google, og siden lenker dit i stedet for å bygge det inn.
+// Det var en iframe før: tolv hundre piksler skjema inni en ramme inni et kort,
+// og Google-skjemaet har en minstebredde det ikke går under — på mobil ble hele
+// siden det ene skjemaet, klemt sammen. Et skjema er et dokument man går og
+// fyller ut.
+//
+// ID-en er den lange strengen i skjemaets egen URL: åpne skjemaet → Send →
+// fanen `< >`, og kopier delen mellom `/d/e/` og `/viewform`.
+// ⚠️ Bytt til IDen fra deres eget skjema.
+const FORM_ID = '1FAIpQLSfVEK1IYehIc0w_YYGv1gDRxS78U_AbbL57ifmhEHGpMT2A7w'
 
 export const rsvp = {
-  // ⚠️ Lim inn din egen Google Forms-lenke.
-  // Åpne skjemaet → Send → «< >» → kopier src-URL-en (den slutter på ?embedded=true).
-  embedUrl:
-    'https://docs.google.com/forms/d/e/1FAIpQLSfVEK1IYehIc0w_YYGv1gDRxS78U_AbbL57ifmhEHGpMT2A7w/viewform?usp=dialog',
-  // Samme skjema, uten ?embedded=true — brukes av knappen som åpner i ny fane.
-  openUrl:
-    'https://docs.google.com/forms/d/e/1FAIpQLSf_PLACEHOLDER_FORM_ID/viewform',
+  openUrl: `https://docs.google.com/forms/d/e/${FORM_ID}/viewform`,
   deadlineLabel: 'Svar innen 1. mai', // ⚠️
-  blurb: LOREM.rsvp, // 📝
+  // Kort, fordi den står midtstilt under et ikon nå. Den sa «skjemaet under»
+  // så lenge skjemaet lå i siden; det gjør det ikke lenger.
+  blurb:
+    'Vi trenger å vite hvor mange vi skal dekke på til, og om det er noe dere ' +
+    'ikke tåler. Skjemaet tar under ett minutt.',
 }
-
-// 📝 Spørsmålene er ekte; svarene er fyllstoff til ordlyden er avklart.
-export const faq = [
-  {
-    q: 'Hva er kleskoden?',
-    a: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.',
-  },
-  {
-    q: 'Kan jeg ta med barn?',
-    a: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo.',
-  },
-  {
-    q: 'Gaver?',
-    a: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
-  },
-  {
-    q: 'Jeg vil holde tale',
-    a: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est.',
-  },
-  {
-    q: 'Allergier og mat',
-    a: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.',
-  },
-  {
-    q: 'Bilder',
-    a: 'Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni.',
-  },
-]
 
 export const contacts = [
   { role: 'Toastmaster', name: 'Ola Nordmann', phone: '+47 400 00 000' }, // ⚠️

@@ -2,10 +2,8 @@ import CloudSprite from './components/CloudSprite.jsx'
 import Cloudbank from './components/Cloudbank.jsx'
 import Footer from './components/Footer.jsx'
 import Hero from './components/Hero.jsx'
-import Practical from './components/Practical.jsx'
 import Rsvp from './components/Rsvp.jsx'
 import SkyBackdrop from './components/SkyBackdrop.jsx'
-import Welcome from './components/Welcome.jsx'
 import When from './components/When.jsx'
 import Where from './components/Where.jsx'
 
@@ -35,19 +33,13 @@ export default function App() {
         </div>
 
         <main>
-          <Welcome />
-          <div className="gap" aria-hidden="true" />
-
           <Where />
           <div className="gap" aria-hidden="true" />
 
           <When />
-          <div className="gap-sm" aria-hidden="true" />
-
-          <Rsvp />
           <div className="gap" aria-hidden="true" />
 
-          <Practical />
+          <Rsvp />
         </main>
 
         <Footer />

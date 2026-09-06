@@ -14,13 +14,30 @@
   z-index: 3;
 }
 
-/* Pulled back up over the pinned hero by exactly one hero, so the passes are
-   already waiting just below the fold and the first flick of the wheel slides
-   them over it. See .hero-pin in hero.css. */
+/* The page body, and the two offsets that make the opening beat work.
+
+   margin-top pulls <main> back up over the pinned hero by exactly one hero, so
+   the passes are already waiting just below the fold and the first flick of the
+   wheel slides them over it. See .hero-pin in hero.css.
+
+   padding-top then makes sure none of the first card is visible until you
+   scroll. One --hero-h of offset is not enough on its own: --hero-h is 100svh,
+   the *small* viewport — the height left when a phone's toolbars are showing.
+   Open the page with them hidden and the window is taller than that, so the
+   fold sat below the card's top edge and the card was already peeking before
+   you had touched it.
+
+   Deriving the difference from 100lvh is the obvious fix and it is not enough
+   either: there are viewports that report lvh smaller than their own
+   innerHeight, and there the correction comes out as zero while the card still
+   shows. So the offset is stated outright instead — a full band of sky on top
+   of whatever the lvh/svh gap turns out to be. The card cannot be above the
+   fold at rest, and the names get the first screen to themselves. */
 main {
   position: relative;
   z-index: 2;
   margin-top: calc(var(--hero-h) * -1);
+  padding-top: calc(max(0px, 100lvh - var(--hero-h)) + var(--gap-sky));
 }
 
 .wrap {
@@ -28,19 +45,10 @@ main {
   margin-inline: auto;
 }
 
-.wrap-wide {
-  width: min(100% - var(--pad), var(--wrap-wide));
-  margin-inline: auto;
-}
-
 /* Open sky between the passes. */
 .gap {
   position: relative;
   height: var(--gap-sky);
-}
-
-.gap-sm {
-  height: 74px;
 }
 
 /* --- the boarding pass ---------------------------------------------------- */
@@ -63,14 +71,23 @@ main {
 }
 
 .pass {
-  --tear: 52px;
+  --tear: 46px;
 
   position: relative;
   display: grid;
   grid-template-columns: var(--tear) 1fr;
   background: var(--panel);
   border-radius: 13px;
+  /* The hairline ring first, and it is not decoration. The card is white and
+     the sky it falls through has white clouds in it — when one drifts behind a
+     card the two are the same colour and the card's edge simply dissolves into
+     it. Stacking order does not help: the card is already three layers above
+     the cloud, it is painted over it correctly, and you still cannot see where
+     one stops and the other starts. Only a defined edge fixes that, so every
+     card carries a one-pixel ring in a cool grey that reads against cloud and
+     disappears against blue. */
   box-shadow:
+    0 0 0 1px rgba(20, 66, 99, 0.09),
     0 24px 46px -22px rgba(12, 50, 84, 0.46),
     0 4px 11px rgba(12, 50, 84, 0.1),
     inset 0 1px 0 #fff;
@@ -88,7 +105,7 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 17px 0 14px;
+  padding: 15px 0 12px;
   border-radius: 13px 0 0 13px;
   background: linear-gradient(180deg, #f4fafd, #e0eef7);
 }
@@ -120,7 +137,7 @@ main {
   transform: rotate(180deg);
   font-family: var(--ui);
   font-weight: 500;
-  font-size: clamp(13px, 1.3vw, 16px);
+  font-size: clamp(12px, 1.2vw, 15px);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -142,12 +159,12 @@ main {
 .pass-body {
   position: relative;
   min-width: 0; /* so a wide child cannot force the grid column open */
-  padding: 24px 28px 26px;
+  padding: 20px 24px 22px;
 }
 
 .pass-title {
   color: var(--ink);
-  margin-bottom: 13px;
+  margin-bottom: 11px;
 }
 
 /* --- scroll reveal -------------------------------------------------------- */
@@ -191,9 +208,13 @@ main {
   box-shadow: 0 8px 20px rgba(206, 52, 25, 0.26);
 }
 
-.btn-rosso:hover {
-  background: var(--rosso-lit);
-  transform: translateY(-2px);
+/* Behind a hover query, or a phone leaves the card lifted after a tap — there
+   is no pointer to move away and unstick it. */
+@media (hover: hover) {
+  .btn-rosso:hover {
+    background: var(--rosso-lit);
+    transform: translateY(-2px);
+  }
 }
 
 .btn svg {
@@ -203,7 +224,7 @@ main {
 /* --- responsive ----------------------------------------------------------- */
 @media (max-width: 860px) {
   .pass-body {
-    padding: 22px 22px 24px;
+    padding: 18px 18px 20px;
   }
 }
 
@@ -212,13 +233,19 @@ main {
      go with it. */
   .pass {
     grid-template-columns: 1fr;
-    border-radius: 12px;
-    /* Less lean on a narrow screen: the same angle throws a full-width card
-       much further sideways than it does an 780px one. */
-    --sway: 0.9deg;
-    --drift: 40px;
+    border-radius: 14px;
+    /* Sit them square. The loose-paper conceit needs margin to lean into, and
+       on a phone the card *is* the screen — there is 15px either side. A tall
+       card throws its corners out by its own height times the sine of the
+       angle, so at 1700px even two degrees puts them past the edge, where
+       .page clips the corners off. Kill the pinned angle outright and leave
+       just enough sway to keep the card alive as it passes the lens. */
+    --tilt: 0deg;
+    --sway: 0.5deg;
+    --drift: 30px;
     box-shadow:
-      0 18px 34px -18px rgba(12, 50, 84, 0.44),
+      0 0 0 1px rgba(20, 66, 99, 0.1),
+      0 16px 30px -16px rgba(12, 50, 84, 0.42),
       0 3px 8px rgba(12, 50, 84, 0.1),
       inset 0 1px 0 #fff;
   }
@@ -227,8 +254,8 @@ main {
     flex-direction: row;
     align-items: center;
     gap: 12px;
-    padding: 10px 16px;
-    border-radius: 12px 12px 0 0;
+    padding: 10px 14px;
+    border-radius: 14px 14px 0 0;
   }
 
   .pass-stub::after {
@@ -250,7 +277,7 @@ main {
     flex: 0 1 auto;
     writing-mode: horizontal-tb;
     transform: none;
-    font-size: 13px;
+    font-size: 11.5px;
     letter-spacing: 0.18em;
   }
 
@@ -259,15 +286,11 @@ main {
   }
 
   .pass-body {
-    padding: 20px 17px 22px;
+    padding: 17px 15px 19px;
   }
 
   .pass-title {
     margin-bottom: 14px;
-  }
-
-  .gap-sm {
-    height: 60px;
   }
 
   .btn {

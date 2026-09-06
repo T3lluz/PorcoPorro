@@ -24,7 +24,6 @@ export default function Panel({
   title,
   code,
   tilt = 0,
-  wide = false,
   className = '',
   children,
 }) {
@@ -58,7 +57,7 @@ export default function Panel({
     <section
       id={id}
       ref={ref}
-      className={`pass-outer reveal ${shown ? 'is-in' : ''} ${wide ? 'wrap-wide' : 'wrap'} ${className}`}
+      className={`pass-outer reveal wrap ${shown ? 'is-in' : ''} ${className}`}
       style={{ '--tilt': `${tilt}deg` }}
     >
       <article className="pass">

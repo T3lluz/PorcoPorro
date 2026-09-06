@@ -52,7 +52,7 @@ export default function Hero() {
         <p className="hero-place">{wedding.place}</p>
       </div>
 
-      <a className="scroll-cue" href="#velkommen" aria-label="Bla nedover">
+      <a className="scroll-cue" href="#hvor" aria-label="Bla nedover">
         <ChevronsDown size={26} strokeWidth={1.5} aria-hidden="true" />
       </a>
     </header>

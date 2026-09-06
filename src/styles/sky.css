@@ -44,14 +44,40 @@
   );
 }
 
-/* Faded out over the approach to the ground, and faded out early — the painted
-   cloud bank on the floor of the document has to arrive against clean sky, not
-   with a second, vector set of clouds laid over the top of it. The 1.4 is what
-   makes them gone rather than merely faint by the time the photo is in frame. */
+/* Cut off just above the painted cloud bank, not faded out over the last third
+   of the page.
+
+   The fade was the wrong instrument. It thinned the whole sky at once, so the
+   entire last stretch of the page lost its weather in order to solve a problem
+   that only exists in the last few hundred pixels of it — and because it was
+   driven by scroll progress rather than by where the photograph actually is,
+   the point at which the sky went bald moved with the window size.
+
+   This is a straight edge instead, parked a little above the top of the
+   painting and following it exactly, because --bank-top (see lib/parallax.js)
+   is measured from the document rather than guessed at from a scroll fraction.
+   Above the edge the sky has clouds all the way down; below it, the painted
+   bank has them. The 180px of feather is what keeps it from reading as a razor
+   line through the middle of a cloud — long enough to be a handover, short
+   enough that there is never a bald band between the two.
+
+   The fallback keeps the layer whole for the frame before the first scroll pass
+   lands. */
 .sky-drift {
   z-index: 1;
   overflow: hidden;
-  opacity: calc(1 - var(--land, 0) * 1.4);
+
+  --cut: calc(var(--bank-top, 300vh) + 90px);
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 calc(var(--cut) - 170px),
+    transparent var(--cut)
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 calc(var(--cut) - 170px),
+    transparent var(--cut)
+  );
 }
 
 /* The parallax proper.
@@ -63,14 +89,27 @@
    as a slightly wobbly backdrop. The near layer takes 22% of the scroll and
    the far one 9%, roughly three times what they used to.
 
-   That much travel would run the sky out of clouds, so each layer is two and a
-   half viewports of sky rather than one, hung above the fold and reaching well
-   below it. min() then caps the climb at the point where the bottom edge of the
-   layer would otherwise rise past the bottom of the screen — the sky slows to
-   the pace of the page for the last stretch instead of emptying out.
+   That much travel would run the sky out of clouds, so each layer is nearly
+   three viewports of sky rather than one, hung above the fold and reaching well
+   below it. min() then holds the fast climb back once the layer's bottom edge
+   would otherwise rise past the bottom of the screen.
 
-     far:  spans -30svh…180svh, capped at -70svh  →  bottom never above 110svh
-     mid:  spans -40svh…220svh, capped at -110svh →  bottom never above 110svh */
+   The second term is the important half of that, and it is there because the
+   first half alone was wrong: a bare min() does not slow the sky down, it stops
+   it dead. On a long page — a phone, or any page once the real form is in — the
+   cap arrived with a viewport or more of scrolling still to go, and the sky
+   froze solid while everything else kept moving, which is precisely the pinned,
+   wallpaper reading the fast rate exists to avoid. So past the cap the layers
+   keep creeping at 2 and 3 per cent instead: slow enough that the extra travel
+   fits inside the layer, fast enough that the sky is never nailed down.
+
+   The heights are then set from the worst case rather than by eye: a short
+   window with a long page, which is a phone on its side. There the page is
+   fifteen viewports of scrolling and the creep alone is worth half a screen, so
+   both layers carry margin for it.
+
+     far:  spans -30svh…230svh, climbs at 9% then 2%
+     mid:  spans -40svh…270svh, climbs at 22% then 3% */
 .drift-far,
 .drift-mid {
   position: absolute;
@@ -80,14 +119,20 @@
 
 .drift-far {
   top: -30svh;
-  height: 210svh;
-  translate: 0 calc(min(var(--sy, 0px) * 0.09, 70svh) * -1);
+  height: 260svh;
+  translate: 0
+    calc(
+      (min(var(--sy, 0px) * 0.09, 70svh) + var(--sy, 0px) * 0.02) * -1
+    );
 }
 
 .drift-mid {
   top: -40svh;
-  height: 260svh;
-  translate: 0 calc(min(var(--sy, 0px) * 0.22, 110svh) * -1);
+  height: 310svh;
+  translate: 0
+    calc(
+      (min(var(--sy, 0px) * 0.22, 110svh) + var(--sy, 0px) * 0.03) * -1
+    );
 }
 
 /* --- clouds --------------------------------------------------------------- */
@@ -98,9 +143,13 @@
   overflow: hidden;
 }
 
+/* `left` is the cloud's centre, so translate pulls it back by half its own
+   width. `translate` and not `transform`, because `transform` belongs to the
+   drift animation — the two compose, translate first. */
 .cloud {
   position: absolute;
-  width: var(--w);
+  width: calc(var(--w) * var(--cloud-scale, 1));
+  translate: -50% 0;
   animation: drift var(--dur, 40s) ease-in-out var(--delay, 0s) infinite
     alternate;
   will-change: transform;
@@ -113,7 +162,9 @@
   transform: scaleX(var(--fx, 1)) scaleY(var(--fy, 1));
 }
 
-/* three depth layers: far reads hazier and bluer, near reads crisp */
+/* two depth layers: far reads hazier and bluer, mid reads nearly crisp. There
+   was a third, near layer in front of the plane; it is gone, because a cloud
+   passing over the boarding passes hides the only text on the page. */
 .layer-far {
   opacity: 0.55;
   filter: blur(2.5px) saturate(0.9);
@@ -124,12 +175,6 @@
   opacity: 0.8;
   filter: blur(0.8px);
   z-index: 2;
-}
-
-.layer-near {
-  opacity: 1;
-  filter: drop-shadow(0 14px 22px rgba(40, 110, 180, 0.13));
-  z-index: 4;
 }
 
 @keyframes drift {
@@ -144,7 +189,11 @@
 /* --- the cloud bank on the floor of the document -------------------------- */
 /* sky-clouds.jpg, pinned to the floor of the document, full bleed, at its true
    1920x1138 aspect. The mask fades its top edge into the CSS sky over a long
-   stretch; because both are the same colour there, the seam disappears. */
+   stretch; because both are the same colour there, the seam disappears.
+
+   `cover` rather than `100% auto`: at the natural aspect the two are identical,
+   and it is what lets the phone rule below force a taller band without the
+   artwork stretching. */
 .cloudbank {
   position: absolute;
   left: 0;
@@ -153,8 +202,8 @@
   z-index: 2;
   padding-top: var(--cloud-ratio); /* keeps the 1920x1138 artwork aspect */
   pointer-events: none;
-  background: url('../assets/backgrounds/sky-clouds.jpg') bottom center / 100%
-    auto no-repeat;
+  background: url('../assets/backgrounds/sky-clouds.jpg') bottom center / cover
+    no-repeat;
   -webkit-mask-image: linear-gradient(
     to bottom,
     transparent 0,
@@ -290,17 +339,40 @@
     filter: none;
   }
 
-  .drift-far .cloud:nth-child(3n) {
+  /* Scaled, not thinned. Hiding every third and every fourth cloud was
+     cheaper, but it also deleted a third of a carefully even scatter and left
+     the survivors bunched — and the ones that remained were still sized for a
+     1440px window, so a single 400px cloud was most of a 390px sky. At 0.6 they
+     are cloud-sized again and the whole spread survives. */
+  :root {
+    --cloud-scale: 0.6;
+  }
+
+  /* one high curl is atmosphere; three is a screensaver. Written as "every
+     curl after the first" rather than by index, so adding or removing a cloud
+     above cannot silently change which ones survive. */
+  .drift-mid .wind ~ .wind {
     display: none;
   }
 
-  .drift-mid .cloud:nth-child(4n) {
-    display: none;
-  }
-
-  /* one high curl is atmosphere; three is a screensaver */
-  .drift-mid .wind:nth-child(n + 16) {
-    display: none;
+  /* The bank is sized off the page *width*, so on a phone it comes out barely
+     230px tall — and the footer's sea is taller than that, which put the whole
+     painting behind the water where nobody ever saw it. The thing you fall onto
+     has to still be there at the end of the fall, so give it a floor in
+     viewport units and let `cover` crop the sides instead.
+     lib/parallax.js sizes --bank-top off the same two cases; keep them in
+     step, or the clouds stop in the wrong place. */
+  .cloudbank {
+    padding-top: 0;
+    height: 56svh;
+    /* And a shorter fade on its top edge. The desktop fade is up to 260px,
+       which is fine against 845px of photograph and absurd against 473 — it
+       faded the whole of the part you can actually see above the sea, so the
+       painting arrived as a pale wash with no clouds in it at all. The seam is
+       colour-matched either way; the fade only has to hide the join, not
+       perform it. */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 120px);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 120px);
   }
 }
 

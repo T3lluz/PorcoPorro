@@ -7,72 +7,74 @@
    Tokens. The page is weather: blue sky is the ground, white belongs to the
    clouds, and the only warm colour anywhere is the aeroplane.
    Daylight has no dark mode — light only, on purpose.
+
+   Every value below is used. The palette started much wider — a full sky ramp,
+   a green isle, four shades of note paper — and most of it belonged to sections
+   that no longer exist. A token nobody reads is a colour you have to keep in
+   your head for nothing.
 --------------------------------------------------------------------------- */
 :root {
   color-scheme: light;
 
-  /* sky */
+  /* sky. The seam pair is sampled from the top row of sky-clouds.jpg, so the
+     join between the CSS sky and the photograph is matched, not faked; the
+     other two are the vertical wash that deepens the top of the page. */
+  --sky-seam-left: #82dbfd;
+  --sky-seam-right: #4aaef9;
+  --sky-high: #47a8f2;
+  --sky-highest: #1f80de;
   --sky-1: #2e8fb8;
-  --sky-2: #5fb4d2;
-  --sky-3: #94cfe3;
-  --sky-4: #c4e5ef;
-  --sky-5: #dcf0f5;
   --sea: #1b6c8c;
-  --isle: #4e8a45;
 
-  /* clouds — three flat tones, hard edges, no blur between them */
-  --cloud: #ffffff;
+  /* clouds */
   --cloud-2: #e6f2f8;
-  --cloud-shade: #9fc6dc;
 
   /* the aeroplane — the only warm colour on the site */
   --rosso: #ce3419;
   --rosso-lit: #ee6a42;
   --rosso-deep: #9e2411;
-  --amber: #efa92b;
-  --steel: #8fa6b6;
-  --verde: #2e9e5b;
 
-  /* ink */
+  /* ink and paper */
   --ink: #173c4c;
   --ink-2: #5a7e8d;
   --line: #d5e9f0;
   --panel: #ffffff;
-  --radius: 22px;
-  --shadow:
-    0 10px 34px rgba(23, 60, 76, 0.1), 0 2px 6px rgba(23, 60, 76, 0.05);
-
-  /* sampled from the top edge of sky-clouds.jpg — the seam is matched, not faked */
-  --sky-seam-left: #82dbfd;
-  --sky-seam-right: #4aaef9;
-  --sky-high: #47a8f2;
-  --sky-highest: #1f80de;
 
   /* natural size of sky-clouds.jpg = 1920 x 1138 */
   --cloud-ratio: 59.27%;
 
+  /* One family per role. Loaded in index.html — keep the two lists in step. */
   --display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
   --ui: 'Zen Maru Gothic', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
   --body: 'Lora', Georgia, 'Times New Roman', serif;
-  --hand: 'Caveat', 'Segoe Script', 'Bradley Hand', cursive;
 
-  /* paper for the pinboard notes */
-  --note-1: #fdf3cf;
-  --note-2: #dff2e6;
-  --note-3: #e2eefb;
-  --note-4: #fbe4e2;
-
-  --gap-sky: 118px;
-  --wrap: 780px;
-  --wrap-wide: 880px;
+  /* Real sky between the cards. These are meant to read as separate things
+     falling past a lens, and at a hundred pixels they read as a stack instead —
+     the gap has to be big enough that the sky behind is the subject for a beat
+     before the next card arrives. */
+  --gap-sky: 190px;
+  --wrap: 700px;
   --pad: 44px;
 
   /* One hero. The pin container is twice this and <main> is pulled back up by
-     exactly this, so the two always agree. Measured in svh, not vh: on a phone
-     the toolbars come and go, and svh is the height the viewport is guaranteed
-     to have, so the lettering can never be pushed under a chrome bar that
-     re-appears. The floor only matters on a landscape phone. */
-  --hero-h: max(480px, 100svh);
+     exactly this, so the two always agree.
+
+     No floor. There used to be one, and it was worse than useless: it only ever
+     bound when the window was shorter than it, and a hero taller than the window
+     puts the lettering below the fold — so on a phone held sideways the floor
+     hid the names it was there to protect. The hero is the window. */
+  --hero-h: 100vh;
+}
+
+/* svh rather than vh, so a toolbar sliding back in cannot cover the bottom of
+   the hero. Guarded: a custom property holds unparsed tokens, so in a browser
+   that does not know svh the declaration would be accepted here and then fail
+   at every point of use — the pin's height, the negative margin on <main> —
+   taking the whole page layout with it. */
+@supports (height: 100svh) {
+  :root {
+    --hero-h: 100svh;
+  }
 }
 
 /* --- reset ---------------------------------------------------------------- */
@@ -141,7 +143,7 @@ h3 {
 }
 
 h2 {
-  font-size: clamp(23px, 2.7vw, 30px);
+  font-size: clamp(21px, 2.4vw, 27px);
   font-weight: 400;
 }
 
@@ -168,33 +170,36 @@ p + p {
   font-variant-numeric: tabular-nums;
 }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  border: 0;
-}
-
 /* --- phone ---------------------------------------------------------------- */
 @media (max-width: 700px) {
   :root {
-    --gap-sky: 84px;
-    --pad: 30px;
+    --gap-sky: 112px;
+    /* Narrower cards, so the sky they are falling through is still visible
+       either side of them. The card is not the page — it is an object in front
+       of one, and it stops reading as that the moment it touches both edges.
+       The room it loses comes back out of the padding and type inside it.
+
+       env() on both sides, because a notch is only ever on one of them and the
+       page is centred — budget for both and nothing lands under the cutout when
+       the phone is turned. */
+    --pad: calc(
+      52px + env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px)
+    );
   }
 
   body {
-    font-size: 15.5px;
+    font-size: 14.5px;
     line-height: 1.66;
   }
 }
 
+/* Still narrower than the screen at this size, just not by as much — below
+   400px the card has to keep enough width to set a readable line. */
 @media (max-width: 400px) {
   :root {
-    --pad: 24px;
+    --pad: calc(
+      44px + env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px)
+    );
   }
 }
 

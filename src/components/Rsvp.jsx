@@ -1,30 +1,18 @@
-import { TicketCheck } from 'lucide-react'
-import { couple, rsvp, wedding } from '../config.js'
+import { FileText, ExternalLink } from 'lucide-react'
+import { rsvp } from '../config.js'
 import Panel from './Panel.jsx'
 
 /* ---------------------------------------------------------------------------
-   Svar — the widest pass on the page, and the one that leans furthest.
+   Svar.
 
-   It used to draw a little boarding pass inside a panel; now that every
-   section *is* a boarding pass, that second card was a card inside a card. The
-   route line and the stamp moved up onto the pass itself instead.
+   This used to embed the form itself — a twelve-hundred-pixel iframe inside a
+   frame inside a card, wrapped in a route line and a rubber stamp. On a phone
+   that single card was most of the page, and Google's form has a minimum width
+   it will not go below anyway, so it spent the whole time squeezed.
+
+   A form is a document you go and fill in. The card says that once and hands
+   over the link.
 --------------------------------------------------------------------------- */
-
-const isPlaceholder = rsvp.embedUrl.includes('PLACEHOLDER')
-
-function FormPlaceholder() {
-  return (
-    <div className="form-placeholder">
-      <TicketCheck className="placeholder-mark" strokeWidth={1.4} aria-hidden="true" />
-      <strong>Svarskjemaet kommer</strong>
-      <p>
-        Her dukker skjemaet opp så snart lenken er på plass. Bytt ut{' '}
-        <code>rsvp.embedUrl</code> i <code>src/config.js</code> med din egen
-        Google Forms-adresse.
-      </p>
-    </div>
-  )
-}
 
 export default function Rsvp() {
   return (
@@ -32,52 +20,26 @@ export default function Rsvp() {
       id="svar"
       eyebrow="Svar"
       title="Gi oss beskjed"
-      code="SK 04"
+      code="SK 03"
       tilt={1.6}
-      wide
       className="rsvp"
     >
-      <span className="pennant">{rsvp.deadlineLabel}</span>
+      <div className="rsvp-card">
+        <FileText className="rsvp-mark" strokeWidth={1.2} aria-hidden="true" />
 
-      <div className="route">
-        <span className="route-name">
-          {couple.one} &amp; {couple.two}
-        </span>
-        <span className="route-rule" aria-hidden="true" />
-        <span className="route-date tabular">{wedding.dateStamp}</span>
-        <span className="stamp">Gi beskjed</span>
-      </div>
+        <p className="rsvp-blurb">{rsvp.blurb}</p>
 
-      <p className="route-blurb">{rsvp.blurb}</p>
-
-      <div className="form-frame">
-        <div className="form-inner">
-          {isPlaceholder ? (
-            <FormPlaceholder />
-          ) : (
-            <iframe
-              src={rsvp.embedUrl}
-              title="Svarskjema"
-              loading="lazy"
-              width="100%"
-              height="1100"
-            >
-              Laster inn skjema …
-            </iframe>
-          )}
-        </div>
-      </div>
-
-      <div className="form-fallback">
-        <p>Får du ikke opp skjemaet her? Åpne det i sin egen fane.</p>
         <a
           className="btn btn-rosso"
           href={rsvp.openUrl}
           target="_blank"
           rel="noreferrer"
         >
-          Åpne skjemaet i ny fane
+          Åpne svarskjemaet
+          <ExternalLink size={15} strokeWidth={2.2} aria-hidden="true" />
         </a>
+
+        <p className="rsvp-deadline">{rsvp.deadlineLabel}</p>
       </div>
     </Panel>
   )

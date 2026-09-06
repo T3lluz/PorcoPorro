@@ -8,7 +8,8 @@
  * masked back inside that same silhouette. The second pass is what stops them
  * reading as flat vector blobs.
  *
- * Mirrors src/assets/clouds/clouds-sprite.svg.
+ * This is the only copy of the geometry; the standalone SVGs it was drawn from
+ * are gone, so edit the shapes here.
  * viewBoxes: cloud-a 320x130 · cloud-b 220x90 · cloud-c 420x100
  */
 export default function CloudSprite() {
@@ -273,8 +274,15 @@ const CLOUD_BOX = {
 /**
  * One cloud. `shape` picks the silhouette; `fx`/`fy` flip and squash it so the
  * three shapes never visibly repeat.
+ *
+ * `x` and `top` are where the cloud's *centre* goes, as percentages of the
+ * layer (sky.css pulls it back by half its own width). That distinction is the
+ * whole reason the sky used to bunch up on the right: these were `left` edges,
+ * so a 300px-wide cloud at 80% started at 80% and spent most of itself off the
+ * screen — which is barely noticeable at 1440px and is most of the sky at 390.
+ * A centre lands where you put it at every width.
  */
-export function Cloud({ shape, layer, w, top, left, dur, delay, travel, fx = 1, fy = 1 }) {
+export function Cloud({ shape, layer, w, top, x, dur, delay, travel, fx = 1, fy = 1 }) {
   return (
     <div
       className={`cloud layer-${layer}`}
@@ -286,7 +294,7 @@ export function Cloud({ shape, layer, w, top, left, dur, delay, travel, fx = 1, 
         '--fx': fx,
         '--fy': fy,
         top,
-        left,
+        left: x,
       }}
     >
       <svg viewBox={CLOUD_BOX[shape]} aria-hidden="true" focusable="false">

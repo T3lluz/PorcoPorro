@@ -3,20 +3,21 @@ import { useEffect, useRef } from 'react'
 /* ---------------------------------------------------------------------------
    The falling camera.
 
-   One rAF-throttled scroll pass writes four numbers and lets CSS do the rest:
+   One rAF-throttled scroll pass writes a handful of numbers and lets CSS do the
+   rest. On :root:
 
-     --sy    on :root — how far the page has fallen, in px. The sky layers read
-             it directly, each with its own coefficient, so the far clouds creep
-             and the near ones rush.
-     --fall  on :root — the same thing over the first viewport only, 0 to 1.
-             The hero lettering sinks and fades on this, so it is gone before
-             the first pass has finished covering it and never resurfaces in the
-             gap between two cards.
-     --land  on :root — 0 until the last stretch of the page, then 0 to 1 as the
-             ground arrives. The drifting vector clouds fade out on it, so the
-             painted cloud bank at the floor is met by clean sky instead of by
-             a second set of clouds laid over it. The last two viewports and a
-             bit of the page are given over to that hand-off.
+     --sy        how far the page has fallen, in px. The sky layers read it
+                 directly, each with its own coefficient, so the far clouds
+                 creep and the near ones rush.
+     --fall      the same thing over the first viewport only, 0 to 1. The hero
+                 lettering sinks and fades on this, so it is gone before the
+                 first pass has finished covering it and never resurfaces in the
+                 gap between two cards.
+     --bank-top  where the top edge of the painted cloud bank is right now, in
+                 viewport pixels — negative once it is above the fold. The
+                 drifting vector clouds are masked off just above that line, so
+                 they stop where the painting starts instead of being drawn over
+                 the top of it.
 
    and, on every registered element:
 
@@ -34,10 +35,15 @@ import { useEffect, useRef } from 'react'
 --------------------------------------------------------------------------- */
 
 const items = new Set()
+let sky = false // whether anyone still wants --bank-top
 let queued = false
 let listening = false
 
 const clamp01 = (n) => (n < 0 ? 0 : n > 1 ? 1 : n)
+
+/** Someone who has asked for less motion gets a camera that holds still. */
+export const stillCamera = () =>
+  globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 
 function tick() {
   queued = false
@@ -54,18 +60,25 @@ function tick() {
   const root = document.documentElement
   const y = globalThis.scrollY
   const docH = root.scrollHeight
-  // How long the approach to the ground lasts. Generous on purpose: the drift
-  // clouds fade out across it, and they have to be gone — not merely faint —
-  // by the time the painted cloud bank on the floor is in frame, or the page
-  // ends with two sets of clouds laid over each other.
-  const landing = vh * 2.4
 
-  root.style.setProperty('--sy', `${Math.round(y)}px`)
-  root.style.setProperty('--fall', clamp01(y / vh).toFixed(3))
-  root.style.setProperty(
-    '--land',
-    clamp01((y + vh - (docH - landing)) / landing).toFixed(3),
-  )
+  // How tall the painted cloud bank is, in two cases — because styles/sky.css
+  // sizes it two ways: off the page width at the artwork's true aspect, and, on
+  // a phone where that comes out shorter than the footer's sea and the painting
+  // would never be seen at all, off the viewport height instead. Taking the
+  // larger covers both without asking which rule is live, and where they
+  // disagree it only ever errs tall, which cuts the clouds a little early.
+  const bankH = Math.max((globalThis.innerWidth || 0) * 0.5927, vh * 0.56)
+  // Its top edge, in viewport coordinates. Published even under reduced motion:
+  // this is not movement, it is where the floor is.
+  root.style.setProperty('--bank-top', `${Math.round(docH - bankH - y)}px`)
+
+  // The rest is motion, and a visitor who has asked for none gets none. Leaving
+  // these unset is what keeps the sky still and the hero unpinned — every rule
+  // that reads them falls back to 0.
+  if (!stillCamera()) {
+    root.style.setProperty('--sy', `${Math.round(y)}px`)
+    root.style.setProperty('--fall', clamp01(y / vh).toFixed(3))
+  }
 
   for (const [el, top, height] of reads) {
     const p = clamp01((vh - top) / (height + vh))
@@ -82,7 +95,9 @@ function schedule() {
   requestAnimationFrame(tick)
 }
 
-function listen(on) {
+/** Listen exactly while something still wants the numbers. */
+function listen() {
+  const on = sky || items.size > 0
   if (on === listening) return
   listening = on
   if (on) {
@@ -94,20 +109,31 @@ function listen(on) {
   }
 }
 
-/** Someone who has asked for less motion gets a camera that holds still. */
-export const stillCamera = () =>
-  globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+/**
+ * Keep --bank-top up to date for as long as the sky is on the page.
+ * @returns {() => void} a stop function, so it can be passed straight to useEffect.
+ */
+export function watchSky() {
+  sky = true
+  listen()
+  schedule()
+
+  return () => {
+    sky = false
+    listen()
+  }
+}
 
 /** @returns {() => void} an unregister function. */
 export function register(el) {
   items.add(el)
-  listen(true)
+  listen()
   schedule()
 
   return () => {
     items.delete(el)
     for (const prop of ['--p', '--s', '--c']) el.style.removeProperty(prop)
-    if (!items.size) listen(false)
+    listen()
   }
 }
 

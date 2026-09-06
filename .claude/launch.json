@@ -5,7 +5,7 @@
       "name": "wedding-dev",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
-      "url": "http://localhost:5173",
+      "autoPort": true,
       "port": 5173
     }
   ]

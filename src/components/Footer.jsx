@@ -1,4 +1,4 @@
-import { Phone, PlaneLanding } from 'lucide-react'
+import { Phone } from 'lucide-react'
 import { contacts, couple, wedding } from '../config.js'
 import useParallax from '../lib/parallax.js'
 
@@ -6,13 +6,14 @@ import useParallax from '../lib/parallax.js'
    The ground.
 
    Everything above this is falling; this is what it lands on. The CSS sky has
-   already paled into sky-clouds.jpg by the time you get here (the bank is
-   pinned to the floor of the document), and the horizon, the sea and the island
-   close the drop.
+   already paled into sky-clouds.jpg by the time you get here, and the horizon
+   and the sea close the drop.
 
-   The three of them move at three different rates off the footer's own --s, so
-   the last stretch of scrolling reads as ground rushing up to meet the lens
-   rather than as one flat block sliding into place.
+   It used to carry a green island in the corner and a rotated ANKOMST stamp.
+   Both are gone: the island was a shape with no place to be — the sea has no
+   coastline anywhere else on the page, so a hill rising out of it read as a
+   stray blob rather than as land — and the stamp was a label for a section that
+   does not need one. What is left is water, two names and a phone number each.
 --------------------------------------------------------------------------- */
 
 export default function Footer() {
@@ -35,24 +36,7 @@ export default function Footer() {
         </svg>
 
         <div className="sea">
-          <svg
-            className="isle"
-            viewBox="0 0 380 130"
-            aria-hidden="true"
-            focusable="false"
-          >
-            <path
-              d="M0 130V78c40-2 66-30 104-44 36-13 72-4 96 20s64 38 120 42c24 2 44 3 60 4v30z"
-              fill="currentColor"
-            />
-          </svg>
-
           <div className="footer-inner wrap">
-            <p className="arrival">
-              <PlaneLanding size={17} strokeWidth={1.8} aria-hidden="true" />
-              Ankomst
-            </p>
-
             <ul className="contacts">
               {contacts.map((c) => (
                 <li key={c.role}>

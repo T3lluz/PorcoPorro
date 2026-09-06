@@ -1,19 +1,18 @@
-import { BedDouble, Bus, Navigation, SquareParking } from 'lucide-react'
-import { travel, venue } from '../config.js'
+import { Navigation } from 'lucide-react'
+import { venue } from '../config.js'
 import directionsUrl from '../lib/directions.js'
 import Panel from './Panel.jsx'
-
-const ICONS = {
-  parking: SquareParking,
-  bus: Bus,
-  bed: BedDouble,
-}
 
 /* ---------------------------------------------------------------------------
    The map is a picture, not a tool: no panning, no zooming, no accidental
    scroll capture on a phone. Everything you can actually do with it lives in
    the «Veibeskrivelse» button underneath, which hands the trip to whichever
    map app the visitor's device already uses.
+
+   Parking, transport and lodging used to sit under it in three columns. They
+   were three paragraphs of advice nobody had asked for yet, and on a phone they
+   stacked into a wall of text taller than the map. The button is the answer to
+   "how do I get there"; the rest can be asked.
 --------------------------------------------------------------------------- */
 
 export default function Where() {
@@ -27,7 +26,7 @@ export default function Where() {
       id="hvor"
       eyebrow="Hvor"
       title="Sted og vei dit"
-      code="SK 02"
+      code="SK 01"
       tilt={1.2}
     >
       <h3 className="venue-name">{venue.name}</h3>
@@ -59,21 +58,6 @@ export default function Where() {
           <Navigation size={15} strokeWidth={2.2} aria-hidden="true" />
         </a>
       </p>
-
-      <div className="travel">
-        {travel.map((t) => {
-          const Icon = ICONS[t.icon]
-          return (
-            <div className="travel-card" key={t.title}>
-              <span className="travel-icon">
-                <Icon size={22} strokeWidth={1.7} aria-hidden="true" />
-              </span>
-              <h4>{t.title}</h4>
-              <p>{t.body}</p>
-            </div>
-          )
-        })}
-      </div>
     </Panel>
   )
 }
