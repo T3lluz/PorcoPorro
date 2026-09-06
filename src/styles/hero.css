@@ -60,6 +60,11 @@
   inset: 0;
   z-index: 2;
   opacity: calc(1 - var(--fall, 0) * 2);
+  /* --fall changes on every scroll frame, so this opacity does too. Hinted, it
+     is a compositor fade over a layer that is rasterised once; unhinted, the
+     six animated curls underneath are repainted on every frame of the opening
+     scroll — which is exactly the stretch that has to feel weightless. */
+  will-change: opacity;
 }
 
 /* --- plane ---------------------------------------------------------------- */
@@ -83,6 +88,7 @@
      overwriting it. */
   translate: 0 calc(var(--fall, 0) * -110svh);
   opacity: calc(1 - var(--fall, 0) * 2.2);
+  will-change: translate, opacity;
   animation: plane-arrive 2.7s cubic-bezier(0.17, 0.72, 0.26, 1) both;
 }
 
@@ -297,6 +303,11 @@
   color: var(--ink);
   translate: 0 calc(var(--fall, 0) * 150px);
   opacity: calc(1 - var(--fall, 0) * 2.2);
+  /* Both of these move on every scroll frame, and the text under them carries a
+     38px shadow — repainting that per frame is the most expensive thing the
+     hero does. Hinted, the lettering is rasterised once and then slid and faded
+     by the compositor. */
+  will-change: translate, opacity;
   text-shadow: 0 0 38px rgba(255, 255, 255, 0.6);
 }
 
@@ -457,12 +468,6 @@
      that the bob reaches the names. See the padding above. */
   .plane-rig {
     top: 12%;
-  }
-
-  /* Half the curls. Six sets of flowing dashes is real work for a phone, and at
-     this width they crowd the lettering rather than reading as air. */
-  .hero-wind .wind:nth-child(n + 4) {
-    display: none;
   }
 
   /* The viewBox is unchanged but it is now a third of the size on screen, so

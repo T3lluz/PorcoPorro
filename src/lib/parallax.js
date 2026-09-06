@@ -3,39 +3,47 @@ import { useEffect, useRef } from 'react'
 /* ---------------------------------------------------------------------------
    The falling camera.
 
-   One rAF-throttled scroll pass writes a handful of numbers and lets CSS do the
-   rest. On :root:
+   One rAF-throttled scroll pass measures where things are and publishes a
+   handful of numbers; CSS decides what they mean. Nothing here animates
+   anything itself, which keeps the motion vocabulary in one place — the
+   stylesheets — instead of split across two languages.
 
-     --sy        how far the page has fallen, in px. The sky layers read it
-                 directly, each with its own coefficient, so the far clouds
-                 creep and the near ones rush.
-     --fall      the same thing over the first viewport only, 0 to 1. The hero
-                 lettering sinks and fades on this, so it is gone before the
-                 first pass has finished covering it and never resurfaces in the
-                 gap between two cards.
-     --bank-top  where the top edge of the painted cloud bank is right now, in
-                 viewport pixels — negative once it is above the fold. The
-                 drifting vector clouds are masked off just above that line, so
-                 they stop where the painting starts instead of being drawn over
-                 the top of it.
+   The numbers, all of them optional at every point of use:
 
-   and, on every registered element:
+     --sy    how far the page has fallen, in px. The sky layers read it, each
+             with its own coefficient, so the far clouds creep and the near ones
+             rush.
+     --fall  the same thing over the first viewport only, 0 to 1. The hero
+             lettering sinks and fades on this, so it is gone before the first
+             pass has finished covering it.
+     --lift  --fall eased out — 1 - (1 - f)². The boarding passes ride up on it
+             so they climb faster than the page for exactly as long as the hero
+             is in the way. Its slope at f = 1 is zero, so the extra speed bleeds
+             away to nothing as the hero lets go; a linear ramp would arrive at
+             the handover still moving and the page would visibly change gear.
+     --s     per element: 0 dead centre, -1 below the frame, +1 above. Multiply
+             it by an angle and a card tips towards you on the way up and away
+             on the way out.
+     --c     per element: 1 - |s|, how centred it is. Drives the slight swell as
+             a pass passes the lens.
 
-     --p   0 the moment its top edge appears at the bottom of the screen,
-           1 the moment its bottom edge leaves at the top
-     --s   the same thing signed: -1 below, 0 dead centre, +1 above. This is
-           the useful one — multiply it by an angle and a card tips towards you
-           on the way up and away from you on the way out.
-     --c   1 - |s|: how centred the element is. Drives the slight swell as a
-           pass passes the lens.
+   WHERE these get written is the performance story, and it is the whole reason
+   this file is shaped the way it is.
 
-   Nothing here animates anything itself. It publishes where things are and
-   the stylesheets decide what that means, which keeps the motion vocabulary
-   in one place — CSS — instead of split across two languages.
+   They used to go on :root. Custom properties inherit, so a write to :root
+   invalidates style for every element in the document — on a phone, sixty times
+   a second, for a page with a live map embed in it. That was most of the scroll
+   jank, and no amount of tuning the values fixes it, because the cost is not in
+   the numbers, it is in who has to be told about them.
+
+   So each value is written on the smallest element whose subtree actually reads
+   it: --sy on the two cloud layers, --fall on .hero (its lettering, rig and
+   prop-wash are all inside it), --lift on <main>. Nothing outside those
+   subtrees is disturbed by a scroll. See watch(), below.
 --------------------------------------------------------------------------- */
 
-const items = new Set()
-let sky = false // whether anyone still wants --bank-top
+const items = new Set() // elements wanting --s / --c
+const cams = new Map() // element -> { names, last }
 let queued = false
 let listening = false
 
@@ -57,33 +65,33 @@ function tick() {
     reads.push([el, top, height])
   }
 
-  const root = document.documentElement
-  const y = globalThis.scrollY
-  const docH = root.scrollHeight
-
-  // How tall the painted cloud bank is, in two cases — because styles/sky.css
-  // sizes it two ways: off the page width at the artwork's true aspect, and, on
-  // a phone where that comes out shorter than the footer's sea and the painting
-  // would never be seen at all, off the viewport height instead. Taking the
-  // larger covers both without asking which rule is live, and where they
-  // disagree it only ever errs tall, which cuts the clouds a little early.
-  const bankH = Math.max((globalThis.innerWidth || 0) * 0.5927, vh * 0.56)
-  // Its top edge, in viewport coordinates. Published even under reduced motion:
-  // this is not movement, it is where the floor is.
-  root.style.setProperty('--bank-top', `${Math.round(docH - bankH - y)}px`)
-
-  // The rest is motion, and a visitor who has asked for none gets none. Leaving
-  // these unset is what keeps the sky still and the hero unpinned — every rule
-  // that reads them falls back to 0.
+  // A visitor who has asked for no motion gets none. Leaving these unwritten is
+  // what keeps the sky still and the hero unpinned — every rule that reads them
+  // falls back to 0.
   if (!stillCamera()) {
-    root.style.setProperty('--sy', `${Math.round(y)}px`)
-    root.style.setProperty('--fall', clamp01(y / vh).toFixed(3))
+    const y = globalThis.scrollY
+    const fall = clamp01(y / vh)
+    const value = {
+      sy: `${Math.round(y)}px`,
+      fall: fall.toFixed(3),
+      lift: (1 - (1 - fall) ** 2).toFixed(3),
+    }
+
+    for (const [el, cam] of cams) {
+      for (const name of cam.names) {
+        const next = value[name]
+        // Nothing is written unless it actually changed. --fall and --lift stop
+        // moving after the first viewport and --sy stops when you stop, so most
+        // frames of a long scroll touch one element instead of three.
+        if (cam.last[name] === next) continue
+        cam.last[name] = next
+        el.style.setProperty(`--${name}`, next)
+      }
+    }
   }
 
   for (const [el, top, height] of reads) {
-    const p = clamp01((vh - top) / (height + vh))
-    const s = p * 2 - 1
-    el.style.setProperty('--p', p.toFixed(3))
+    const s = clamp01((vh - top) / (height + vh)) * 2 - 1
     el.style.setProperty('--s', s.toFixed(3))
     el.style.setProperty('--c', (1 - Math.abs(s)).toFixed(3))
   }
@@ -97,7 +105,7 @@ function schedule() {
 
 /** Listen exactly while something still wants the numbers. */
 function listen() {
-  const on = sky || items.size > 0
+  const on = cams.size > 0 || items.size > 0
   if (on === listening) return
   listening = on
   if (on) {
@@ -110,18 +118,37 @@ function listen() {
 }
 
 /**
- * Keep --bank-top up to date for as long as the sky is on the page.
- * @returns {() => void} a stop function, so it can be passed straight to useEffect.
+ * Have the camera write the named values on this element, and only this
+ * element. Pick the shallowest node whose subtree needs them — that subtree is
+ * exactly what a scroll will cost.
+ * @param {Element} el
+ * @param {...('sy'|'fall'|'lift')} names
+ * @returns {() => void} a stop function, so it can be returned from useEffect.
  */
-export function watchSky() {
-  sky = true
+export function watch(el, ...names) {
+  cams.set(el, { names, last: {} })
   listen()
   schedule()
 
   return () => {
-    sky = false
+    cams.delete(el)
+    for (const name of names) el.style.removeProperty(`--${name}`)
     listen()
   }
+}
+
+/** Ref-flavoured `watch`. */
+export function useCamera(...names) {
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    return watch(el, ...names)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  return ref
 }
 
 /** @returns {() => void} an unregister function. */
@@ -132,7 +159,7 @@ export function register(el) {
 
   return () => {
     items.delete(el)
-    for (const prop of ['--p', '--s', '--c']) el.style.removeProperty(prop)
+    for (const prop of ['--s', '--c']) el.style.removeProperty(prop)
     listen()
   }
 }

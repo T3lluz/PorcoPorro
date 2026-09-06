@@ -1,14 +1,20 @@
 /* ---------------------------------------------------------------------------
    The sky system. One continuous sky behind everything, in three z-layers:
 
-     0  .sky-base   fixed  — the horizontal seam gradient, exactly the colours
-                             of the top row of sky-clouds.jpg
+     0  .sky-base   fixed  — the horizontal base gradient
      0  .sky-wash   scrolls — the deep-blue vertical wash, anchored to the top
                              of the document so it pales away as you descend
-                             and never tints the join with the photo
      1  .sky-drift  fixed  — far + mid clouds and the faint high wind
-     2  .cloudbank  document bottom
      3  .content
+
+   There was a fourth: a photograph of a cloud bank pinned to the floor of the
+   document, and every question it raised was about itself. How tall. How far
+   up. How to hand over from a vector sky to a picture of one without a seam —
+   which has no good answer, because no amount of feathering makes a vector
+   cloud become a photograph. What to do when the footer covered the part you
+   were meant to land on. It is gone, and with it a moving mask, a scroll-linked
+   opacity, two measured elements, four tokens and 200kB of JPEG. The footer's
+   horizon haze was always the real transition; the sky runs into it now.
 --------------------------------------------------------------------------- */
 
 .sky-base,
@@ -44,94 +50,82 @@
   );
 }
 
-/* Cut off just above the painted cloud bank, not faded out over the last third
-   of the page.
+/* No mask, no cut, no fade. The drifting clouds run the whole height of the
+   page and are dissolved at the bottom by something that was already there:
+   .horizon::before in sections.css, the band of haze the footer paints above
+   its own waterline. Clouds thinning into haze into water is a horizon; it is
+   what the mask here was imitating, badly and expensively.
 
-   The fade was the wrong instrument. It thinned the whole sky at once, so the
-   entire last stretch of the page lost its weather in order to solve a problem
-   that only exists in the last few hundred pixels of it — and because it was
-   driven by scroll progress rather than by where the photograph actually is,
-   the point at which the sky went bald moved with the window size.
+   Expensively because the line it cut along moved. It was parked on the top
+   edge of the painted cloud bank, which meant new mask geometry on every scroll
+   frame, which meant this fixed full-screen layer and the thirty clouds inside
+   it had to be re-rasterised sixty times a second. There was a whole separate
+   opacity-based version of it for phones to dodge that cost. Both are gone.
 
-   This is a straight edge instead, parked a little above the top of the
-   painting and following it exactly, because --bank-top (see lib/parallax.js)
-   is measured from the document rather than guessed at from a scroll fraction.
-   Above the edge the sky has clouds all the way down; below it, the painted
-   bank has them. The 180px of feather is what keeps it from reading as a razor
-   line through the middle of a cloud — long enough to be a handover, short
-   enough that there is never a bald band between the two.
+   `contain` is the replacement, and it costs nothing: it promises the browser
+   that nothing inside these layers can affect the size or paint of anything
+   outside them, so a cloud moving is a cloud moving and not the beginning of a
+   walk back up the tree. */
+/* The parallax proper, in two directions.
 
-   The fallback keeps the layer whole for the frame before the first scroll pass
-   lands. */
-.sky-drift {
-  z-index: 1;
-  overflow: hidden;
+   VERTICALLY. Both layers are fixed, so left alone they sit dead still while
+   the passes fall past them, which reads as wallpaper rather than as distance.
+   Against the falling camera they rise — and they rise *hard*: the ground below
+   is moving at the full rate of the scroll, so anything that creeps merely
+   reads as a slightly wobbly backdrop. The near layer takes 48% of the scroll
+   and the far one 20%.
 
-  --cut: calc(var(--bank-top, 300vh) + 90px);
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    #000 calc(var(--cut) - 170px),
-    transparent var(--cut)
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    #000 calc(var(--cut) - 170px),
-    transparent var(--cut)
-  );
-}
+   Those were 22 and 9. At that pace the sky was plainly behind you rather than
+   around you: the cards went past it, not through it. Roughly half the rate of
+   the page is the point where the near clouds stop being scenery — the camera
+   is dropping through them, and the far layer holding at two fifths of that is
+   what keeps the two apart as depth instead of reading as one loose sheet.
 
-/* The parallax proper.
+   min() then holds the fast climb back once a layer's bottom edge would
+   otherwise rise past the bottom of the screen, and the second term past the
+   cap is the important half: a bare min() does not slow the sky down, it stops
+   it dead, and a sky nailed in place is exactly the wallpaper the fast rate
+   exists to avoid. Past the cap the layers keep creeping at 2 and 3 per cent.
 
-   Both layers are fixed, so left alone they sit dead still while the passes
-   fall past them, which reads as wallpaper rather than as distance. Against
-   the falling camera they rise — and they rise *hard*: the ground below is
-   moving at the full rate of the scroll, so anything that creeps merely reads
-   as a slightly wobbly backdrop. The near layer takes 22% of the scroll and
-   the far one 9%, roughly three times what they used to.
+   With two cards rather than three the page is short enough that neither cap is
+   reached in practice; they are the guard rail, not the design.
 
-   That much travel would run the sky out of clouds, so each layer is nearly
-   three viewports of sky rather than one, hung above the fold and reaching well
-   below it. min() then holds the fast climb back once the layer's bottom edge
-   would otherwise rise past the bottom of the screen.
+     far:  spans -30svh…230svh, climbs at 20% then 2%
+     mid:  spans -40svh…270svh, climbs at 48% then 3%
 
-   The second term is the important half of that, and it is there because the
-   first half alone was wrong: a bare min() does not slow the sky down, it stops
-   it dead. On a long page — a phone, or any page once the real form is in — the
-   cap arrived with a viewport or more of scrolling still to go, and the sky
-   froze solid while everything else kept moving, which is precisely the pinned,
-   wallpaper reading the fast rate exists to avoid. So past the cap the layers
-   keep creeping at 2 and 3 per cent instead: slow enough that the extra travel
-   fits inside the layer, fast enough that the sky is never nailed down.
-
-   The heights are then set from the worst case rather than by eye: a short
-   window with a long page, which is a phone on its side. There the page is
-   fifteen viewports of scrolling and the creep alone is worth half a screen, so
-   both layers carry margin for it.
-
-     far:  spans -30svh…230svh, climbs at 9% then 2%
-     mid:  spans -40svh…270svh, climbs at 22% then 3% */
+   HORIZONTALLY. The aeroplane holds still in the middle of the hero and the
+   sky goes past it — that is the only way a fixed picture of a plane reads as
+   flight. It streams to the right, because the nose points left, and it does
+   not stop, slow, or turn round: one direction, for as long as the page is
+   open. --fly-dur is how long a cloud takes to cross, and it is the only knob;
+   see .cloud below for how the stream is made seamless. */
 .drift-far,
 .drift-mid {
   position: absolute;
   left: 0;
   right: 0;
+  contain: layout paint;
 }
 
 .drift-far {
+  --fly-dur: 132s;
+
   top: -30svh;
   height: 260svh;
   translate: 0
     calc(
-      (min(var(--sy, 0px) * 0.09, 70svh) + var(--sy, 0px) * 0.02) * -1
+      (min(var(--sy, 0px) * 0.20, 100svh) + var(--sy, 0px) * 0.02) * -1
     );
 }
 
 .drift-mid {
+  --fly-dur: 58s;
+
   top: -40svh;
   height: 310svh;
   translate: 0
     calc(
-      (min(var(--sy, 0px) * 0.22, 110svh) + var(--sy, 0px) * 0.03) * -1
+      (min(var(--sy, 0px) * 0.48, 140svh) + var(--sy, 0px) * 0.03) * -1
     );
 }
 
@@ -143,16 +137,55 @@
   overflow: hidden;
 }
 
-/* `left` is the cloud's centre, so translate pulls it back by half its own
-   width. `translate` and not `transform`, because `transform` belongs to the
-   drift animation — the two compose, translate first. */
+/* One way, for ever, and never the same cloud twice at the seam.
+
+   The horizontal position is not `left` any more — it is a phase. Every cloud
+   runs the same journey, from fully off the left edge of the layer to fully off
+   the right, at the same speed as every other cloud in its layer; what differs
+   is where in that journey it happens to be, which is what --fly-phase sets as
+   a negative animation delay. The scatter is unchanged, because the numbers
+   that used to be x positions are the phases now: they step through the golden
+   ratio, so the clouds are as evenly spread through the cycle as they used to
+   be across the sky, and the field stays uniformly populated at every moment.
+
+   This is what makes it seamless. A cloud does not wrap where you can see it —
+   it leaves the frame on the right and its next arrival is on the left, a whole
+   cycle later, with the rest of the layer covering for it in between. Panning
+   the layer as a rigid sheet cannot do that without tiling the scatter, and
+   swinging it back and forth (which is what it did before) is not flight, it is
+   a pendulum: the sky reversed every twenty seconds and the aeroplane appeared
+   to change its mind.
+
+   `translate` and not `transform`, because `transform` belongs to the drift
+   animation below — the two compose, translate first. */
 .cloud {
   position: absolute;
+  left: 0;
   width: calc(var(--w) * var(--cloud-scale, 1));
-  translate: -50% 0;
-  animation: drift var(--dur, 40s) ease-in-out var(--delay, 0s) infinite
-    alternate;
-  will-change: transform;
+  animation-name: drift, fly;
+  animation-duration: var(--dur, 40s), var(--fly-dur, 58s);
+  animation-timing-function: ease-in-out, linear;
+  animation-delay: var(--delay, 0s),
+    calc(var(--fly-dur, 58s) * var(--fly-phase, 0) * -1);
+  animation-iteration-count: infinite;
+  animation-direction: alternate, normal;
+  /* No will-change. An animated transform is composited on its own without the
+     hint, and there are thirty-odd of these — hinting each one costs a layer of
+     GPU memory per cloud on a phone for nothing. */
+}
+
+/* -100% is the cloud's own width, so it starts wholly outside the layer rather
+   than half-showing at the edge, and the extra 40px on each end is margin
+   against a browser rounding the two differently. Nothing is ever seen entering
+   or leaving, which is the whole trick: the jump back to the start happens off
+   the side of the screen, a cloud-width clear of it. */
+@keyframes fly {
+  from {
+    translate: calc(-100% - 40px) 0;
+  }
+  to {
+    translate: calc(100vw + 40px) 0;
+  }
 }
 
 .cloud svg {
@@ -186,42 +219,15 @@
   }
 }
 
-/* --- the cloud bank on the floor of the document -------------------------- */
-/* sky-clouds.jpg, pinned to the floor of the document, full bleed, at its true
-   1920x1138 aspect. The mask fades its top edge into the CSS sky over a long
-   stretch; because both are the same colour there, the seam disappears.
-
-   `cover` rather than `100% auto`: at the natural aspect the two are identical,
-   and it is what lets the phone rule below force a taller band without the
-   artwork stretching. */
-.cloudbank {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 2;
-  padding-top: var(--cloud-ratio); /* keeps the 1920x1138 artwork aspect */
-  pointer-events: none;
-  background: url('../assets/backgrounds/sky-clouds.jpg') bottom center / cover
-    no-repeat;
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    #000 clamp(140px, 22svh, 260px)
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    #000 clamp(140px, 22svh, 260px)
-  );
-}
-
 /* --- wind curls ----------------------------------------------------------- */
 /* Two animations, deliberately out of step with each other:
 
      .wind      carries the curl across the sky, lifting and growing slightly as
                 it goes, and fades it in and out at the ends of that pass so
-                nothing ever pops in at the edge of the screen;
+                nothing ever pops in at the edge of the screen. The plateau is
+                long — in by a tenth of the pass, out only in the last fifth —
+                because these are quick now, and a short cycle with a slow fade
+                at both ends is not a gust, it is a blink;
      .wind path flows the dash along each stroke four times faster, so the line
                 looks continuously redrawn by the air rather than towed through
                 it. pathLength="1000" on every path means one dash rule governs
@@ -247,43 +253,47 @@
 
 .wind path {
   fill: none;
-  stroke: #ffffff;
+  /* Not flat white — see #wind-fade in CloudSprite.jsx. The stroke fades out
+     along its own length, so the tail is nearly gone and the curl at the front
+     is at full strength. The spiral is the head of the gust; the straight run
+     behind it is the wake, and a wake should be thinning. */
+  stroke: url(#wind-fade);
   stroke-linecap: round;
-  animation: wind-flow calc(var(--dur, 26s) / 7) linear var(--delay, 0s)
+  animation: wind-flow calc(var(--dur, 26s) / 4.5) linear var(--delay, 0s)
     infinite;
 }
 
 .wind-halo path {
   stroke-width: 13;
   stroke-opacity: 0.3;
-  stroke-dasharray: 840 160;
+  stroke-dasharray: 620 380;
 }
 
 .wind-line path {
   stroke-width: 3.6;
   stroke-opacity: 1;
-  stroke-dasharray: 700 300;
+  stroke-dasharray: 560 440;
 }
 
 /* the two shorter wisps run a little ahead of the lead line */
 .wind-line path:nth-child(2) {
-  animation-duration: calc(var(--dur, 26s) / 5.5);
+  animation-duration: calc(var(--dur, 26s) / 3.6);
   stroke-width: 2.5;
 }
 
 .wind-line path:nth-child(3) {
-  animation-duration: calc(var(--dur, 26s) / 9);
+  animation-duration: calc(var(--dur, 26s) / 5.5);
   stroke-width: 2.1;
   stroke-opacity: 0.7;
 }
 
 .wind-halo path:nth-child(2) {
-  animation-duration: calc(var(--dur, 26s) / 5.5);
+  animation-duration: calc(var(--dur, 26s) / 3.6);
   stroke-width: 9;
 }
 
 .wind-halo path:nth-child(3) {
-  animation-duration: calc(var(--dur, 26s) / 9);
+  animation-duration: calc(var(--dur, 26s) / 5.5);
   stroke-width: 8;
 }
 
@@ -298,20 +308,20 @@
     opacity: 0;
     transform: translate3d(0, 0, 0) scale(0.86);
   }
-  14% {
+  9% {
     opacity: var(--op, 0.45);
     transform: translate3d(
-        calc(var(--travel, 60vw) * 0.14),
-        calc(var(--rise, -34px) * 0.14),
+        calc(var(--travel, 60vw) * 0.09),
+        calc(var(--rise, -34px) * 0.09),
         0
       )
       scale(0.89);
   }
-  70% {
+  82% {
     opacity: var(--op, 0.45);
     transform: translate3d(
-        calc(var(--travel, 60vw) * 0.7),
-        calc(var(--rise, -34px) * 0.7),
+        calc(var(--travel, 60vw) * 0.82),
+        calc(var(--rise, -34px) * 0.82),
         0
       )
       scale(1.02);
@@ -324,14 +334,26 @@
 }
 
 /* --- phone ---------------------------------------------------------------- */
-/* A phone GPU pays for every blurred layer separately, and there are now two
-   and a half viewports of them. Thin the sky out and drop the blur — at this
-   size the difference between a blurred cloud and a pale one is not visible
-   anyway, and the depth still reads off the parallax rates above. */
+/* The mobile budget, and it is a budget.
+
+   A phone pays for every blurred layer separately, for every filter pass, for
+   every composited layer it has to keep in memory, and — worst of all — for
+   anything whose geometry changes while you scroll, because that cannot be
+   composited and has to be painted again.
+
+   Most of what used to be in here has been deleted rather than tuned: the
+   moving mask and the scroll-linked opacity went with the painted cloud bank,
+   and the camera stopped writing to :root, which was invalidating every element
+   on the page sixty times a second. What is left is a size adjustment, two
+   durations, and one honest trade — a third of the far clouds, so the wind can
+   animate exactly as it does on a desktop. */
 @media (max-width: 700px) {
+  /* No filters at all. `saturate(0.9)` reads as nothing at this size and costs
+     a filter pass per cloud — eighteen of them on the far layer alone. The
+     depth still comes off the opacity and the parallax rates. */
   .layer-far {
     opacity: 0.46;
-    filter: saturate(0.9);
+    filter: none;
   }
 
   .layer-mid {
@@ -339,40 +361,36 @@
     filter: none;
   }
 
-  /* Scaled, not thinned. Hiding every third and every fourth cloud was
-     cheaper, but it also deleted a third of a carefully even scatter and left
-     the survivors bunched — and the ones that remained were still sized for a
-     1440px window, so a single 400px cloud was most of a 390px sky. At 0.6 they
-     are cloud-sized again and the whole spread survives. */
-  :root {
-    --cloud-scale: 0.6;
-  }
+  /* A third of the far layer, and the far layer only. It is the palest and the
+     slowest of the two, so it is the one that can lose clouds without the sky
+     reading as thin — and every third one keeps the even spread, because the
+     scatter steps through the golden ratio and every third term of that
+     sequence is still a golden-ratio sequence.
 
-  /* one high curl is atmosphere; three is a screensaver. Written as "every
-     curl after the first" rather than by index, so adding or removing a cloud
-     above cannot silently change which ones survive. */
-  .drift-mid .wind ~ .wind {
+     This is where the phone's budget is spent now instead of on the wind. Each
+     cloud is a composited layer of its own, and layers are the thing a phone
+     runs out of; six curls of animated stroke are paint, which is cheaper here
+     than six more layers. The wind is the part you notice. */
+  .drift-far .cloud:nth-child(3n) {
     display: none;
   }
 
-  /* The bank is sized off the page *width*, so on a phone it comes out barely
-     230px tall — and the footer's sea is taller than that, which put the whole
-     painting behind the water where nobody ever saw it. The thing you fall onto
-     has to still be there at the end of the fall, so give it a floor in
-     viewport units and let `cover` crop the sides instead.
-     lib/parallax.js sizes --bank-top off the same two cases; keep them in
-     step, or the clouds stop in the wrong place. */
-  .cloudbank {
-    padding-top: 0;
-    height: 56svh;
-    /* And a shorter fade on its top edge. The desktop fade is up to 260px,
-       which is fine against 845px of photograph and absurd against 473 — it
-       faded the whole of the part you can actually see above the sea, so the
-       painting arrived as a pale wash with no clouds in it at all. The seam is
-       colour-matched either way; the fade only has to hide the join, not
-       perform it. */
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 120px);
-    mask-image: linear-gradient(to bottom, transparent 0, #000 120px);
+  /* The crossing is a screen wide either way, so a single duration would have a
+     cloud take as long to cross a 390px phone as a 1400px monitor — the same
+     journey in the same time, which on the small screen is barely motion at
+     all. Shorter, so the stream reads at the size it is actually seen. */
+  .drift-far {
+    --fly-dur: 74s;
+  }
+
+  .drift-mid {
+    --fly-dur: 32s;
+  }
+
+  /* Scaled, not thinned — this is about size, not count. The clouds were sized
+     for a 1440px window, so a single 400px one was most of a 390px sky. */
+  :root {
+    --cloud-scale: 0.6;
   }
 }
 

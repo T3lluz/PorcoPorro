@@ -1,5 +1,5 @@
 /**
- * The cloud geometry, inlined once per page. Every cloud on the site is drawn
+ * The cloud geometry and the wind's stroke gradient, inlined once per page. Every cloud on the site is drawn
  * with <svg viewBox="…"><use href="#cloud-a" /></svg>, so there is exactly one
  * copy of the shapes no matter how many clouds are in the sky.
  *
@@ -38,6 +38,20 @@ export default function CloudSprite() {
         >
           <stop offset="0" stopColor="#ffffff" />
           <stop offset="1" stopColor="#d7eaf9" />
+        </linearGradient>
+
+        {/* The wind strokes are painted with this rather than with flat white,
+            so each one dies away along its own length: nothing at the tail,
+            full strength by the time it reaches the curl at the front. A gust
+            has a head and a wake, and the spiral is the head — a stroke of even
+            weight from end to end reads as a drawn line, not as moving air.
+            objectBoundingBox, so it fits each path individually. */}
+        <linearGradient id="wind-fade" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#fff" stopOpacity="0" />
+          <stop offset=".22" stopColor="#fff" stopOpacity=".12" />
+          <stop offset=".48" stopColor="#fff" stopOpacity=".48" />
+          <stop offset=".74" stopColor="#fff" stopOpacity=".88" />
+          <stop offset="1" stopColor="#fff" stopOpacity="1" />
         </linearGradient>
 
         <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
@@ -275,12 +289,16 @@ const CLOUD_BOX = {
  * One cloud. `shape` picks the silhouette; `fx`/`fy` flip and squash it so the
  * three shapes never visibly repeat.
  *
- * `x` and `top` are where the cloud's *centre* goes, as percentages of the
- * layer (sky.css pulls it back by half its own width). That distinction is the
- * whole reason the sky used to bunch up on the right: these were `left` edges,
- * so a 300px-wide cloud at 80% started at 80% and spent most of itself off the
- * screen — which is barely noticeable at 1440px and is most of the sky at 390.
- * A centre lands where you put it at every width.
+ * `top` is where its top edge goes, as a percentage of the layer. `x` used to
+ * be where its centre went, and is now *when* in the crossing it is — the sky
+ * streams one way at a fixed rate (see @keyframes fly in sky.css), so a cloud's
+ * horizontal place is a phase, not a coordinate, and a phase is set as a
+ * negative delay on the animation that carries it.
+ *
+ * The numbers themselves did not have to change, which is the point: they step
+ * through the golden ratio, and a golden-ratio sequence is as evenly spread
+ * around a cycle as it is across a width. The scatter that never clumped in
+ * space does not clump in time either.
  */
 export function Cloud({ shape, layer, w, top, x, dur, delay, travel, fx = 1, fy = 1 }) {
   return (
@@ -293,8 +311,8 @@ export function Cloud({ shape, layer, w, top, x, dur, delay, travel, fx = 1, fy 
         '--travel': travel,
         '--fx': fx,
         '--fy': fy,
+        '--fly-phase': parseFloat(x) / 100,
         top,
-        left: x,
       }}
     >
       <svg viewBox={CLOUD_BOX[shape]} aria-hidden="true" focusable="false">

@@ -63,7 +63,7 @@ src/
   index.css            tokens (farger, typografi, mål) + reset + basetypografi
   lib/
     directions.js      velger Apple Maps eller Google Maps etter enhet
-    parallax.js        kameraet: publiserer --sy, --fall, --bank-top, --p, --s, --c
+    parallax.js        kameraet: publiserer --sy, --fall, --lift, --s, --c
   styles/
     base.css           sideskall, boardingkortet, knapper
     sky.css            himmelsystemet og vindkrøllene
@@ -73,9 +73,23 @@ src/
   assets/              flyet og det malte skybildet
 ```
 
-Tre seksjoner, i denne rekkefølgen: **Hvor** (sted, kart, veibeskrivelse),
-**Når** (dato og tre klokkeslett), **Svar** (lenke til skjemaet). Hver av dem er
-et `<Panel>` — et boardingkort med stubb, perforering og innhold.
+To seksjoner, i denne rekkefølgen: **Hvor & når** (dato, sted, kart og
+veibeskrivelse) og **Svar** (lenke til skjemaet). Begge er et `<Panel>` — et
+boardingkort med stubb, perforering og innhold.
+
+Kortet sier fire ting og ikke mer: dato, kirke, kart, vei. Rekken med tre
+klokkeslett var et program, og avsnittet om parkering og gangavstander var råd
+ingen hadde spurt om ennå — begge svarte på spørsmål gjesten ikke har på vei
+inn, på det kortet som skal svare på de to hun har.
+
+Sted og tid lå på hvert sitt kort før, med en skjermhøyde åpen himmel imellom.
+Det er ett spørsmål — «hvor skal jeg være, og når» — og å svare på det over to
+kort betyr at gjesten må rulle for å finne andre halvdel av setningen.
+
+Begge kortene tegnes fra første bilde. De ventet på hver sin
+`IntersectionObserver` før, som gjorde at kortet under folden ikke bare var
+utenfor bildet, det fantes ikke — du rullet inn i tom himmel uten noe under, og
+uten noen måte å se om siden var slutt. Se `components/Panel.jsx`.
 
 ### Himmelen
 
@@ -86,11 +100,31 @@ et `<Panel>` — et boardingkort med stubb, perforering og innhold.
 | `.sky-base`  | fixed  | Vannrett gradient, nøyaktig fargene i øverste bildrad  |
 | `.sky-wash`  | ruller | Dyp blå loddrett vask, festet til toppen av dokumentet |
 | `.sky-drift` | fixed  | Fjerne og mellomliggende skyer + svak høydevind        |
-| `.cloudbank` | bunnen | `sky-clouds.jpg`, festet til dokumentets gulv          |
 
-`.drift-far` og `.drift-mid` stiger mot `--sy` med hver sin koeffisient. Uten det
-ville de faste lagene stå bom stille mens kortene faller forbi — det leser som
-tapet, ikke som avstand.
+`.drift-far` og `.drift-mid` stiger mot `--sy` med hver sin koeffisient — 20 %
+og 48 % av rullingen. Uten det ville de faste lagene stå bom stille mens kortene
+faller forbi; det leser som tapet, ikke som avstand. Og med for lite av det
+leser det som at himmelen ligger *bak* deg i stedet for rundt deg — omtrent
+halve sidens fart er punktet der de nære skyene slutter å være kulisser og
+kameraet faller gjennom dem.
+
+Samtidig strømmer begge lagene sidelengs, mot høyre, fordi flyet peker mot
+venstre: et fast bilde av et fly leser bare som flyging hvis himmelen går forbi
+det. Det går én vei og stopper aldri.
+
+Sømløsheten ligger i at hver enkelt sky går rundt for seg. Alle skyene i et lag
+gjør nøyaktig samme reise — fra helt utenfor venstre kant til helt utenfor
+høyre, på `--fly-dur` — og det eneste som skiller dem er hvor i reisen de er,
+satt som negativ `animation-delay`. Derfor er `x` i skylistene ikke lenger en
+posisjon, men en fase. Tallene måtte ikke endres da de sluttet å være
+koordinater, og det er hele grunnen til at de er akkurat disse tallene: de
+stepper gjennom det gylne snitt, og en gyllen-snitt-følge er like jevnt spredt
+rundt en syklus som den er over en bredde.
+
+En sky går aldri rundt der du kan se det. Å panorere hele laget som ett stivt
+ark får det ikke til uten å flislegge spredningen, og å svinge det fram og
+tilbake er ikke flyging, det er en pendel — himmelen snudde hvert tjuende
+sekund, og flyet så ut til å ombestemme seg.
 
 Skjøten mellom CSS-himmelen og fotoet er fargematchet, ikke jukset: øverste rad
 i `sky-clouds.jpg` går `#82dbfd` → `#4aaef9`, og gradienten over er akkurat de
@@ -111,29 +145,36 @@ den — og først når heroen er dekket, slipper den taket og siden ruller norma
 ### Det fallende kameraet
 
 `lib/parallax.js` animerer ingenting selv. Én rAF-strupet scroll-runde skriver
-seks tall og lar CSS bestemme hva de betyr:
+en håndfull tall og lar CSS bestemme hva de betyr:
 
 | Variabel | Hvor        | Hva den er                                                           |
 | -------- | ----------- | -------------------------------------------------------------------- |
-| `--sy`   | `:root`     | Hvor langt siden har falt, i piksler                                 |
-| `--fall` | `:root`     | Det samme, men bare over første skjermhøyde, 0 til 1                 |
-| `--bank-top` | `:root` | Hvor overkanten av det malte skybildet er nå, i piksler fra toppen av vinduet |
-| `--p`    | per element | 0 når overkanten kommer inn nederst, 1 når underkanten går ut øverst |
-| `--s`    | per element | Samme, fortegnet: −1 under, 0 midt i bildet, +1 over                 |
+| `--sy`   | skylagene   | Hvor langt siden har falt, i piksler                                 |
+| `--fall` | `.hero`     | Det samme, men bare over første skjermhøyde, 0 til 1                 |
+| `--lift` | `<main>`    | `--fall` myknet ut. Boardingkortene stiger på den, så de klatrer fortere enn siden mens heroen er i veien |
+| `--s`    | per element | −1 under bildet, 0 midt i det, +1 over                               |
 | `--c`    | per element | `1 − abs(s)`, altså hvor midt i bildet elementet er                  |
+
+`--lift` er `--fall` myknet ut: `1 − (1 − f)²`. Kortene kan ikke starte høyere
+enn de gjør — da ville det første stukket fram over folden allerede før du rørte
+noe — så den eneste måten å nå dem tidligere på er at de kommer opp fortere enn
+siden. `<main>` klatrer én `--card-rise` ekstra over den første skjermhøyden, og
+`.footer` trekker den samme `--card-rise` fra sin egen toppmarg, så bakken blir
+liggende nøyaktig like langt under det siste kortet. Mykningen er den
+bærende delen: stigningstallet er null ved `f = 1`, så farten blør bort akkurat
+idet heroen slipper taket. En rett rampe ville kommet fram til overgangen i full
+fart, og siden ville synlig skiftet gir.
 
 `--fall` finnes fordi heroen står fast til pinnen tar slutt: navnene synker og
 tones ut på den, og er borte før det første kortet har rukket å dekke dem —
 ellers ville de dukket opp igjen i den åpne himmelen mellom to kort.
 
-`--bank-top` er der vektorskyene slutter. De klippes av like over det malte
-skybildet i bunnen i stedet for å tones ut over den siste strekningen: en
-uttoning tynnet ut hele himmelen på slutten av siden for å løse et problem som
-bare finnes i de siste hundre pikslene av den, og fordi den ble styrt av hvor
-langt du hadde rullet og ikke av hvor bildet faktisk lå, flyttet punktet der
-himmelen ble tom seg med vindusstørrelsen. Kanten følger bildet i stedet, og de
-170 pikslene med mykning er nok til at det ene settet skyer forsvinner mens det
-andre kommer.
+Nederst slutter ikke himmelen, den går over i noe annet. Horisontdisen i
+bunnteksten (`.horizon::before`) rekker langt opp forbi toppen av den, og
+drivskyene tynnes ut inni den: sky blir dis, dis blir vannfarge, og først da
+begynner vannet. Det er ingen maske noe sted i himmelen som klipper dem av,
+fordi *dette* er avklippet — og i motsetning til en maske er det en fast
+gradient som verken flytter seg eller males på nytt.
 
 Hvert boardingkort har sin egen lille `tilt`. Kameraet legger `--s` oppå: kortet
 vipper mot linsen på vei opp og fra den på vei ut, og `--c` gir det en knapt
@@ -143,6 +184,49 @@ leser som bakke på vei opp mot linsa.
 
 Alt dette er slått av under `prefers-reduced-motion` — da registreres ingenting,
 og kortene ligger flatt.
+
+### Hvor tallene skrives
+
+Dette er ytelseshistorien, og grunnen til at `parallax.js` ser ut som den gjør.
+
+Tallene lå på `:root` før. Custom properties arves, så en skriving til `:root`
+ugyldiggjør stilen til *hvert eneste element* på siden — på en telefon, seksti
+ganger i sekundet, på en side med et levende kartinnbygg i seg. Det var mesteparten
+av hakkingen, og ingen justering av verdiene hjelper, for kostnaden ligger ikke
+i tallene, den ligger i hvem som må få beskjed om dem.
+
+Nå skrives hver verdi på det minste elementet hvis undertre faktisk leser den:
+`--sy` på de to skylagene, `--fall` på `.hero` (riggen, propellvinden, navnene og
+scroll-hintet ligger alle inni den), `--lift` på `<main>`. En rulling koster de
+undertrærne og ingenting annet. `watch()` i `parallax.js` er hele API-et.
+
+### Mobilbudsjettet
+
+En telefon betaler for hvert lag med uskarphet, hvert filter og hvert hintet
+komposittlag — men aller mest for alt som endrer *geometri* mens du ruller, for
+det kan ikke komposittes og må males på nytt. Derfor, under 700px:
+
+- Boardingkortet flates ut til en ren `translate3d`. `perspective` + `rotateX` +
+  `scale` som endrer seg hvert bilde rasterer hele kortet på nytt — og det ene
+  kortet inneholder et levende Google-kart, det dyreste elementet på siden.
+  Kartrammen har `contain: strict` i tillegg, så kortets transform ikke drar
+  kartets rastrering med seg.
+- Ingen filtre: ikke på skyene, ikke på kartet.
+- En tredel av det fjerne skylaget. Hver sky er et eget komposittlag, og lag er
+  det en telefon går tom for — det er den ene byttehandelen, og den er gjort for
+  at vinden skal animere nøyaktig som på skjerm.
+- Vindkrøllene slutter å tegne stiplingen på nytt (`stroke-dashoffset` er
+  maling, ikke kompositering). De driver fortsatt.
+- Skyene krysser skjermen raskere, fordi reisen er én skjermbredde og en
+  telefonskjerm er smal: samme varighet ville gitt samme reise på samme tid, som
+  på det lille formatet knapt er bevegelse.
+
+Det som ikke står her, er det som ble slettet i stedet for justert: det malte
+skybildet i bunnen, masken som fulgte det, den scroll-styrte gjennomsiktigheten
+som fantes bare for å slippe unna masken på telefon, to elementer som måtte måles
+hvert bilde, fire tokens og 200 kB JPEG.
+
+Hver enkelt av dem står forklart der den er skrevet.
 
 ### Banneret
 
@@ -215,6 +299,7 @@ Pages spiser mapper som begynner med `_`.
 ## Ting som fortsatt står igjen
 
 - [ ] Erstatte alle ⚠️ i `src/config.js` med ekte opplysninger
+- [ ] Dobbeltsjekke adressen og koordinatene til St. Paulus kirke
 - [ ] Lime inn ID-en til det ekte Google-skjemaet
 - [ ] Bytte `public/og-image.jpg` mot et ekte delebilde
 

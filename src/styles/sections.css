@@ -15,19 +15,22 @@
   color: var(--ink-2);
 }
 
-.venue-blurb {
-  margin-top: 11px;
-  max-width: 56ch;
-}
-
 .map-frame {
   position: relative;
-  margin-top: 16px;
+  margin-top: 18px;
   border-radius: 11px;
   overflow: hidden;
   height: clamp(150px, 22vw, 185px);
   background: var(--cloud-2);
   box-shadow: inset 0 0 0 1px var(--line);
+  /* Walled off from the card it sits in. This is the most expensive element on
+     the page by a distance — a live map embed, painting itself on its own
+     schedule — and the card around it is transformed on every scroll frame.
+     Containment promises the browser that nothing in here changes the size or
+     paint of anything outside it, so the card's transform does not drag the
+     map's raster along with it. The height is fixed above, which is what makes
+     size containment safe to include. */
+  contain: strict;
 }
 
 .map-frame iframe {
@@ -89,38 +92,6 @@
 
 .map-actions {
   margin-top: 16px;
-}
-
-/* --- Naar ---------------------------------------------------------------- */
-/* The three times a guest plans around, under the date in the title. */
-/* A row, not three equal columns. On a 700px card an even split puts two words
-   in the middle of a 210px cell and leaves the rest as a hole; set side by side
-   at their own width they read as one line of times, and they still wrap by
-   themselves if a phone ever runs out of room. */
-.hours {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px 38px;
-  margin-top: 6px;
-}
-
-.hours-time {
-  display: block;
-  font-family: var(--ui);
-  font-weight: 500;
-  font-size: 16px;
-  letter-spacing: 0.05em;
-  color: var(--rosso);
-}
-
-.hours-what {
-  display: block;
-  margin-top: 1px;
-  font-family: var(--ui);
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-2);
 }
 
 /* --- Svar ----------------------------------------------------------------- */
@@ -185,9 +156,24 @@
    at a higher z-index it reached up over the bottom of the last boarding pass
    and washed it out. The ground goes behind the things falling onto it. */
 .footer {
+  /* The band of air above the water, and now the only transition between the
+     sky and the sea. It is drawn by an absolutely-positioned ::before that
+     reaches a whole --haze-h above the wave, up out of the footer and into the
+     open sky above it — which is exactly what it should do: the drifting clouds
+     fade into it and it cools into water colour. It had to be boxed in with
+     padding while there was a photograph underneath for it to cover; there is
+     not, so it is free again. */
+  --haze-h: clamp(280px, 40vh, 520px);
+
   position: relative;
   z-index: 1;
-  margin-top: clamp(140px, 20vh, 300px);
+  /* --ground-gap is the open sky between the last boarding pass and the top of
+     the footer. Less --card-rise, because the passes above are drawn that much
+     higher than they are laid out once the hero is behind you (see .pass-outer
+     in base.css). Taking it off here shortens the document by the same amount,
+     so the ground stays exactly --ground-gap below the last card and the page
+     does not end in a screenful of nothing. */
+  margin-top: calc(var(--ground-gap) - var(--card-rise));
   min-height: clamp(300px, 38vw, 620px);
   display: flex;
   flex-direction: column;
@@ -196,51 +182,56 @@
 
 .horizon {
   --edge-h: clamp(40px, 6vw, 78px); /* the wave */
-  --haze-h: clamp(200px, 30vh, 380px); /* the band of air above it */
 
   position: relative;
 }
 
 /* The haze, and the reason it is here.
 
-   Behind the footer is the painted cloud bank, and the painted cloud bank is
-   white right down to its last row of pixels. It met the sea head-on: a hard
-   pale line across the page directly above the footer, which is not a horizon,
-   it is a seam. A real horizon on a bright day is a band, not an edge — the
-   cloud dissolves into haze, the haze cools into water colour, and only then
-   does the water start. That is what this is: it sits behind the wave and the
-   sea both, and it is what the last of the photo fades into. */
+   A real horizon on a bright day is a band, not an edge: the air pales, cools
+   into water colour, and only then does the water start. Without it the sky met
+   the sea head-on — a hard line across the page directly above the footer,
+   which is not a horizon, it is a seam.
+
+   It is not white any more, and that is the fix. It used to run to a near-white
+   at 72% opacity within the first quarter of its own height, because it had a
+   photograph of white cloud underneath it to dissolve; against bare blue sky
+   the same gradient is a white fog with a visible top edge, which is worse than
+   the seam it was hired to hide. So it is the sky's own colour, thinned —
+   daylight blue paling towards the water — and the alpha ramp is slow at the
+   start and steep only at the end, which is how haze actually accumulates:
+   nothing for a long way, then all at once near the ground.
+
+   The stops are placed off --haze-h rather than as percentages of the box,
+   because the box is --haze-h *plus* the wave: everything up to --haze-h is the
+   band of air, and everything after it is behind the wave, cooling into water.
+   Percentages would have moved that boundary every time the wave was resized.
+
+   It reaches a long way up, well past the top of the footer, and that is the
+   point: the drifting clouds run into it and thin out inside it. There is no
+   mask anywhere in the sky cutting them off, because this is the cut-off — and
+   unlike a mask it is a static gradient that never moves and never repaints. */
 .horizon::before {
   content: '';
   position: absolute;
   left: 0;
   right: 0;
   /* Bottom edge parked exactly on the bottom of the wave, top edge one haze
-     above the horizon — so the gradient's last stop lands on the waterline
-     rather than somewhere arbitrary inside the footer, and the transparent
-     upper half of the wave has haze behind it instead of photograph. */
+     above the horizon, so the last stop lands on the waterline rather than
+     somewhere arbitrary inside the footer. */
   bottom: calc(100% - var(--edge-h));
   height: calc(var(--haze-h) + var(--edge-h));
   z-index: 0;
   pointer-events: none;
-  /* The stops are anchored off --edge-h, not off round percentages, and that is
-     the whole trick. This box deliberately runs *behind* the wave — it has to,
-     or the transparent upper half of the wave would show photograph again — so
-     its bottom 76-odd pixels are never seen. Percentage stops put the dark end
-     of the gradient down there, out of sight, and all that ever rendered was
-     the pale top half: a near-white band meeting the sea head-on, which is the
-     white line, only now painted by me instead of by the photo.
-
-     So the last visible stop is placed at the wave's own crest — 0.42 of the
-     wave's height up from the bottom, just above where the curve peaks — and by
-     that point the haze has already cooled to water colour. What meets the sea
-     is sky, not paper. */
   background: linear-gradient(
     180deg,
-    rgba(240, 250, 253, 0) 0,
-    rgba(236, 248, 253, 0.72) 26%,
-    rgba(196, 229, 245, 0.94) 52%,
-    rgba(146, 199, 226, 1) calc(100% - var(--edge-h) * 1.15),
+    rgba(226, 244, 252, 0) 0,
+    rgba(224, 242, 252, 0.09) calc(var(--haze-h) * 0.26),
+    rgba(211, 235, 249, 0.23) calc(var(--haze-h) * 0.46),
+    rgba(191, 223, 242, 0.43) calc(var(--haze-h) * 0.63),
+    rgba(164, 205, 233, 0.65) calc(var(--haze-h) * 0.79),
+    rgba(130, 179, 214, 0.87) calc(var(--haze-h) * 0.93),
+    rgba(102, 155, 195, 0.98) var(--haze-h),
     #5f9cbe calc(100% - var(--edge-h) * 0.42),
     #4d8bae 100%
   );
@@ -328,25 +319,20 @@
 
 /* --- responsive ----------------------------------------------------------- */
 @media (max-width: 700px) {
-  /* Three across is still right on a phone — they are two words each, not
-     paragraphs — but they get more air between them. */
-  .hours {
-    gap: 9px 18px;
-  }
-
-  .hours-time {
-    font-size: 14.5px;
-  }
-
-  .hours-what {
-    font-size: 9.5px;
-    letter-spacing: 0.1em;
-  }
-
   .map-frame {
     height: 190px;
     margin-top: 13px;
     border-radius: 10px;
+  }
+
+  /* No tint on the embed. A filter over an iframe is a full compositing pass
+     over live, independently-painted content, and it has to be redone whenever
+     anything about the frame moves. The map is the heaviest element on the page
+     already; it does not also need to be recoloured on the way past. It reads
+     fine untinted at this size — the rounded frame and the crimson pin are what
+     place it in the palette, not eight degrees of hue rotation. */
+  .map-frame iframe {
+    filter: none;
   }
 
   .rsvp .pass {
@@ -361,12 +347,9 @@
   }
 
   .footer {
-    margin-top: 80px;
-    min-height: 250px;
-  }
+    --haze-h: clamp(190px, 26vh, 260px);
 
-  .horizon {
-    --haze-h: 150px;
+    min-height: 250px;
   }
 
   .contacts {

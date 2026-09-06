@@ -5,15 +5,18 @@ import useParallax from '../lib/parallax.js'
 /* ---------------------------------------------------------------------------
    The ground.
 
-   Everything above this is falling; this is what it lands on. The CSS sky has
-   already paled into sky-clouds.jpg by the time you get here, and the horizon
-   and the sea close the drop.
+   Everything above this is falling; this is what it lands on. The horizon haze
+   reaches a long way up out of it — that is its job, it is the band of air the
+   sky dissolves into — and the wave and the sea close the drop. There used to
+   be a photograph of clouds between the two; the haze was always doing the
+   actual work.
 
    It used to carry a green island in the corner and a rotated ANKOMST stamp.
    Both are gone: the island was a shape with no place to be — the sea has no
    coastline anywhere else on the page, so a hill rising out of it read as a
    stray blob rather than as land — and the stamp was a label for a section that
    does not need one. What is left is water, two names and a phone number each.
+
 --------------------------------------------------------------------------- */
 
 export default function Footer() {

@@ -21,35 +21,22 @@ export const couple = {
 
 export const wedding = {
   // ⚠️ Sett riktig dato. ISO-format, brukes til nedtelling.
-  dateISO: '2027-06-12T14:00:00+02:00',
-  dateLong: '12. juni 2027',
-  dateStamp: '12 . 06 . 2027',
-  place: 'Sandefjord, ved sjøen', // ⚠️
+  dateISO: '2027-06-26T14:00:00+02:00',
+  dateLong: '26. juni 2027',
+  dateStamp: '26 . 06 . 2027',
+  place: 'St. Paulus kirke, Oslo',
   invitation:
-    'Vi gifter oss, og vi vil ha dere med. Det blir sjø, forhåpentligvis sol, ' +
-    'og en dag vi har tenkt å bruke god tid på. Alt dere trenger å vite står ' +
-    'her: når, hvor, veien dit — og et skjema dere kan svare på når dere vet.',
+    'Vi gifter oss, og vi vil ha dere med. Vielsen er i St. Paulus kirke midt ' +
+    'i Oslo, og vi har tenkt å bruke god tid på dagen. Alt dere trenger å vite ' +
+    'står her: når, hvor, veien dit — og et skjema dere kan svare på når dere vet.',
 }
 
 export const venue = {
-  name: 'Midtåsen', // ⚠️
-  address: 'Midtåsveien 30, 3223 Sandefjord', // ⚠️
-  blurb:
-    'Vi feirer ute så lenge været vil, og inne når det ikke vil lenger. Ta med ' +
-    'sko dere kan gå på gress i, og noe å ha over skuldrene til kvelden — det ' +
-    'kommer alltid en bris inn fra sjøen når sola først har lagt seg.',
-  lat: 59.1206, // ⚠️
-  lng: 10.2372, // ⚠️
+  name: 'St. Paulus kirke',
+  address: 'Akersveien 5, 0177 Oslo', // ⚠️ dobbeltsjekk
+  lat: 59.9186, // ⚠️ dobbeltsjekk
+  lng: 10.7452, // ⚠️ dobbeltsjekk
 }
-
-// Tre klokkeslett, ikke et program. Den fulle timeplanen lå her før og ble
-// tatt bort med vilje: det gjestene trenger på forhånd er når de skal møte, når
-// det begynner og når det slutter. Resten finner de ut når de er der.
-export const hours = [
-  { time: '14:00', what: 'Ankomst' },
-  { time: '15:00', what: 'Vielse' },
-  { time: '02:00', what: 'Siste taxi' },
-]
 
 // Skjemaet ligger hos Google, og siden lenker dit i stedet for å bygge det inn.
 // Det var en iframe før: tolv hundre piksler skjema inni en ramme inni et kort,

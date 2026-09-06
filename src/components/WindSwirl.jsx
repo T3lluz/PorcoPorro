@@ -10,6 +10,14 @@
    every path to the same length, so one dash rule in CSS governs all of them
    regardless of their real geometry.
 
+   Every path runs left to right and ends where the wind is going, which is what
+   lets a single gradient do the fading: the strokes are painted with
+   #wind-fade (CloudSprite.jsx), transparent at the tail and full strength at
+   the head, so the straight run behind the curl thins away and the spiral is
+   what you actually see. Nothing here may be mirrored horizontally — `fy`
+   flips these vertically and that is fine, but an `fx` of -1 would point the
+   fade the wrong way and leave a gust with its wake in front of it.
+
    Motion is layered the same way weather is: the wrapper carries the curl
    across the sky and fades it in and out at the ends of that pass, while the
    dash flows along each stroke several times faster, so the line looks like it

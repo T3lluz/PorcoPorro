@@ -16,9 +16,8 @@
 :root {
   color-scheme: light;
 
-  /* sky. The seam pair is sampled from the top row of sky-clouds.jpg, so the
-     join between the CSS sky and the photograph is matched, not faked; the
-     other two are the vertical wash that deepens the top of the page. */
+  /* sky. The first pair is the horizontal base gradient; the other two are the
+     vertical wash that deepens the top of the page. */
   --sky-seam-left: #82dbfd;
   --sky-seam-right: #4aaef9;
   --sky-high: #47a8f2;
@@ -40,8 +39,10 @@
   --line: #d5e9f0;
   --panel: #ffffff;
 
-  /* natural size of sky-clouds.jpg = 1920 x 1138 */
-  --cloud-ratio: 59.27%;
+  /* The open sky between the last boarding pass and the top of the footer. The
+     horizon haze reaches up out of the footer into it, so this is the number
+     that decides how much clear blue there is before the ground starts. */
+  --ground-gap: clamp(210px, 28vh, 400px);
 
   /* One family per role. Loaded in index.html — keep the two lists in step. */
   --display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
@@ -51,8 +52,47 @@
   /* Real sky between the cards. These are meant to read as separate things
      falling past a lens, and at a hundred pixels they read as a stack instead —
      the gap has to be big enough that the sky behind is the subject for a beat
-     before the next card arrives. */
-  --gap-sky: 190px;
+     before the next card arrives. There are two cards now rather than three, so
+     this is the only gap on the page and it can afford to be shorter than when
+     it had to be spent twice. */
+  --gap-sky: 150px;
+
+  /* How much open sky sits between the fold and the top edge of the first card
+     at rest. See `main` in base.css for exactly what this offsets.
+
+     It has a floor, and the floor is --drift on .pass. The card does not sit
+     where its layout box is: the camera translates it by `--s * --drift`, and
+     at rest --s is exactly -1, because the card is entirely below the frame.
+     So the card is drawn a whole --drift *above* its own box before you have
+     touched anything — 58px on a desktop, 30px on a phone. Set the lead-in
+     under that and the card's edge is on screen at scroll zero, which is the
+     one thing this offset exists to prevent.
+
+     What you see below the fold at rest is therefore --lead-sky minus --drift,
+     and that is the number to tune: a card that shows nothing at rest but comes
+     up with the first flick of the wheel. Keep the two in step — if --drift on
+     .pass grows, this has to grow with it. */
+  --lead-sky: 96px;
+
+  /* How much *extra* the boarding passes climb, over and above the scroll,
+     while the hero is still in front of them. Named for the cards and not just
+     `--rise`, because the wind curls got there first: every .wind carries a
+     --rise of its own for how far it lifts as it crosses the sky, and a token
+     on :root with that name would be inherited straight into their keyframes.
+
+     The first card cannot start any higher than it does — see --lead-sky — so
+     the only way to reach it sooner is for it to come up faster than the page
+     does. It rides --lift, which is 0 at rest and 1 by the end of the first
+     viewport, so over that stretch the passes travel one viewport of scrolling
+     plus this, and the dead screenful of open sky between the fading names and
+     the top of the first card closes from both ends instead of one.
+
+     After the first viewport it is a constant offset and the page scrolls
+     normally; .footer subtracts it back out of its own top margin so the ground
+     stays exactly as far below the last card as it was. Change one, change the
+     other. */
+  --card-rise: 30svh;
+
   --wrap: 700px;
   --pad: 44px;
 
@@ -103,7 +143,6 @@ body {
   line-height: 1.68;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
 }
 
 img,
@@ -173,7 +212,10 @@ p + p {
 /* --- phone ---------------------------------------------------------------- */
 @media (max-width: 700px) {
   :root {
-    --gap-sky: 112px;
+    --gap-sky: 96px;
+    --lead-sky: 52px;
+    --card-rise: 25svh;
+    --ground-gap: 200px;
     /* Narrower cards, so the sky they are falling through is still visible
        either side of them. The card is not the page — it is an object in front
        of one, and it stops reading as that the moment it touches both edges.

@@ -20,7 +20,7 @@ export default function Rsvp() {
       id="svar"
       eyebrow="Svar"
       title="Gi oss beskjed"
-      code="SK 03"
+      code="SK 02"
       tilt={1.6}
       className="rsvp"
     >

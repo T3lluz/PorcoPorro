@@ -20,24 +20,32 @@
    the passes are already waiting just below the fold and the first flick of the
    wheel slides them over it. See .hero-pin in hero.css.
 
-   padding-top then makes sure none of the first card is visible until you
-   scroll. One --hero-h of offset is not enough on its own: --hero-h is 100svh,
-   the *small* viewport — the height left when a phone's toolbars are showing.
-   Open the page with them hidden and the window is taller than that, so the
-   fold sat below the card's top edge and the card was already peeking before
-   you had touched it.
+   padding-top then decides how far below the fold "just below" is, and that is
+   the whole answer to "why do I have to scroll so far to reach the first card".
+   The first card's top edge sits at exactly 100lvh + --lead-sky down the
+   document, whatever the window is doing:
 
-   Deriving the difference from 100lvh is the obvious fix and it is not enough
-   either: there are viewports that report lvh smaller than their own
-   innerHeight, and there the correction comes out as zero while the card still
-   shows. So the offset is stated outright instead — a full band of sky on top
-   of whatever the lvh/svh gap turns out to be. The card cannot be above the
-   fold at rest, and the names get the first screen to themselves. */
+     card top = (pin height - one hero) + padding-top
+              = (2H - H) + (100lvh - H + --lead-sky)
+              = 100lvh + --lead-sky
+
+   100lvh and not 100svh, and that distinction is the reason this is not simply
+   `--gap-sky`. --hero-h is the *small* viewport, the height left when a phone's
+   toolbars are showing. Open the page with them hidden and the window is taller
+   than that, so an offset measured in svh puts the fold below the card's top
+   edge and the card is already peeking before you have touched anything. lvh is
+   the tall case, so the card clears the fold in both.
+
+   --lead-sky is then the only number that decides how soon the card arrives,
+   and it is small: a thumb-flick of sky, not a screenful. It used to be a full
+   --gap-sky on top of an lvh/svh correction stated as a whole extra band, which
+   on a phone came to the better part of a screen of nothing before the first
+   card showed an edge. */
 main {
   position: relative;
   z-index: 2;
   margin-top: calc(var(--hero-h) * -1);
-  padding-top: calc(max(0px, 100lvh - var(--hero-h)) + var(--gap-sky));
+  padding-top: calc(100lvh - var(--hero-h) + var(--lead-sky));
 }
 
 .wrap {
@@ -66,8 +74,20 @@ main {
    property on the wrapper, because the wrapper needs to stay a plain box —
    giving it a filter or a perspective would make it a containing block and take
    the card's shadow with it. */
+/* And then it climbs. The passes cover the hero at the rate of the scroll plus
+   --card-rise over the first viewport, so the stretch where you are looking at
+   nothing but sky with a card edge creeping up from the bottom is short instead
+   of most of a screen. --lift is eased, so this hands back to ordinary
+   scrolling without a change of gear; see lib/parallax.js.
+
+   On the sections and not on <main>, deliberately. The effect is identical —
+   everything inside main moves together either way — but <main> is the full
+   height of the page and contains a live map embed, and giving a box that size
+   a transform that changes on every frame asks the compositor for a layer to
+   match. These two are small, and they are already promoted for the tilt. */
 .pass-outer {
   position: relative;
+  translate: 0 calc(var(--lift, 0) * var(--card-rise) * -1);
 }
 
 .pass {
@@ -167,17 +187,9 @@ main {
   margin-bottom: 11px;
 }
 
-/* --- scroll reveal -------------------------------------------------------- */
-/* Opacity only. The movement is the camera's job now, and a second transform
-   here would fight the one on .pass. */
-.reveal {
-  opacity: 0;
-  transition: opacity 520ms ease;
-}
-
-.reveal.is-in {
-  opacity: 1;
-}
+/* The passes used to fade in one at a time on an IntersectionObserver. They do
+   not any more — see the note in components/Panel.jsx — so there is nothing
+   here to hold them back. */
 
 /* --- buttons -------------------------------------------------------------- */
 .btn {
@@ -234,14 +246,25 @@ main {
   .pass {
     grid-template-columns: 1fr;
     border-radius: 14px;
-    /* Sit them square. The loose-paper conceit needs margin to lean into, and
-       on a phone the card *is* the screen — there is 15px either side. A tall
-       card throws its corners out by its own height times the sine of the
-       angle, so at 1700px even two degrees puts them past the edge, where
-       .page clips the corners off. Kill the pinned angle outright and leave
-       just enough sway to keep the card alive as it passes the lens. */
-    --tilt: 0deg;
-    --sway: 0.5deg;
+    /* Sit them square, and flatten the camera to a slide.
+
+       Two reasons, and they point the same way. The first is layout: the
+       loose-paper conceit needs margin to lean into, and on a phone the card
+       *is* the screen — there is 15px either side. A tall card throws its
+       corners out by its own height times the sine of the angle, so at 1700px
+       even two degrees puts them past the edge, where .page clips the corners
+       off.
+
+       The second is cost, and it is the larger one. A perspective + rotateX +
+       scale that changes every scroll frame is not a composited transform: the
+       card's whole subtree has to be re-rasterised at a new projection sixty
+       times a second — and one of these cards contains a live Google Maps
+       iframe, which is the single most expensive thing on the page to redraw.
+       A plain translate3d is handed to the compositor and costs nothing per
+       frame, so that is all the phone gets. The card still rises and settles
+       against the fall; it just no longer tips while doing it, which at half a
+       degree was not visible on a 390px screen in the first place. */
+    transform: translate3d(0, calc(var(--s, 0) * var(--drift, 30px)), 0);
     --drift: 30px;
     box-shadow:
       0 0 0 1px rgba(20, 66, 99, 0.1),
@@ -300,10 +323,6 @@ main {
 
 /* --- motion budget -------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
-  .reveal {
-    opacity: 1;
-  }
-
   /* Nothing registers with the parallax engine under reduced motion, so --s and
      --c never arrive — but --tilt would still lean every card. Sit them flat. */
   .pass {
@@ -322,7 +341,19 @@ main {
     position: relative;
   }
 
+  /* Unpinned, the padding above is measuring against a hero that is no longer
+     overlapped, so it collapses to almost nothing and the first card lands hard
+     against the bottom of the names. Give it the same open sky the two cards
+     get between them. */
   main {
     margin-top: 0;
+    padding-top: var(--gap-sky);
+  }
+
+  /* --lift is never published either, so `main` sits where it is laid out. The
+     footer subtracts --card-rise from its own margin to make room for a climb
+     that is not happening, so take that away too. */
+  :root {
+    --card-rise: 0px;
   }
 }

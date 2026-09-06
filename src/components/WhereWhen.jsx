@@ -1,21 +1,33 @@
 import { Navigation } from 'lucide-react'
-import { venue } from '../config.js'
+import { venue, wedding } from '../config.js'
 import directionsUrl from '../lib/directions.js'
 import Panel from './Panel.jsx'
 
 /* ---------------------------------------------------------------------------
+   Hvor & når, on one card.
+
+   These were two passes — a «Hvor» with the map and a «Når» with three times —
+   and splitting them was the wrong cut. A guest asks one question, "where do I
+   have to be, and at what time", and answering it across two cards separated by
+   a whole screen of open sky made them scroll to find the other half of a
+   sentence.
+
+   So: the date is the title, the place sits under it, and the map and
+   «Veibeskrivelse» close the card.
+
+   Nothing else is on it. A row of three times — arrive, ceremony, last taxi —
+   was a programme, and a paragraph about parking and walking distances was
+   advice nobody had asked for yet; both answered questions the guest does not
+   have on the way in, on the card that has to answer the two they do. Date,
+   church, map, route. Anything else can be asked.
+
    The map is a picture, not a tool: no panning, no zooming, no accidental
    scroll capture on a phone. Everything you can actually do with it lives in
-   the «Veibeskrivelse» button underneath, which hands the trip to whichever
-   map app the visitor's device already uses.
-
-   Parking, transport and lodging used to sit under it in three columns. They
-   were three paragraphs of advice nobody had asked for yet, and on a phone they
-   stacked into a wall of text taller than the map. The button is the answer to
-   "how do I get there"; the rest can be asked.
+   the button underneath, which hands the trip to whichever map app the
+   visitor's device already uses.
 --------------------------------------------------------------------------- */
 
-export default function Where() {
+export default function WhereWhen() {
   const at = `${venue.lat},${venue.lng}`
   // ll= keeps the map centred on the venue, so the crimson overlay pin lands on
   // the same spot Google marks. t=m forces the road map over satellite.
@@ -24,14 +36,13 @@ export default function Where() {
   return (
     <Panel
       id="hvor"
-      eyebrow="Hvor"
-      title="Sted og vei dit"
+      eyebrow={'Hvor & når'}
+      title={wedding.dateLong}
       code="SK 01"
       tilt={1.2}
     >
       <h3 className="venue-name">{venue.name}</h3>
       <p className="venue-address">{venue.address}</p>
-      <p className="venue-blurb">{venue.blurb}</p>
 
       <div className="map-frame">
         <iframe

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { register, stillCamera } from '../lib/parallax.js'
 
 /* ---------------------------------------------------------------------------
@@ -13,10 +13,15 @@ import { register, stillCamera } from '../lib/parallax.js'
    read as loose paper falling past a lens rather than as a stack of panels
    scrolling by. See lib/parallax.js for where --s comes from, and .pass in
    base.css for what it is multiplied by.
---------------------------------------------------------------------------- */
 
-// No observer, or the visitor asked for less motion: show everything at once.
-const showImmediately = () => !globalThis.IntersectionObserver || stillCamera()
+   There is no per-card reveal any more. Each pass used to wait for an
+   IntersectionObserver of its own before fading in, which meant the card below
+   the fold was not merely out of frame, it was not *there* — you scrolled into
+   blank sky with nothing under it and no way to tell whether the page had ended.
+   A staggered fade is only legible when you can see the things that have not
+   faded in yet. The cards are all painted from the first frame now; the falling
+   camera is what stages them.
+--------------------------------------------------------------------------- */
 
 export default function Panel({
   id,
@@ -28,36 +33,18 @@ export default function Panel({
   children,
 }) {
   const ref = useRef(null)
-  const [shown, setShown] = useState(showImmediately)
 
   useEffect(() => {
     const el = ref.current
-    if (!el) return
-
-    const unwatch = stillCamera() ? undefined : register(el)
-    if (showImmediately()) return unwatch
-
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return
-        setShown(true)
-        io.disconnect() // once only
-      },
-      { rootMargin: '0px 0px -8% 0px', threshold: 0.04 },
-    )
-    io.observe(el)
-
-    return () => {
-      io.disconnect()
-      unwatch?.()
-    }
+    if (!el || stillCamera()) return
+    return register(el)
   }, [])
 
   return (
     <section
       id={id}
       ref={ref}
-      className={`pass-outer reveal wrap ${shown ? 'is-in' : ''} ${className}`}
+      className={`pass-outer wrap ${className}`}
       style={{ '--tilt': `${tilt}deg` }}
     >
       <article className="pass">
