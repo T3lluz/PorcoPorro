@@ -2,7 +2,10 @@
 
 React 19 + Vite 8, statisk bygg, publisert på GitHub Pages.
 
-.github/media/desktop.png github/media/mobile.png
+<p align="center">
+  <img src=".github/media/desktop.png" height="340" alt="Toppen av siden på desktop" />
+  <img src=".github/media/mobile.png" height="340" alt="Toppen av siden på mobil" />
+</p>
 
 ## Kom i gang
 
