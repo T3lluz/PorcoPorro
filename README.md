@@ -1,14 +1,8 @@
 # Susan & Skage
 
-Bryllupsside på én rullende side: et rødt Savoia-sjøfly trekker et håndmalt
-banner over toppen, og alt det praktiske ligger lenger nede på boardingkort som
-faller forbi kameraet. Norsk tekst, ingen meny, ingen backend.
-
 React 19 + Vite 8, statisk bygg, publisert på GitHub Pages.
 
-|                    Desktop                     |                   Mobil                    |
-| :--------------------------------------------: | :----------------------------------------: |
-| ![Toppen av siden på desktop](.github/media/desktop.png) | ![Toppen av siden på mobil](.github/media/mobile.png) |
+.github/media/desktop.png github/media/mobile.png
 
 ## Kom i gang
 
