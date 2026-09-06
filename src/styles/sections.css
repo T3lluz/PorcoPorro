@@ -23,13 +23,12 @@
   height: clamp(150px, 22vw, 185px);
   background: var(--cloud-2);
   box-shadow: inset 0 0 0 1px var(--line);
-  /* Walled off from the card it sits in. This is the most expensive element on
-     the page by a distance — a live map embed, painting itself on its own
-     schedule — and the card around it is transformed on every scroll frame.
-     Containment promises the browser that nothing in here changes the size or
-     paint of anything outside it, so the card's transform does not drag the
-     map's raster along with it. The height is fixed above, which is what makes
-     size containment safe to include. */
+  /* Walled off from the card it sits in. A live map embed is the most
+     expensive element on the page, and the card around it is transformed on
+     every scroll frame. Containment promises the browser that nothing in here
+     changes the size or paint of anything outside it, so the card's transform
+     does not drag the map's raster along with it. The height is fixed above,
+     which is what makes size containment safe to include. */
   contain: strict;
 }
 
@@ -43,8 +42,8 @@
 }
 
 /* The map is a picture. This sits over the embed and eats every click, drag and
-   two-finger scroll before it can pan, zoom, or trap the page scroll on a
-   phone. «Veibeskrivelse» underneath is the interactive part. */
+   two-finger scroll before it can pan, zoom or trap the page scroll on a phone.
+   «Veibeskrivelse» underneath is the interactive part. */
 .map-shield {
   position: absolute;
   inset: 0;
@@ -95,14 +94,11 @@
 }
 
 /* --- Svar ----------------------------------------------------------------- */
-/* One mark, one sentence, one button. The embedded form and everything that
-   framed it — route line, rubber stamp, pennant, nested paper frames — is gone;
-   what is left has to carry the card on its own, so it is centred and given
-   room to breathe rather than dressed up. */
-/* The last card falls hardest and sits lowest, so it gets a deeper shadow than
-   the other two — but it keeps the hairline ring, which is not decoration: the
-   card is white and so are the clouds it falls through, and without a defined
-   edge it dissolves into any cloud that drifts behind it. See .pass in base.css.
+/* One mark, one sentence, one button, centred.
+
+   The last card falls hardest and sits lowest, so it gets a deeper shadow than
+   the other one, but it keeps the hairline ring: without a defined edge a white
+   card dissolves into any cloud that drifts behind it (see .pass in base.css).
    This rule outranks the phone override there, so it restates the phone shadow
    itself further down. */
 .rsvp .pass {
@@ -135,8 +131,7 @@
   color: var(--ink-2);
 }
 
-/* It was --ink-2 at ten and a half pixels, which on white is a rumour rather
-   than a deadline. It is the one piece of urgency on the card. */
+/* The one piece of urgency on the card, so it is crimson rather than grey. */
 .rsvp-deadline {
   font-family: var(--ui);
   font-weight: 500;
@@ -147,22 +142,19 @@
 }
 
 /* --- the ground ----------------------------------------------------------- */
-/* The end of the fall. Only the type inside moves — it settles a beat late
-   against the drop (see .footer-inner), so the last stretch reads as ground
-   coming up to meet the lens. The horizon edge itself never moves: a gap
-   between it and the sea would show sky through the floor. */
-/* Below <main>, not above it. The haze reaches a long way up out of the footer
-   — that is its job, it is the band of air the photograph dissolves into — and
-   at a higher z-index it reached up over the bottom of the last boarding pass
-   and washed it out. The ground goes behind the things falling onto it. */
+/* The end of the fall. Only the type inside moves, settling a beat late against
+   the drop (see .footer-inner) so the last stretch reads as ground coming up to
+   meet the lens. The horizon edge itself never moves: a gap between it and the
+   sea would show sky through the floor.
+
+   Below <main> in stacking order, not above it. The haze reaches a long way up
+   out of the footer, and at a higher z-index it would wash out the bottom of
+   the last boarding pass. The ground goes behind the things falling onto it. */
 .footer {
-  /* The band of air above the water, and now the only transition between the
-     sky and the sea. It is drawn by an absolutely-positioned ::before that
-     reaches a whole --haze-h above the wave, up out of the footer and into the
-     open sky above it — which is exactly what it should do: the drifting clouds
-     fade into it and it cools into water colour. It had to be boxed in with
-     padding while there was a photograph underneath for it to cover; there is
-     not, so it is free again. */
+  /* The band of air above the water, and the only transition between sky and
+     sea. It is drawn by an absolutely-positioned ::before that reaches a whole
+     --haze-h above the wave, up out of the footer and into the open sky: the
+     drifting clouds fade into it and it cools into water colour. */
   --haze-h: clamp(280px, 40vh, 520px);
 
   position: relative;
@@ -186,31 +178,22 @@
   position: relative;
 }
 
-/* The haze, and the reason it is here.
+/* The haze.
 
    A real horizon on a bright day is a band, not an edge: the air pales, cools
-   into water colour, and only then does the water start. Without it the sky met
-   the sea head-on — a hard line across the page directly above the footer,
-   which is not a horizon, it is a seam.
+   into water colour, and only then does the water start. Without it the sky
+   meets the sea head-on, which is a seam rather than a horizon.
 
-   It is not white any more, and that is the fix. It used to run to a near-white
-   at 72% opacity within the first quarter of its own height, because it had a
-   photograph of white cloud underneath it to dissolve; against bare blue sky
-   the same gradient is a white fog with a visible top edge, which is worse than
-   the seam it was hired to hide. So it is the sky's own colour, thinned —
-   daylight blue paling towards the water — and the alpha ramp is slow at the
-   start and steep only at the end, which is how haze actually accumulates:
-   nothing for a long way, then all at once near the ground.
+   It is the sky's own colour thinned, not white: against bare blue a white
+   gradient reads as fog with a visible top edge. The alpha ramp is slow at the
+   start and steep only at the end, which is how haze accumulates, and the stops
+   are placed off --haze-h rather than as percentages of the box, because the
+   box is --haze-h plus the wave. Percentages would move that boundary every
+   time the wave was resized.
 
-   The stops are placed off --haze-h rather than as percentages of the box,
-   because the box is --haze-h *plus* the wave: everything up to --haze-h is the
-   band of air, and everything after it is behind the wave, cooling into water.
-   Percentages would have moved that boundary every time the wave was resized.
-
-   It reaches a long way up, well past the top of the footer, and that is the
-   point: the drifting clouds run into it and thin out inside it. There is no
-   mask anywhere in the sky cutting them off, because this is the cut-off — and
-   unlike a mask it is a static gradient that never moves and never repaints. */
+   It reaches well past the top of the footer on purpose: the drifting clouds
+   run into it and thin out inside it, so this is what cuts them off. Unlike a
+   mask it is a static gradient that never moves and never repaints. */
 .horizon::before {
   content: '';
   position: absolute;
@@ -326,11 +309,10 @@
   }
 
   /* No tint on the embed. A filter over an iframe is a full compositing pass
-     over live, independently-painted content, and it has to be redone whenever
-     anything about the frame moves. The map is the heaviest element on the page
-     already; it does not also need to be recoloured on the way past. It reads
-     fine untinted at this size — the rounded frame and the crimson pin are what
-     place it in the palette, not eight degrees of hue rotation. */
+     over live, independently-painted content, redone whenever anything about
+     the frame moves, and the map is already the heaviest element on the page.
+     The rounded frame and the crimson pin are what place it in the palette
+     anyway, not eight degrees of hue rotation. */
   .map-frame iframe {
     filter: none;
   }
@@ -356,8 +338,8 @@
     gap: 16px 34px;
   }
 
-  /* Padded to a 44px-tall tap target — it is a tel: link, so it is the one
-     thing on this page a guest will actually press in a hurry. */
+  /* Padded to a 44px tap target: a tel: link is the one thing on this page a
+     guest presses in a hurry. */
   .contact-phone {
     padding: 10px 0;
     font-size: 14px;

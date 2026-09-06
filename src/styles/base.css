@@ -17,30 +17,21 @@
 /* The page body, and the two offsets that make the opening beat work.
 
    margin-top pulls <main> back up over the pinned hero by exactly one hero, so
-   the passes are already waiting just below the fold and the first flick of the
-   wheel slides them over it. See .hero-pin in hero.css.
+   the passes wait just below the fold and the first flick of the wheel slides
+   them over it. See .hero-pin in hero.css.
 
-   padding-top then decides how far below the fold "just below" is, and that is
-   the whole answer to "why do I have to scroll so far to reach the first card".
-   The first card's top edge sits at exactly 100lvh + --lead-sky down the
-   document, whatever the window is doing:
+   padding-top decides how far below the fold that is. The first card's top edge
+   lands at exactly 100lvh + --lead-sky down the document, whatever the window
+   is doing:
 
      card top = (pin height - one hero) + padding-top
               = (2H - H) + (100lvh - H + --lead-sky)
               = 100lvh + --lead-sky
 
-   100lvh and not 100svh, and that distinction is the reason this is not simply
-   `--gap-sky`. --hero-h is the *small* viewport, the height left when a phone's
-   toolbars are showing. Open the page with them hidden and the window is taller
-   than that, so an offset measured in svh puts the fold below the card's top
-   edge and the card is already peeking before you have touched anything. lvh is
-   the tall case, so the card clears the fold in both.
-
-   --lead-sky is then the only number that decides how soon the card arrives,
-   and it is small: a thumb-flick of sky, not a screenful. It used to be a full
-   --gap-sky on top of an lvh/svh correction stated as a whole extra band, which
-   on a phone came to the better part of a screen of nothing before the first
-   card showed an edge. */
+   lvh and not svh, which is why this is not simply --gap-sky: --hero-h is the
+   small viewport, the height left when a phone's toolbars are showing. With
+   them hidden the window is taller, so an svh offset would put the fold below
+   the card's top edge and the card would peek before you touched anything. */
 main {
   position: relative;
   z-index: 2;
@@ -60,31 +51,27 @@ main {
 }
 
 /* --- the boarding pass ---------------------------------------------------- */
-/* The camera is falling and these are loose paper falling with it, so nothing
-   here is upright. Each pass carries a small --tilt of its own; the parallax
-   engine adds --s on top, which tips the card towards you on the way up the
-   frame and away again on its way out, and --c swells it very slightly as it
-   passes dead centre.
+/* Nothing here is upright: each pass carries a small --tilt of its own, the
+   camera adds --s on top to tip it towards you on the way up the frame and away
+   on its way out, and --c swells it slightly as it passes dead centre.
 
    They are deliberately tight. A boarding pass is a small card you hold in one
-   hand — the moment the padding grows, it stops reading as a ticket and starts
-   reading as a section of a website with a stripe down the side.
+   hand; the moment the padding grows it reads as a section of a website with a
+   stripe down the side.
 
    perspective() is the first function in the list rather than a `perspective`
-   property on the wrapper, because the wrapper needs to stay a plain box —
-   giving it a filter or a perspective would make it a containing block and take
-   the card's shadow with it. */
-/* And then it climbs. The passes cover the hero at the rate of the scroll plus
-   --card-rise over the first viewport, so the stretch where you are looking at
-   nothing but sky with a card edge creeping up from the bottom is short instead
-   of most of a screen. --lift is eased, so this hands back to ordinary
-   scrolling without a change of gear; see lib/parallax.js.
+   property on the wrapper, because the wrapper has to stay a plain box: giving
+   it a filter or a perspective would make it a containing block and take the
+   card's shadow with it. */
+/* The climb. Over the first viewport the passes cover the hero at the rate of
+   the scroll plus --card-rise, so the stretch of bare sky with a card edge
+   creeping up from the bottom is short. --lift is eased, so this hands back to
+   ordinary scrolling without a change of gear; see lib/parallax.js.
 
-   On the sections and not on <main>, deliberately. The effect is identical —
-   everything inside main moves together either way — but <main> is the full
-   height of the page and contains a live map embed, and giving a box that size
-   a transform that changes on every frame asks the compositor for a layer to
-   match. These two are small, and they are already promoted for the tilt. */
+   On the sections rather than on <main>: the effect is identical, but <main> is
+   the full height of the page and contains a live map embed, and a transform
+   that changes every frame on a box that size asks the compositor for a layer
+   to match. These two are small and already promoted for the tilt. */
 .pass-outer {
   position: relative;
   translate: 0 calc(var(--lift, 0) * var(--card-rise) * -1);
@@ -98,13 +85,10 @@ main {
   grid-template-columns: var(--tear) 1fr;
   background: var(--panel);
   border-radius: 13px;
-  /* The hairline ring first, and it is not decoration. The card is white and
-     the sky it falls through has white clouds in it — when one drifts behind a
-     card the two are the same colour and the card's edge simply dissolves into
-     it. Stacking order does not help: the card is already three layers above
-     the cloud, it is painted over it correctly, and you still cannot see where
-     one stops and the other starts. Only a defined edge fixes that, so every
-     card carries a one-pixel ring in a cool grey that reads against cloud and
+  /* The hairline ring is not decoration. The card is white and so are the
+     clouds it falls through, so when one drifts behind a card the edge
+     dissolves into it. Stacking order does not help; only a defined edge does,
+     hence a one-pixel ring in a cool grey that reads against cloud and
      disappears against blue. */
   box-shadow:
     0 0 0 1px rgba(20, 66, 99, 0.09),
@@ -130,7 +114,7 @@ main {
   background: linear-gradient(180deg, #f4fafd, #e0eef7);
 }
 
-/* The tear is a column of punched holes, not a drawn line — a dashed rule reads
+/* The tear is a column of punched holes, not a drawn line: a dashed rule reads
    as decoration, a row of holes reads as something you are meant to tear. */
 .pass-stub::after {
   content: '';
@@ -187,10 +171,6 @@ main {
   margin-bottom: 11px;
 }
 
-/* The passes used to fade in one at a time on an IntersectionObserver. They do
-   not any more — see the note in components/Panel.jsx — so there is nothing
-   here to hold them back. */
-
 /* --- buttons -------------------------------------------------------------- */
 .btn {
   display: inline-flex;
@@ -220,7 +200,7 @@ main {
   box-shadow: 0 8px 20px rgba(206, 52, 25, 0.26);
 }
 
-/* Behind a hover query, or a phone leaves the card lifted after a tap — there
+/* Behind a hover query, or a phone leaves the button lifted after a tap: there
    is no pointer to move away and unstick it. */
 @media (hover: hover) {
   .btn-rosso:hover {
@@ -248,22 +228,17 @@ main {
     border-radius: 14px;
     /* Sit them square, and flatten the camera to a slide.
 
-       Two reasons, and they point the same way. The first is layout: the
-       loose-paper conceit needs margin to lean into, and on a phone the card
-       *is* the screen — there is 15px either side. A tall card throws its
-       corners out by its own height times the sine of the angle, so at 1700px
-       even two degrees puts them past the edge, where .page clips the corners
-       off.
+       Layout: the loose-paper lean needs margin to lean into, and on a phone
+       the card is the screen, with 15px either side. A tall card throws its
+       corners out by its own height times the sine of the angle, so even two
+       degrees puts them past the edge where .page clips them off.
 
-       The second is cost, and it is the larger one. A perspective + rotateX +
-       scale that changes every scroll frame is not a composited transform: the
-       card's whole subtree has to be re-rasterised at a new projection sixty
-       times a second — and one of these cards contains a live Google Maps
-       iframe, which is the single most expensive thing on the page to redraw.
-       A plain translate3d is handed to the compositor and costs nothing per
-       frame, so that is all the phone gets. The card still rises and settles
-       against the fall; it just no longer tips while doing it, which at half a
-       degree was not visible on a 390px screen in the first place. */
+       Cost, which matters more: perspective + rotateX + scale changing every
+       scroll frame is not a composited transform, so the card's whole subtree
+       is re-rasterised at a new projection sixty times a second, and one of
+       these cards holds a live Google Maps iframe. A plain translate3d is handed
+       to the compositor and costs nothing per frame. The card still rises and
+       settles against the fall, it just no longer tips while doing it. */
     transform: translate3d(0, calc(var(--s, 0) * var(--drift, 30px)), 0);
     --drift: 30px;
     box-shadow:
@@ -324,15 +299,14 @@ main {
 /* --- motion budget -------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   /* Nothing registers with the parallax engine under reduced motion, so --s and
-     --c never arrive — but --tilt would still lean every card. Sit them flat. */
+     --c never arrive, but --tilt would still lean every card. Sit them flat. */
   .pass {
     transform: none;
   }
 
   /* And take the pin out with them. The hero's lettering fades on --fall, which
-     also never arrives; left pinned it would show through the open sky between
-     two cards. Unpinned, the page is an ordinary stack and the problem cannot
-     arise. */
+     also never arrives, so left pinned it would show through the open sky
+     between two cards. Unpinned, the page is an ordinary stack. */
   .hero-pin {
     height: auto;
   }
@@ -341,10 +315,9 @@ main {
     position: relative;
   }
 
-  /* Unpinned, the padding above is measuring against a hero that is no longer
-     overlapped, so it collapses to almost nothing and the first card lands hard
-     against the bottom of the names. Give it the same open sky the two cards
-     get between them. */
+  /* Unpinned, the padding above measures against a hero that is no longer
+     overlapped, so it collapses and the first card lands hard against the
+     bottom of the names. Give it the same open sky the cards get. */
   main {
     margin-top: 0;
     padding-top: var(--gap-sky);

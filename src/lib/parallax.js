@@ -1,46 +1,34 @@
 import { useEffect, useRef } from 'react'
 
-/* ---------------------------------------------------------------------------
-   The falling camera.
+/*
+  The falling camera.
 
-   One rAF-throttled scroll pass measures where things are and publishes a
-   handful of numbers; CSS decides what they mean. Nothing here animates
-   anything itself, which keeps the motion vocabulary in one place — the
-   stylesheets — instead of split across two languages.
+  One rAF-throttled scroll pass measures where things are and publishes a
+  handful of numbers; CSS decides what they mean. Nothing here animates anything
+  itself, which keeps the motion vocabulary in the stylesheets.
 
-   The numbers, all of them optional at every point of use:
+  The numbers, all optional at every point of use:
 
-     --sy    how far the page has fallen, in px. The sky layers read it, each
-             with its own coefficient, so the far clouds creep and the near ones
-             rush.
-     --fall  the same thing over the first viewport only, 0 to 1. The hero
-             lettering sinks and fades on this, so it is gone before the first
-             pass has finished covering it.
-     --lift  --fall eased out — 1 - (1 - f)². The boarding passes ride up on it
-             so they climb faster than the page for exactly as long as the hero
-             is in the way. Its slope at f = 1 is zero, so the extra speed bleeds
-             away to nothing as the hero lets go; a linear ramp would arrive at
-             the handover still moving and the page would visibly change gear.
-     --s     per element: 0 dead centre, -1 below the frame, +1 above. Multiply
-             it by an angle and a card tips towards you on the way up and away
-             on the way out.
-     --c     per element: 1 - |s|, how centred it is. Drives the slight swell as
-             a pass passes the lens.
+    --sy    how far the page has fallen, in px. The sky layers read it, each
+            with its own coefficient, so far clouds creep and near ones rush.
+    --fall  the same over the first viewport only, 0 to 1. The hero lettering
+            sinks and fades on this.
+    --lift  --fall eased out, 1 - (1 - f)². The boarding passes ride up on it so
+            they climb faster than the page for as long as the hero is in the
+            way. Its slope at f = 1 is zero, so the extra speed bleeds away as
+            the hero lets go; a linear ramp would visibly change gear.
+    --s     per element: 0 dead centre, -1 below the frame, +1 above. Multiply
+            by an angle and a card tips towards you on the way up.
+    --c     per element: 1 - |s|, how centred it is. Drives the slight swell as
+            a pass crosses the lens.
 
-   WHERE these get written is the performance story, and it is the whole reason
-   this file is shaped the way it is.
-
-   They used to go on :root. Custom properties inherit, so a write to :root
-   invalidates style for every element in the document — on a phone, sixty times
-   a second, for a page with a live map embed in it. That was most of the scroll
-   jank, and no amount of tuning the values fixes it, because the cost is not in
-   the numbers, it is in who has to be told about them.
-
-   So each value is written on the smallest element whose subtree actually reads
-   it: --sy on the two cloud layers, --fall on .hero (its lettering, rig and
-   prop-wash are all inside it), --lift on <main>. Nothing outside those
-   subtrees is disturbed by a scroll. See watch(), below.
---------------------------------------------------------------------------- */
+  Where these get written is the performance story. They used to go on :root,
+  and custom properties inherit, so every write invalidated style for every
+  element in the document, sixty times a second, on a page with a live map embed
+  in it. Each value now goes on the smallest element whose subtree reads it:
+  --sy on the two cloud layers, --fall on .hero, --lift on <main>. Nothing
+  outside those subtrees is disturbed by a scroll.
+*/
 
 const items = new Set() // elements wanting --s / --c
 const cams = new Map() // element -> { names, last }
@@ -66,7 +54,7 @@ function tick() {
   }
 
   // A visitor who has asked for no motion gets none. Leaving these unwritten is
-  // what keeps the sky still and the hero unpinned — every rule that reads them
+  // what keeps the sky still and the hero unpinned: every rule that reads them
   // falls back to 0.
   if (!stillCamera()) {
     const y = globalThis.scrollY
@@ -119,7 +107,7 @@ function listen() {
 
 /**
  * Have the camera write the named values on this element, and only this
- * element. Pick the shallowest node whose subtree needs them — that subtree is
+ * element. Pick the shallowest node whose subtree needs them: that subtree is
  * exactly what a scroll will cost.
  * @param {Element} el
  * @param {...('sy'|'fall'|'lift')} names
@@ -140,13 +128,15 @@ export function watch(el, ...names) {
 /** Ref-flavoured `watch`. */
 export function useCamera(...names) {
   const ref = useRef(null)
+  // The rest array is a fresh object on every render, so key the effect on the
+  // names themselves. They are literals at every call site.
+  const key = names.join(',')
 
   useEffect(() => {
     const el = ref.current
     if (!el) return
-    return watch(el, ...names)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    return watch(el, ...key.split(','))
+  }, [key])
 
   return ref
 }

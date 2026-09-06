@@ -1,25 +1,21 @@
 import { couple } from '../config.js'
-import usePrefersReducedMotion from './usePrefersReducedMotion.js'
+import usePrefersReducedMotion from '../lib/usePrefersReducedMotion.js'
 
-/* ---------------------------------------------------------------------------
-   The towed banner.
+/*
+  The towed banner. The geometry is generated rather than hand-drawn, because
+  what makes a towed banner read as cloth is a rule, not a shape:
 
-   The geometry is generated rather than hand-drawn, because the thing that
-   makes a towed banner read as cloth is a rule, not a shape:
+    - the leading edge is held by a rigid pole, so it barely moves;
+    - the disturbance travels away from the tow, down the length of the cloth:
+      a travelling wave, not a flap in place;
+    - amplitude grows toward the free trailing edge;
+    - as each crest passes, the cloth twists edge-on and its silhouette narrows.
 
-     · the leading edge is held by a rigid pole, so it barely moves;
-     · the disturbance travels *away* from the tow, down the length of the
-       cloth — it is a travelling wave, not a flap in place;
-     · amplitude grows toward the free trailing edge, where nothing holds it;
-     · as each crest passes, the cloth twists edge-on and its silhouette
-       narrows, then opens up again in the trough.
-
-   All four fall out of one wave sampled at FRAMES phases. Every path in here —
-   cloth, pole, the two bridle ropes, and the invisible centreline the lettering
-   rides — is sampled from that same wave at the same phases and animated in
-   lockstep, which is why the letters ripple *with* the cloth rather than
-   sitting on top of it.
---------------------------------------------------------------------------- */
+  All four fall out of one wave sampled at FRAMES phases. Cloth, pole, both
+  bridle ropes and the invisible centreline the lettering rides are sampled from
+  that same wave at the same phases, which is why the letters ripple with the
+  cloth rather than sitting on top of it.
+*/
 
 const X0 = 230 // leading edge (the pole)
 const X1 = 880 // free trailing edge
@@ -27,7 +23,7 @@ const MID = 130 // the cloth's rest centreline
 const H = 54 // half-height at rest
 const LAMBDA = 520 // one wavelength, in viewBox units
 const K = (Math.PI * 2) / LAMBDA
-const A_NEAR = 2 // amplitude at the pole — near enough to nothing
+const A_NEAR = 2 // amplitude at the pole, near enough to nothing
 const A_FAR = 27 // amplitude at the free end
 const STEPS = 24 // samples along the cloth
 const FRAMES = 10 // phase snapshots per cycle
@@ -39,7 +35,7 @@ const KNOT = { x: 170, y: 126 }
 const XS = Array.from({ length: STEPS + 1 }, (_, i) => X0 + ((X1 - X0) * i) / STEPS)
 
 // Amplitude ramps super-linearly, so the last third of the banner does most of
-// the moving — which is where the eye expects it.
+// the moving, which is where the eye expects it.
 const amp = (x) => {
   const u = (x - X0) / (X1 - X0)
   return A_NEAR + (A_FAR - A_NEAR) * u ** 1.7
@@ -79,7 +75,7 @@ const PHASES = Array.from({ length: FRAMES + 1 }, (_, i) =>
 const track = (fn) => PHASES.map(fn).join(';')
 const KEY_TIMES = PHASES.map((_, i) => r(i / FRAMES)).join(';')
 
-/** A travelling wave moves at a constant rate — hence calcMode="linear". */
+/** A travelling wave moves at a constant rate, hence calcMode="linear". */
 function Wave({ to }) {
   return (
     <animate

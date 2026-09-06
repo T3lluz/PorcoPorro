@@ -4,7 +4,7 @@ const QUERY = '(prefers-reduced-motion: reduce)'
 
 /**
  * CSS can switch off every animation, but it cannot switch off SMIL. Components
- * that animate inside SVG ask this hook and simply do not render the <animate>
+ * that animate inside SVG ask this hook and skip rendering their <animate>
  * elements when the visitor has asked for less motion.
  */
 export default function usePrefersReducedMotion() {

@@ -3,29 +3,12 @@ import { venue, wedding } from '../config.js'
 import directionsUrl from '../lib/directions.js'
 import Panel from './Panel.jsx'
 
-/* ---------------------------------------------------------------------------
-   Hvor & når, on one card.
-
-   These were two passes — a «Hvor» with the map and a «Når» with three times —
-   and splitting them was the wrong cut. A guest asks one question, "where do I
-   have to be, and at what time", and answering it across two cards separated by
-   a whole screen of open sky made them scroll to find the other half of a
-   sentence.
-
-   So: the date is the title, the place sits under it, and the map and
-   «Veibeskrivelse» close the card.
-
-   Nothing else is on it. A row of three times — arrive, ceremony, last taxi —
-   was a programme, and a paragraph about parking and walking distances was
-   advice nobody had asked for yet; both answered questions the guest does not
-   have on the way in, on the card that has to answer the two they do. Date,
-   church, map, route. Anything else can be asked.
-
-   The map is a picture, not a tool: no panning, no zooming, no accidental
-   scroll capture on a phone. Everything you can actually do with it lives in
-   the button underneath, which hands the trip to whichever map app the
-   visitor's device already uses.
---------------------------------------------------------------------------- */
+/*
+  Date, church, map, route. The map is a picture, not a tool: no panning, no
+  zooming, no accidental scroll capture on a phone. Everything you can do with
+  it lives in the button underneath, which hands the trip to whichever map app
+  the device already uses.
+*/
 
 export default function WhereWhen() {
   const at = `${venue.lat},${venue.lng}`

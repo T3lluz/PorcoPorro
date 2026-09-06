@@ -1,16 +1,14 @@
 /**
- * The cloud geometry and the wind's stroke gradient, inlined once per page. Every cloud on the site is drawn
- * with <svg viewBox="…"><use href="#cloud-a" /></svg>, so there is exactly one
- * copy of the shapes no matter how many clouds are in the sky.
+ * The cloud geometry and the wind's stroke gradient, inlined once per page.
+ * Every cloud on the site is drawn with <use href="#cloud-a" />, so there is
+ * exactly one copy of the shapes no matter how many clouds are in the sky.
  *
  * Each cloud is a silhouette (<g id="shape-*">) painted twice: once flat with a
  * shared vertical gradient, then again with blurred shadow and highlight blobs
  * masked back inside that same silhouette. The second pass is what stops them
  * reading as flat vector blobs.
  *
- * This is the only copy of the geometry; the standalone SVGs it was drawn from
- * are gone, so edit the shapes here.
- * viewBoxes: cloud-a 320x130 · cloud-b 220x90 · cloud-c 420x100
+ * viewBoxes: cloud-a 320x130, cloud-b 220x90, cloud-c 420x100.
  */
 export default function CloudSprite() {
   return (
@@ -40,12 +38,10 @@ export default function CloudSprite() {
           <stop offset="1" stopColor="#d7eaf9" />
         </linearGradient>
 
-        {/* The wind strokes are painted with this rather than with flat white,
-            so each one dies away along its own length: nothing at the tail,
-            full strength by the time it reaches the curl at the front. A gust
-            has a head and a wake, and the spiral is the head — a stroke of even
-            weight from end to end reads as a drawn line, not as moving air.
-            objectBoundingBox, so it fits each path individually. */}
+        {/* The wind strokes use this rather than flat white, so each one dies
+            away along its own length: nothing at the tail, full strength at the
+            curl in front. A stroke of even weight end to end reads as a drawn
+            line, not as moving air. objectBoundingBox, so it fits each path. */}
         <linearGradient id="wind-fade" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0" stopColor="#fff" stopOpacity="0" />
           <stop offset=".22" stopColor="#fff" stopOpacity=".12" />
@@ -289,16 +285,10 @@ const CLOUD_BOX = {
  * One cloud. `shape` picks the silhouette; `fx`/`fy` flip and squash it so the
  * three shapes never visibly repeat.
  *
- * `top` is where its top edge goes, as a percentage of the layer. `x` used to
- * be where its centre went, and is now *when* in the crossing it is — the sky
- * streams one way at a fixed rate (see @keyframes fly in sky.css), so a cloud's
- * horizontal place is a phase, not a coordinate, and a phase is set as a
- * negative delay on the animation that carries it.
- *
- * The numbers themselves did not have to change, which is the point: they step
- * through the golden ratio, and a golden-ratio sequence is as evenly spread
- * around a cycle as it is across a width. The scatter that never clumped in
- * space does not clump in time either.
+ * `top` is where its top edge goes, as a percentage of the layer. `x` is not a
+ * position but a phase: the sky streams one way at a fixed rate (@keyframes fly
+ * in sky.css), so where a cloud sits horizontally is where it is in that
+ * crossing, set as a negative delay on the animation.
  */
 export function Cloud({ shape, layer, w, top, x, dur, delay, travel, fx = 1, fy = 1 }) {
   return (

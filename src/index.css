@@ -3,20 +3,15 @@
 @import './styles/hero.css';
 @import './styles/sections.css';
 
-/* ---------------------------------------------------------------------------
-   Tokens. The page is weather: blue sky is the ground, white belongs to the
-   clouds, and the only warm colour anywhere is the aeroplane.
-   Daylight has no dark mode — light only, on purpose.
-
-   Every value below is used. The palette started much wider — a full sky ramp,
-   a green isle, four shades of note paper — and most of it belonged to sections
-   that no longer exist. A token nobody reads is a colour you have to keep in
-   your head for nothing.
---------------------------------------------------------------------------- */
+/*
+  Tokens. The page is weather: blue sky is the ground, white belongs to the
+  clouds, and the only warm colour anywhere is the aeroplane. Daylight has no
+  dark mode, so this is light only, on purpose.
+*/
 :root {
   color-scheme: light;
 
-  /* sky. The first pair is the horizontal base gradient; the other two are the
+  /* sky: the first pair is the horizontal base gradient, the other two the
      vertical wash that deepens the top of the page. */
   --sky-seam-left: #82dbfd;
   --sky-seam-right: #4aaef9;
@@ -28,7 +23,7 @@
   /* clouds */
   --cloud-2: #e6f2f8;
 
-  /* the aeroplane — the only warm colour on the site */
+  /* the aeroplane, the only warm colour on the site */
   --rosso: #ce3419;
   --rosso-lit: #ee6a42;
   --rosso-deep: #9e2411;
@@ -39,78 +34,63 @@
   --line: #d5e9f0;
   --panel: #ffffff;
 
-  /* The open sky between the last boarding pass and the top of the footer. The
-     horizon haze reaches up out of the footer into it, so this is the number
-     that decides how much clear blue there is before the ground starts. */
+  /* Open sky between the last boarding pass and the top of the footer. The
+     horizon haze reaches up out of the footer into it, so this decides how much
+     clear blue there is before the ground starts. */
   --ground-gap: clamp(210px, 28vh, 400px);
 
-  /* One family per role. Loaded in index.html — keep the two lists in step. */
+  /* One family per role. Loaded in index.html; keep the two lists in step. */
   --display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
   --ui: 'Zen Maru Gothic', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
   --body: 'Lora', Georgia, 'Times New Roman', serif;
 
-  /* Real sky between the cards. These are meant to read as separate things
-     falling past a lens, and at a hundred pixels they read as a stack instead —
-     the gap has to be big enough that the sky behind is the subject for a beat
-     before the next card arrives. There are two cards now rather than three, so
-     this is the only gap on the page and it can afford to be shorter than when
-     it had to be spent twice. */
+  /* Real sky between the cards. They are meant to read as separate things
+     falling past a lens, so the gap has to be big enough that the sky behind is
+     the subject for a beat before the next card arrives. */
   --gap-sky: 150px;
 
-  /* How much open sky sits between the fold and the top edge of the first card
-     at rest. See `main` in base.css for exactly what this offsets.
+  /* Open sky between the fold and the top edge of the first card at rest. See
+     `main` in base.css for what this offsets.
 
-     It has a floor, and the floor is --drift on .pass. The card does not sit
-     where its layout box is: the camera translates it by `--s * --drift`, and
-     at rest --s is exactly -1, because the card is entirely below the frame.
-     So the card is drawn a whole --drift *above* its own box before you have
-     touched anything — 58px on a desktop, 30px on a phone. Set the lead-in
-     under that and the card's edge is on screen at scroll zero, which is the
-     one thing this offset exists to prevent.
+     Its floor is --drift on .pass. The card is not drawn where its layout box
+     is: the camera translates it by `--s * --drift`, and at rest --s is -1
+     because the card is entirely below the frame, so it is drawn a whole
+     --drift above its own box before you touch anything (58px on desktop, 30px
+     on a phone). Set this under that and the card's edge is already on screen
+     at scroll zero, which is the one thing this offset exists to prevent.
 
-     What you see below the fold at rest is therefore --lead-sky minus --drift,
-     and that is the number to tune: a card that shows nothing at rest but comes
-     up with the first flick of the wheel. Keep the two in step — if --drift on
-     .pass grows, this has to grow with it. */
+     What shows below the fold at rest is --lead-sky minus --drift. If --drift
+     on .pass grows, this has to grow with it. */
   --lead-sky: 96px;
 
-  /* How much *extra* the boarding passes climb, over and above the scroll,
-     while the hero is still in front of them. Named for the cards and not just
-     `--rise`, because the wind curls got there first: every .wind carries a
-     --rise of its own for how far it lifts as it crosses the sky, and a token
-     on :root with that name would be inherited straight into their keyframes.
+  /* How much extra the boarding passes climb, over and above the scroll, while
+     the hero is still in front of them. Named for the cards rather than just
+     `--rise` because every .wind carries a --rise of its own, and a token on
+     :root with that name would be inherited into their keyframes.
 
-     The first card cannot start any higher than it does — see --lead-sky — so
-     the only way to reach it sooner is for it to come up faster than the page
-     does. It rides --lift, which is 0 at rest and 1 by the end of the first
-     viewport, so over that stretch the passes travel one viewport of scrolling
-     plus this, and the dead screenful of open sky between the fading names and
-     the top of the first card closes from both ends instead of one.
+     The first card cannot start any higher than it does (see --lead-sky), so
+     the only way to reach it sooner is for it to come up faster than the page.
+     It rides --lift, 0 at rest and 1 by the end of the first viewport, so over
+     that stretch the passes travel one viewport of scrolling plus this.
 
-     After the first viewport it is a constant offset and the page scrolls
-     normally; .footer subtracts it back out of its own top margin so the ground
-     stays exactly as far below the last card as it was. Change one, change the
-     other. */
+     After the first viewport it is a constant offset; .footer subtracts it back
+     out of its own top margin so the ground stays exactly as far below the last
+     card as it was. Change one, change the other. */
   --card-rise: 30svh;
 
   --wrap: 700px;
   --pad: 44px;
 
   /* One hero. The pin container is twice this and <main> is pulled back up by
-     exactly this, so the two always agree.
-
-     No floor. There used to be one, and it was worse than useless: it only ever
-     bound when the window was shorter than it, and a hero taller than the window
-     puts the lettering below the fold — so on a phone held sideways the floor
-     hid the names it was there to protect. The hero is the window. */
+     exactly this, so the two always agree. No floor: a hero taller than the
+     window puts the lettering below the fold. The hero is the window. */
   --hero-h: 100vh;
 }
 
 /* svh rather than vh, so a toolbar sliding back in cannot cover the bottom of
    the hero. Guarded: a custom property holds unparsed tokens, so in a browser
-   that does not know svh the declaration would be accepted here and then fail
-   at every point of use — the pin's height, the negative margin on <main> —
-   taking the whole page layout with it. */
+   that does not know svh the declaration would be accepted here and then fail at
+   every point of use, taking the page layout with it. */
 @supports (height: 100svh) {
   :root {
     --hero-h: 100svh;
@@ -216,14 +196,13 @@ p + p {
     --lead-sky: 52px;
     --card-rise: 25svh;
     --ground-gap: 200px;
-    /* Narrower cards, so the sky they are falling through is still visible
-       either side of them. The card is not the page — it is an object in front
-       of one, and it stops reading as that the moment it touches both edges.
-       The room it loses comes back out of the padding and type inside it.
+    /* Narrower cards, so the sky they fall through is still visible either side
+       of them: the card is an object in front of the page, and it stops reading
+       as that the moment it touches both edges.
 
        env() on both sides, because a notch is only ever on one of them and the
-       page is centred — budget for both and nothing lands under the cutout when
-       the phone is turned. */
+       page is centred, so budgeting for both keeps anything from landing under
+       the cutout when the phone is turned. */
     --pad: calc(
       52px + env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px)
     );
@@ -235,8 +214,8 @@ p + p {
   }
 }
 
-/* Still narrower than the screen at this size, just not by as much — below
-   400px the card has to keep enough width to set a readable line. */
+/* Still narrower than the screen, just not by as much: below 400px the card has
+   to keep enough width to set a readable line. */
 @media (max-width: 400px) {
   :root {
     --pad: calc(

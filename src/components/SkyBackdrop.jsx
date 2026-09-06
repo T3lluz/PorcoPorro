@@ -2,61 +2,27 @@ import { useCamera } from '../lib/parallax.js'
 import { Cloud } from './CloudSprite.jsx'
 import WindSwirl from './WindSwirl.jsx'
 
-/* ---------------------------------------------------------------------------
-   The sky behind everything.
+/*
+  The sky behind everything, in three pieces:
 
-   Three pieces, on purpose:
+  .sky-wash   scrolls with the document. The deep-blue vertical wash, anchored
+              to the top of the page so the blue pales away as you descend.
+  .sky-drift  fixed. Carries the far and mid cloud layers plus a few faint wind
+              curls, so the whole page has weather and not just the hero.
+  .drift-far  each rises against --sy at its own rate. The ground below moves at
+  .drift-mid  the full rate of the page, so a sky that only creeps reads as a
+              loose background rather than as distance.
 
-   .sky-wash  scrolls with the document. It is the deep-blue vertical wash, and
-              it is anchored to the top of the page so the blue pales away as
-              you descend, leaving the lower half of the page in plain daylight
-              blue for the footer's haze to cool into.
+  Each layer is close to three viewports tall, hung above the fold and reaching
+  well below it, because moving that fast for the length of a page needs more
+  sky than a screenful.
 
-   .sky-drift is fixed. It carries the far and mid cloud layers and a few faint
-              wind curls, so the whole page has weather, not just the hero. It
-              runs the whole height of the page and is not cut off anywhere: the
-              footer's horizon haze is what the clouds dissolve into at the
-              bottom, and that is a gradient the footer was already painting.
-              There was a mask here, parked on the top edge of a painted cloud
-              bank and therefore moving on every scroll frame — which meant
-              re-rasterising a fixed, full-screen layer with thirty clouds in it
-              sixty times a second. Both the bank and the mask are gone.
+  Scatter: `top` is the cloud's top edge as a percentage of the layer, and `x`
+  is a phase rather than a position (see Cloud in CloudSprite.jsx). The numbers
+  step through the golden ratio, which never drops a new point near an old one
+  and never leaves a gap, so the field stays evenly covered at every moment.
+*/
 
-   .drift-far / .drift-mid each rise against --sy at their own rate — the far
-              layer at 9% of the scroll, the mid layer at 22%. The ground below
-              moves at the full rate of the page, so a sky that creeps does not
-              read as distance, it reads as a slightly loose background.
-
-   Moving that fast for the length of a page needs more sky than a screenful,
-   so each layer is close to three viewports tall, hung above the fold and
-   reaching well below it.
-
-   The base colour under all of it is a fixed horizontal gradient running
-   #82dbfd → #4aaef9.
---------------------------------------------------------------------------- */
-
-/* Scatter.
-
-   `top` is where the cloud's top edge goes, as a percentage of the layer rather
-   than of the screen.
-
-   `x` is no longer a position. The sky streams to the right at a fixed rate and
-   every cloud makes the same crossing, so what distinguishes one from another
-   is where in that crossing it currently is — a phase, set as a negative delay.
-   See Cloud() in CloudSprite.jsx and @keyframes fly in sky.css.
-
-   The numbers did not have to change when it stopped being a coordinate, and
-   that is the whole reason they are these numbers. They step through the golden
-   ratio — each is the one before it plus 0.618, wrapped back into 0..1 — which
-   is the sequence that never drops a new point near an old one and never leaves
-   a gap. Evenly spread across a width, evenly spread around a cycle: the sky is
-   as uniformly covered at every instant as it used to be in the one frame I was
-   looking at. Hand-picked percentages kept clustering; random ones clump worse
-   than either.
-
-   The tops are simply evenly spaced from the top of the layer to the bottom,
-   because the whole page needs weather, not just the parts of it I happened to
-   look at. */
 const far = [
   { shape: 'cloud-a', w: '230px', top: '3%', x: '75%', dur: '52s', delay: '-4s', travel: '18px', fy: 1.16 },
   { shape: 'cloud-b', w: '180px', top: '8.5%', x: '37%', dur: '61s', delay: '-16s', travel: '22px', fx: -1, fy: 1.07 },
@@ -96,8 +62,8 @@ const mid = [
 ]
 
 export default function SkyBackdrop() {
-  // Each layer is handed --sy directly. It is the only thing on the page that
-  // reads it, and a scroll therefore costs these two subtrees and nothing else.
+  // Each layer is handed --sy directly, and nothing else on the page reads it,
+  // so a scroll costs these two subtrees and nothing more.
   const farLayer = useCamera('sy')
   const midLayer = useCamera('sy')
 
@@ -119,23 +85,16 @@ export default function SkyBackdrop() {
           ))}
 
           {/* The high wind, last in the layer. Two of them: this is the sky
-              behind the whole page rather than the air off a propeller, so it
-              wants to be noticed once a screenful, not constantly.
+              behind the whole page rather than air off a propeller, so it wants
+              to be noticed once a screenful, not constantly.
 
-              It goes past. That is the whole brief: air moves, weather drifts,
-              and the ratio between the two is the only thing that makes a pale
-              curl read as wind rather than as another, thinner cloud. It
-              crosses roughly six times faster than the mid clouds — two
-              hundred pixels a second against their thirty on a desktop — and
-              the same relationship holds on a phone, because both are stated in
-              viewport widths.
-
-              Shortening the duration rather than lengthening the travel, which
-              is not the same thing: a curl that crossed further in the same
-              time would spend most of its cycle off the side of the screen
-              waiting to fade, and there would be fewer of them in frame at
-              once. Faster and just as often is a gust; faster and rarer is a
-              draught. */}
+              It crosses roughly six times faster than the mid clouds, which is
+              the ratio that makes a pale curl read as wind rather than as
+              another, thinner cloud. Both are stated in viewport widths, so the
+              relationship holds on a phone too. Tuned by shortening the
+              duration, not by lengthening the travel: a curl that crossed
+              further in the same time would spend most of its cycle off the
+              side of the screen. */}
           <WindSwirl w="220px" top="42%" left="-16%" dur="6.7s" delay="-2.3s" travel="95vw" rise="-28px" op={0.22} />
           <WindSwirl w="170px" top="66%" left="14%" dur="6.1s" delay="-3.7s" travel="88vw" rise="-20px" op={0.18} fy={-1} />
         </div>
