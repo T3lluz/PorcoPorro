@@ -1,11 +1,11 @@
-import { Phone } from 'lucide-react'
-import { contacts, couple, wedding } from '../config.js'
+import { couple, wedding } from '../config.js'
 import useParallax from '../lib/parallax.js'
+import porcoLogo from '../assets/Porco_Rosso_logo.png'
 
 /*
   The ground. Everything above is falling; this is what it lands on. The horizon
-  haze reaches a long way up out of it (see .horizon::before in sections.css) and
-  is what the drifting sky dissolves into.
+  haze reaches a long way up out of it (see .horizon::before in sections.css)
+  and is what the drifting sky dissolves into.
 */
 
 export default function Footer() {
@@ -29,27 +29,19 @@ export default function Footer() {
 
         <div className="sea">
           <div className="footer-inner wrap">
-            <ul className="contacts">
-              {contacts.map((c) => (
-                <li key={c.role}>
-                  <p className="contact-role">{c.role}</p>
-                  <p className="contact-name">{c.name}</p>
-                  <a
-                    className="contact-phone"
-                    href={`tel:${c.phone.replace(/\s/g, '')}`}
-                  >
-                    <Phone size={13} strokeWidth={2} aria-hidden="true" />
-                    {c.phone}
-                  </a>
-                </li>
-              ))}
-            </ul>
-
-            <div className="smallprint">
-              <span>
-                {couple.one} &amp; {couple.two} · {wedding.dateLong}
-              </span>
-              <span>Porco Rosso © 1992 Studio Ghibli</span>
+            <div className="signoff">
+              <p className="signoff-couple">
+                {couple.one} &amp; {couple.two}
+              </p>
+              <p className="signoff-date">{wedding.dateLong}</p>
+              <img
+                className="porco-logo"
+                src={porcoLogo}
+                alt="Porco Rosso"
+                width="240"
+                height="240"
+              />
+              <p className="signoff-credit">Porco Rosso © 1992 Studio Ghibli</p>
             </div>
           </div>
         </div>

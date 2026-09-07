@@ -23,10 +23,15 @@
   /* clouds */
   --cloud-2: #e6f2f8;
 
-  /* the aeroplane, the only warm colour on the site */
-  --rosso: #ce3419;
-  --rosso-lit: #ee6a42;
-  --rosso-deep: #9e2411;
+  /* The aeroplane, the only warm colour on the site — so it is sampled from the
+     aeroplane rather than picked. The logo in the footer prints its body in
+     #cd261c and the plane sits at #cb2e0d, both a few degrees off pure red; the
+     old #ce3419 was the same weight but eight degrees round towards orange,
+     which is enough that the button and the badge below it read as two
+     different reds on the same page. Matched now, and the tints move with it. */
+  --rosso: #cb281b;
+  --rosso-lit: #e5503b;
+  --rosso-deep: #9a1e12;
 
   /* ink and paper */
   --ink: #173c4c;

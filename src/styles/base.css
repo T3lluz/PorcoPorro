@@ -172,41 +172,101 @@ main {
 }
 
 /* --- buttons -------------------------------------------------------------- */
+/* A printed label, not a widget.
+
+   Two things were making these read as something borrowed from another site
+   rather than something set on the card they sit on.
+
+   The shape: a fully round pill is the only such geometry on a page otherwise
+   built from paper — 13px on the pass, 11px on the map frame, a hairline rule
+   around both. A capsule among rectangles reads as an app control that landed
+   on the artwork. So the corner is 8px, which is the same language as the frame
+   directly above it without being the same number.
+
+   The shadow, which mattered more: it was a warm halo in the button's own
+   colour. Every other shadow on this page is the cool blue of paper in daylight
+   (rgba(12, 50, 84, …)) and that consistency is what holds the picture
+   together — cards, badge, stub, all lit from one sky. A crimson glow is the
+   button lighting itself, which is why it floated off the card instead of
+   sitting on it. Same shadow family as everything else now, and nothing lifts
+   on hover for the same reason: the cards float, the ink printed on them does
+   not. */
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
   font-family: var(--ui);
   font-weight: 500;
   font-size: 11.5px;
-  letter-spacing: 0.15em;
+  /* A touch wider than the old setting. The label is four or five words of
+     uppercase and this is the one place on the card where type is doing the job
+     of a control, so it is allowed to be spaced like a stamp. */
+  letter-spacing: 0.17em;
   text-transform: uppercase;
   text-decoration: none;
-  padding: 12px 22px;
-  border-radius: 999px;
+  padding: 13px 24px;
+  border-radius: 8px;
   border: 0;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   /* a comfortable thumb target even where the label is short */
-  min-height: 44px;
+  min-height: 46px;
   transition:
-    transform 180ms ease,
+    transform 160ms ease,
     box-shadow 180ms ease,
     background-color 180ms ease;
 }
 
+/* The global :focus-visible rule carries a 4px radius for the ring it draws,
+   and at equal specificity it reshapes the button's own corners for as long as
+   it is focused. Restate the radius above it. */
+.btn:focus-visible {
+  border-radius: 8px;
+}
+
+/* No ring around it. .pass carries one because a white card falling past a white
+   cloud has no edge without it; a block of saturated crimson on white paper has
+   nothing to dissolve into, so the outline was solving a problem this element
+   does not have — and a 1px shadow ring sits on the outside of the border box,
+   half a device pixel off the fill on any display that is not at 1x, which is
+   what made it read as an outline that did not quite belong to the button.
+
+   Both shadows carry negative spread, so neither reaches past the sides or the
+   top: the whole of the shadow is underneath, where a thing resting on paper
+   puts it, and nothing traces the shape. */
 .btn-rosso {
   background: var(--rosso);
   color: #fff;
-  box-shadow: 0 8px 20px rgba(206, 52, 25, 0.26);
+  box-shadow:
+    0 10px 20px -10px rgba(12, 50, 84, 0.5),
+    0 3px 6px -3px rgba(12, 50, 84, 0.28);
 }
 
-/* Behind a hover query, or a phone leaves the button lifted after a tap: there
-   is no pointer to move away and unstick it. */
+/* Behind a hover query, or a phone leaves the button in its hover state after a
+   tap: there is no pointer to move away and release it.
+
+   It darkens rather than brightens. --rosso-lit is the light catching the top
+   of the aeroplane and belongs to the plane; on a printed label the thing that
+   happens under your finger is more ink, not more light. */
 @media (hover: hover) {
   .btn-rosso:hover {
-    background: var(--rosso-lit);
-    transform: translateY(-2px);
+    background: var(--rosso-deep);
+    box-shadow:
+      0 13px 24px -11px rgba(12, 50, 84, 0.55),
+      0 3px 6px -3px rgba(12, 50, 84, 0.3);
   }
+}
+
+/* Pressed, it goes down onto the card and the shadow underneath closes up,
+   which is the whole of the feedback. */
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-rosso:active {
+  box-shadow:
+    0 5px 11px -8px rgba(12, 50, 84, 0.45),
+    0 2px 4px -2px rgba(12, 50, 84, 0.24);
 }
 
 .btn svg {
@@ -292,7 +352,7 @@ main {
   }
 
   .btn {
-    padding: 12px 20px;
+    padding: 13px 21px;
   }
 }
 

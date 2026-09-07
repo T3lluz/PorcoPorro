@@ -30,7 +30,7 @@ const FORM_ID = '1FAIpQLSfVEK1IYehIc0w_YYGv1gDRxS78U_AbbL57ifmhEHGpMT2A7w' // �
 
 export const rsvp = {
   openUrl: `https://docs.google.com/forms/d/e/${FORM_ID}/viewform`,
-  deadlineLabel: 'Svar innen 1. mai', // ⚠️
+  deadlineLabel: 'Svar innen Lorem ipsum', // ⚠️
   blurb:
     'Vi trenger å vite hvor mange vi skal dekke på til, og om det er noe dere ' +
     'ikke tåler. Skjemaet tar under ett minutt.',
