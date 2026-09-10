@@ -1,6 +1,6 @@
 # Susan & Skage
 
-React 19 + Vite 8, statisk bygg, publisert på GitHub Pages.
+React 19 + Vite 8, statisk build, publisert på GitHub Pages.
 
 <p align="center">
   <img src=".github/media/desktop.jpg" height="340" alt="Toppen av siden på desktop" />
@@ -15,13 +15,6 @@ npm run dev
 ```
 
 Siden kjører på <http://localhost:5173>.
-
-| Kommando          | Hva den gjør                    |
-| ----------------- | ------------------------------- |
-| `npm run dev`     | Utviklingsserver med hot reload |
-| `npm run build`   | Statisk bygg til `dist/`        |
-| `npm run preview` | Serverer `dist/` lokalt         |
-| `npm run lint`    | Oxlint                          |
 
 
 ## Struktur
