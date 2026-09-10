@@ -34,7 +34,7 @@ export const venues = [
     code: 'SK 02',
     eyebrow: 'Festen',
     name: 'Vespa og Humla',
-    time: 'Lorem ipsum', // TODO: klokkeslett
+    time: 'Kommer snart', // TODO: klokkeslett
     address: 'Københavngata 2, 0553 Oslo',
     lat: 59.92477,
     lng: 10.76288,
@@ -47,7 +47,7 @@ const FORM_ID = '1FAIpQLSfVEK1IYehIc0w_YYGv1gDRxS78U_AbbL57ifmhEHGpMT2A7w' // TO
 
 export const rsvp = {
   openUrl: `https://docs.google.com/forms/d/e/${FORM_ID}/viewform`,
-  deadlineLabel: 'Svar innen Lorem ipsum', // TODO: frist
+  deadlineLabel: 'Svar innen: Kommer snart', // TODO: frist
   blurb:
     'Vi trenger å vite hvor mange vi skal dekke på til, og om det er noe dere ' +
     'ikke tåler. Skjemaet tar under ett minutt.',
