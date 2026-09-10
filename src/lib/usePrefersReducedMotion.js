@@ -2,11 +2,7 @@ import { useEffect, useState } from 'react'
 
 const QUERY = '(prefers-reduced-motion: reduce)'
 
-/**
- * CSS can switch off every animation, but it cannot switch off SMIL. Components
- * that animate inside SVG ask this hook and skip rendering their <animate>
- * elements when the visitor has asked for less motion.
- */
+/** CSS cannot switch off SMIL, so SVG animations skip rendering instead. */
 export default function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(
     () => globalThis.matchMedia?.(QUERY).matches ?? false,

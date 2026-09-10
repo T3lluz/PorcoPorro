@@ -1,12 +1,8 @@
-/*
-  The sky system. One continuous sky behind everything, in three z-layers:
-
-    0  .sky-base   fixed    the horizontal base gradient
-    0  .sky-wash   scrolls  the deep-blue vertical wash, anchored to the top of
-                            the document so it pales away as you descend
-    1  .sky-drift  fixed    far + mid clouds and the faint high wind
-    3  .content
-*/
+/* One sky behind everything:
+     0  .sky-base   fixed    horizontal base gradient
+     0  .sky-wash   scrolls  vertical wash, anchored to the top of the document
+     1  .sky-drift  fixed    far + mid clouds, high wind
+     3  .content                                                              */
 
 .sky-base,
 .sky-drift {
@@ -41,41 +37,16 @@
   );
 }
 
-/* No mask, no cut, no fade. The drifting clouds run the whole height of the
-   page and are dissolved at the bottom by .horizon::before in sections.css, the
-   band of haze the footer paints above its own waterline. Clouds thinning into
-   haze into water is a horizon, and unlike a mask it is a static gradient that
-   never moves and never repaints.
+/* Both layers are fixed, so they rise against --sy to read as distance rather
+   than wallpaper: mid at 48% of the scroll, far at 20%. min() caps the climb
+   before a layer's bottom edge would clear the screen; the trailing 2% and 3%
+   keep it creeping past the cap instead of stopping dead. Neither cap is
+   reached at this page length.
 
-   `contain` promises the browser that nothing inside these layers can affect
-   the size or paint of anything outside them, so a cloud moving is a cloud
-   moving and not the start of a walk back up the tree. */
-/* The parallax proper, in two directions.
+   Horizontally the sky streams right past a stationary plane, since the nose
+   points left. --fly-dur is one crossing.
 
-   VERTICALLY. Both layers are fixed, so left alone they sit dead still while
-   the passes fall past them, which reads as wallpaper rather than as distance.
-   Against the falling camera they rise, and they rise hard: the ground below
-   moves at the full rate of the scroll, so anything that merely creeps reads as
-   a loose backdrop. The near layer takes 48% of the scroll, the far one 20%.
-   Roughly half the rate of the page is where the near clouds stop being scenery
-   and the camera starts dropping through them; the far layer at two fifths of
-   that is what keeps the two apart as depth.
-
-   min() holds the fast climb back once a layer's bottom edge would otherwise
-   rise past the bottom of the screen. The second term past the cap matters: a
-   bare min() does not slow the sky, it stops it dead, and a sky nailed in place
-   is the wallpaper the fast rate exists to avoid. Past the cap the layers keep
-   creeping at 2% and 3%. The page is short enough that neither cap is reached
-   in practice; they are a guard rail.
-
-     far:  spans -30svh to 230svh, climbs at 20% then 2%
-     mid:  spans -40svh to 270svh, climbs at 48% then 3%
-
-   HORIZONTALLY. The plane holds still in the middle of the hero and the sky
-   goes past it, which is the only way a fixed picture of a plane reads as
-   flight. It streams right, because the nose points left, and it never stops,
-   slows or turns round. --fly-dur is how long a cloud takes to cross; see
-   .cloud below for how the stream is made seamless. */
+   contain: nothing inside these can affect layout or paint outside them. */
 .drift-far,
 .drift-mid {
   position: absolute;
@@ -107,6 +78,7 @@
 }
 
 /* --- clouds --------------------------------------------------------------- */
+
 .cloud-sprite {
   position: absolute;
   width: 0;
@@ -114,21 +86,13 @@
   overflow: hidden;
 }
 
-/* One way, for ever, and never the same cloud twice at the seam.
+/* Horizontal position is a phase, not a `left`: every cloud in a layer runs the
+   same crossing at the same speed, and --fly-phase offsets it as a negative
+   delay. Phases step through the golden ratio, so the field stays evenly
+   populated and a cloud never wraps where you can see it.
 
-   Horizontal position is a phase, not a `left`. Every cloud in a layer runs the
-   same journey at the same speed, from fully off the left edge to fully off the
-   right; what differs is where in that journey it is, set by --fly-phase as a
-   negative animation delay. The phases step through the golden ratio, so the
-   field stays evenly populated at every moment.
-
-   That is what makes it seamless: a cloud never wraps where you can see it. It
-   leaves on the right and arrives again on the left a whole cycle later, with
-   the rest of the layer covering for it. Panning the layer as a rigid sheet
-   cannot do that without tiling the scatter.
-
-   `translate` and not `transform`, because `transform` belongs to the drift
-   animation below. The two compose, translate first. */
+   `translate`, not `transform`, which the drift animation owns. They compose,
+   translate first. */
 .cloud {
   position: absolute;
   left: 0;
@@ -140,15 +104,12 @@
     calc(var(--fly-dur, 58s) * var(--fly-phase, 0) * -1);
   animation-iteration-count: infinite;
   animation-direction: alternate, normal;
-  /* No will-change: an animated transform is composited on its own without the
-     hint, and there are thirty-odd of these. Hinting each one would cost a
-     layer of GPU memory per cloud on a phone for nothing. */
+  /* No will-change: an animated transform composites without it, and there are
+     thirty-odd of these to pay GPU memory for. */
 }
 
-/* -100% is the cloud's own width, so it starts wholly outside the layer rather
-   than half-showing at the edge; the extra 40px each end is margin against a
-   browser rounding the two differently. The jump back to the start happens off
-   the side of the screen, a cloud-width clear of it. */
+/* -100% is the cloud's own width, so it starts wholly outside the layer. The
+   40px is margin against the two ends rounding differently. */
 @keyframes fly {
   from {
     translate: calc(-100% - 40px) 0;
@@ -165,9 +126,7 @@
   transform: scaleX(var(--fx, 1)) scaleY(var(--fy, 1));
 }
 
-/* Two depth layers: far reads hazier and bluer, mid nearly crisp. There is no
-   near layer in front of the passes, because a cloud drifting over them would
-   hide the only text on the page. */
+/* No near layer in front of the passes: it would cover the text. */
 .layer-far {
   opacity: 0.55;
   filter: blur(2.5px) saturate(0.9);
@@ -190,21 +149,12 @@
 }
 
 /* --- wind curls ----------------------------------------------------------- */
-/* Two animations, deliberately out of step:
 
-     .wind      carries the curl across the sky, lifting and growing slightly,
-                and fades it in and out at the ends of that pass so nothing pops
-                in at the edge of the screen. The plateau is long (in by a tenth
-                of the pass, out only in the last fifth) because these are
-                quick, and a short cycle with a slow fade at both ends is a
-                blink rather than a gust;
-     .wind path flows the dash along each stroke four times faster, so the line
-                looks redrawn by the air rather than towed through it.
-                pathLength="1000" lets one dash rule govern strokes of very
-                different real lengths.
-
-   Every stroke is painted twice, a wide faint halo under a crisp line, which
-   feathers the ends instead of stopping them dead in a round cap. */
+/* Two animations out of step: .wind carries the curl across and fades it at
+   both ends, .wind path flows the dash along each stroke four times faster.
+   pathLength="1000" lets one dash rule cover strokes of different real length.
+   Each stroke is painted twice, a wide faint halo under a crisp line, which
+   feathers the ends instead of capping them. */
 .wind {
   position: absolute;
   width: var(--w, 260px);
@@ -221,12 +171,10 @@
   transform: scale(var(--fx, 1), var(--fy, 1));
 }
 
+/* Gradient stroke, not flat white: see #wind-fade in CloudSprite.jsx. Fades
+   along its own length, so the wake thins behind the curl. */
 .wind path {
   fill: none;
-  /* Not flat white; see #wind-fade in CloudSprite.jsx. The stroke fades along
-     its own length, so the tail is nearly gone and the curl at the front is at
-     full strength. The spiral is the head of the gust, the straight run behind
-     it the wake, and a wake should be thinning. */
   stroke: url(#wind-fade);
   stroke-linecap: round;
   animation: wind-flow calc(var(--dur, 26s) / 4.5) linear var(--delay, 0s)
@@ -304,14 +252,10 @@
 }
 
 /* --- phone ---------------------------------------------------------------- */
-/* The mobile budget. A phone pays for every blurred layer separately, for every
-   filter pass, for every composited layer it keeps in memory, and most of all
-   for anything whose geometry changes while you scroll, since that cannot be
-   composited and has to be painted again. */
+
 @media (max-width: 700px) {
-  /* No filters. `saturate(0.9)` reads as nothing at this size and costs a
-     filter pass per cloud, eighteen of them on the far layer alone. The depth
-     still comes off the opacity and the parallax rates. */
+  /* saturate(0.9) reads as nothing at this size and costs a filter pass per
+     cloud, eighteen on the far layer alone. */
   .layer-far {
     opacity: 0.46;
     filter: none;
@@ -322,22 +266,15 @@
     filter: none;
   }
 
-  /* A third of the far layer, and the far layer only: it is the palest and
-     slowest of the two, so it can lose clouds without the sky reading as thin,
-     and dropping every third one keeps the even spread, since every third term
-     of a golden-ratio sequence is still a golden-ratio sequence.
-
-     This is where the phone's budget goes instead of on the wind. Each cloud is
-     a composited layer, and layers are what a phone runs out of; the curls are
-     paint, which is cheaper. The wind is the part you notice. */
+  /* Drop a third of the far layer: it is the palest, and every third term of a
+     golden-ratio sequence is still one, so the spread stays even. Each cloud
+     costs a composited layer; the wind is paint, and cheaper. */
   .drift-far .cloud:nth-child(3n) {
     display: none;
   }
 
-  /* The crossing is a screen wide either way, so one duration would have a
-     cloud take as long to cross a 390px phone as a 1400px monitor, which on the
-     small screen is barely motion. Shorter, so the stream reads at the size it
-     is actually seen. */
+  /* The crossing is one screen wide either way, so one duration would take as
+     long on a 390px phone as on a 1400px monitor. */
   .drift-far {
     --fly-dur: 74s;
   }
@@ -346,17 +283,13 @@
     --fly-dur: 32s;
   }
 
-  /* Scaled, not thinned: this is about size, not count. The clouds are sized
-     for a 1440px window, where a single 400px one would be most of a 390px
-     sky. */
+  /* Size, not count: these are sized for a 1440px window. */
   :root {
     --cloud-scale: 0.6;
   }
 }
 
-/* With motion switched off the curls would simply never appear, since their
-   fade-in lives in the keyframes. Show them, still, at their travelled-in
-   opacity. */
+/* The fade-in lives in the keyframes, so without this the curls never appear. */
 @media (prefers-reduced-motion: reduce) {
   .wind {
     opacity: var(--op, 0.45);

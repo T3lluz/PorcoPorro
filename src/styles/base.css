@@ -1,6 +1,4 @@
-/* ---------------------------------------------------------------------------
-   Shared primitives: the page shell, the boarding pass, buttons.
---------------------------------------------------------------------------- */
+/* Page shell, boarding pass, buttons. */
 
 .page {
   position: relative;
@@ -8,30 +6,15 @@
   isolation: isolate;
 }
 
-/* Everything that is not sky sits here. */
 .content {
   position: relative;
   z-index: 3;
 }
 
-/* The page body, and the two offsets that make the opening beat work.
-
-   margin-top pulls <main> back up over the pinned hero by exactly one hero, so
-   the passes wait just below the fold and the first flick of the wheel slides
-   them over it. See .hero-pin in hero.css.
-
-   padding-top decides how far below the fold that is. The first card's top edge
-   lands at exactly 100lvh + --lead-sky down the document, whatever the window
-   is doing:
-
-     card top = (pin height - one hero) + padding-top
-              = (2H - H) + (100lvh - H + --lead-sky)
-              = 100lvh + --lead-sky
-
-   lvh and not svh, which is why this is not simply --gap-sky: --hero-h is the
-   small viewport, the height left when a phone's toolbars are showing. With
-   them hidden the window is taller, so an svh offset would put the fold below
-   the card's top edge and the card would peek before you touched anything. */
+/* margin-top pulls <main> up over the pinned hero by one hero, so the passes
+   wait just below the fold. padding-top then puts the first card's top edge at
+   100lvh + --lead-sky. lvh, not svh: --hero-h is the small viewport, so an svh
+   offset would let the card peek before you scrolled. */
 main {
   position: relative;
   z-index: 2;
@@ -44,39 +27,22 @@ main {
   margin-inline: auto;
 }
 
-/* Open sky between the passes. */
 .gap {
   position: relative;
   height: var(--gap-sky);
 }
 
-/* --- the boarding pass ---------------------------------------------------- */
-/* Nothing here is upright: each pass carries a small --tilt of its own, the
-   camera adds --s on top to tip it towards you on the way up the frame and away
-   on its way out, and --c swells it slightly as it passes dead centre.
+/* --- boarding pass -------------------------------------------------------- */
 
-   They are deliberately tight. A boarding pass is a small card you hold in one
-   hand; the moment the padding grows it reads as a section of a website with a
-   stripe down the side.
-
-   perspective() is the first function in the list rather than a `perspective`
-   property on the wrapper, because the wrapper has to stay a plain box: giving
-   it a filter or a perspective would make it a containing block and take the
-   card's shadow with it. */
-/* The climb. Over the first viewport the passes cover the hero at the rate of
-   the scroll plus --card-rise, so the stretch of bare sky with a card edge
-   creeping up from the bottom is short. --lift is eased, so this hands back to
-   ordinary scrolling without a change of gear; see lib/parallax.js.
-
-   On the sections rather than on <main>: the effect is identical, but <main> is
-   the full height of the page and contains a live map embed, and a transform
-   that changes every frame on a box that size asks the compositor for a layer
-   to match. These two are small and already promoted for the tilt. */
+/* Climbs faster than the page while the hero is still covering it. */
 .pass-outer {
   position: relative;
   translate: 0 calc(var(--lift, 0) * var(--card-rise) * -1);
 }
 
+/* perspective() inside `transform`, not a `perspective` property on .pass-outer:
+   that would make the wrapper a containing block and clip this card's shadow.
+   The 1px ring is load-bearing: white card, white clouds behind it. */
 .pass {
   --tear: 46px;
 
@@ -85,11 +51,6 @@ main {
   grid-template-columns: var(--tear) 1fr;
   background: var(--panel);
   border-radius: 13px;
-  /* The hairline ring is not decoration. The card is white and so are the
-     clouds it falls through, so when one drifts behind a card the edge
-     dissolves into it. Stacking order does not help; only a defined edge does,
-     hence a one-pixel ring in a cool grey that reads against cloud and
-     disappears against blue. */
   box-shadow:
     0 0 0 1px rgba(20, 66, 99, 0.09),
     0 24px 46px -22px rgba(12, 50, 84, 0.46),
@@ -103,7 +64,6 @@ main {
   will-change: transform;
 }
 
-/* --- the stub ------------------------------------------------------------- */
 .pass-stub {
   position: relative;
   display: flex;
@@ -114,8 +74,7 @@ main {
   background: linear-gradient(180deg, #f4fafd, #e0eef7);
 }
 
-/* The tear is a column of punched holes, not a drawn line: a dashed rule reads
-   as decoration, a row of holes reads as something you are meant to tear. */
+/* the tear: a column of punched holes */
 .pass-stub::after {
   content: '';
   position: absolute;
@@ -131,8 +90,6 @@ main {
   background-size: 6px 13px;
 }
 
-/* Set bottom-to-top, the way a real stub reads when the card is upright, and
-   large enough to be the section's title rather than a caption on it. */
 .pass-eyebrow {
   flex: 1;
   display: grid;
@@ -159,10 +116,9 @@ main {
   color: var(--sky-1);
 }
 
-/* --- the body ------------------------------------------------------------- */
 .pass-body {
   position: relative;
-  min-width: 0; /* so a wide child cannot force the grid column open */
+  min-width: 0; /* or a wide child forces the grid column open */
   padding: 20px 24px 22px;
 }
 
@@ -172,25 +128,7 @@ main {
 }
 
 /* --- buttons -------------------------------------------------------------- */
-/* A printed label, not a widget.
 
-   Two things were making these read as something borrowed from another site
-   rather than something set on the card they sit on.
-
-   The shape: a fully round pill is the only such geometry on a page otherwise
-   built from paper — 13px on the pass, 11px on the map frame, a hairline rule
-   around both. A capsule among rectangles reads as an app control that landed
-   on the artwork. So the corner is 8px, which is the same language as the frame
-   directly above it without being the same number.
-
-   The shadow, which mattered more: it was a warm halo in the button's own
-   colour. Every other shadow on this page is the cool blue of paper in daylight
-   (rgba(12, 50, 84, …)) and that consistency is what holds the picture
-   together — cards, badge, stub, all lit from one sky. A crimson glow is the
-   button lighting itself, which is why it floated off the card instead of
-   sitting on it. Same shadow family as everything else now, and nothing lifts
-   on hover for the same reason: the cards float, the ink printed on them does
-   not. */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -198,9 +136,6 @@ main {
   font-family: var(--ui);
   font-weight: 500;
   font-size: 11.5px;
-  /* A touch wider than the old setting. The label is four or five words of
-     uppercase and this is the one place on the card where type is doing the job
-     of a control, so it is allowed to be spaced like a stamp. */
   letter-spacing: 0.17em;
   text-transform: uppercase;
   text-decoration: none;
@@ -209,31 +144,18 @@ main {
   border: 0;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  /* a comfortable thumb target even where the label is short */
-  min-height: 46px;
+  min-height: 46px; /* thumb target */
   transition:
     transform 160ms ease,
     box-shadow 180ms ease,
     background-color 180ms ease;
 }
 
-/* The global :focus-visible rule carries a 4px radius for the ring it draws,
-   and at equal specificity it reshapes the button's own corners for as long as
-   it is focused. Restate the radius above it. */
+/* The global :focus-visible carries a 4px radius and wins at equal specificity. */
 .btn:focus-visible {
   border-radius: 8px;
 }
 
-/* No ring around it. .pass carries one because a white card falling past a white
-   cloud has no edge without it; a block of saturated crimson on white paper has
-   nothing to dissolve into, so the outline was solving a problem this element
-   does not have — and a 1px shadow ring sits on the outside of the border box,
-   half a device pixel off the fill on any display that is not at 1x, which is
-   what made it read as an outline that did not quite belong to the button.
-
-   Both shadows carry negative spread, so neither reaches past the sides or the
-   top: the whole of the shadow is underneath, where a thing resting on paper
-   puts it, and nothing traces the shape. */
 .btn-rosso {
   background: var(--rosso);
   color: #fff;
@@ -242,12 +164,7 @@ main {
     0 3px 6px -3px rgba(12, 50, 84, 0.28);
 }
 
-/* Behind a hover query, or a phone leaves the button in its hover state after a
-   tap: there is no pointer to move away and release it.
-
-   It darkens rather than brightens. --rosso-lit is the light catching the top
-   of the aeroplane and belongs to the plane; on a printed label the thing that
-   happens under your finger is more ink, not more light. */
+/* Behind a hover query, or a phone leaves the button lit after a tap. */
 @media (hover: hover) {
   .btn-rosso:hover {
     background: var(--rosso-deep);
@@ -257,8 +174,6 @@ main {
   }
 }
 
-/* Pressed, it goes down onto the card and the shadow underneath closes up,
-   which is the whole of the feedback. */
 .btn:active {
   transform: translateY(1px);
 }
@@ -274,6 +189,7 @@ main {
 }
 
 /* --- responsive ----------------------------------------------------------- */
+
 @media (max-width: 860px) {
   .pass-body {
     padding: 18px 18px 20px;
@@ -281,24 +197,13 @@ main {
 }
 
 @media (max-width: 700px) {
-  /* The stub rotates a quarter turn into a header band, and the punched holes
-     go with it. */
+  /* Stub becomes a header band, and the camera flattens to a plain translate:
+     perspective + rotateX + scale per frame is not composited, so the whole
+     subtree including the map iframe would re-rasterise on every scroll frame.
+     The lean also has no margin to lean into at this width. */
   .pass {
     grid-template-columns: 1fr;
     border-radius: 14px;
-    /* Sit them square, and flatten the camera to a slide.
-
-       Layout: the loose-paper lean needs margin to lean into, and on a phone
-       the card is the screen, with 15px either side. A tall card throws its
-       corners out by its own height times the sine of the angle, so even two
-       degrees puts them past the edge where .page clips them off.
-
-       Cost, which matters more: perspective + rotateX + scale changing every
-       scroll frame is not a composited transform, so the card's whole subtree
-       is re-rasterised at a new projection sixty times a second, and one of
-       these cards holds a live Google Maps iframe. A plain translate3d is handed
-       to the compositor and costs nothing per frame. The card still rises and
-       settles against the fall, it just no longer tips while doing it. */
     transform: translate3d(0, calc(var(--s, 0) * var(--drift, 30px)), 0);
     --drift: 30px;
     box-shadow:
@@ -356,17 +261,14 @@ main {
   }
 }
 
-/* --- motion budget -------------------------------------------------------- */
+/* --- reduced motion ------------------------------------------------------- */
+/* No camera variables are published, so everything reading them falls back to
+   0. Undo the layout that assumed they would arrive. */
 @media (prefers-reduced-motion: reduce) {
-  /* Nothing registers with the parallax engine under reduced motion, so --s and
-     --c never arrive, but --tilt would still lean every card. Sit them flat. */
   .pass {
     transform: none;
   }
 
-  /* And take the pin out with them. The hero's lettering fades on --fall, which
-     also never arrives, so left pinned it would show through the open sky
-     between two cards. Unpinned, the page is an ordinary stack. */
   .hero-pin {
     height: auto;
   }
@@ -375,17 +277,12 @@ main {
     position: relative;
   }
 
-  /* Unpinned, the padding above measures against a hero that is no longer
-     overlapped, so it collapses and the first card lands hard against the
-     bottom of the names. Give it the same open sky the cards get. */
   main {
     margin-top: 0;
     padding-top: var(--gap-sky);
   }
 
-  /* --lift is never published either, so `main` sits where it is laid out. The
-     footer subtracts --card-rise from its own margin to make room for a climb
-     that is not happening, so take that away too. */
+  /* .footer subtracts this from its own margin; no climb to make room for now. */
   :root {
     --card-rise: 0px;
   }

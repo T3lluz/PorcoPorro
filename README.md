@@ -3,8 +3,8 @@
 React 19 + Vite 8, statisk bygg, publisert på GitHub Pages.
 
 <p align="center">
-  <img src=".github/media/desktop.png" height="340" alt="Toppen av siden på desktop" />
-  <img src=".github/media/mobile.png" height="340" alt="Toppen av siden på mobil" />
+  <img src=".github/media/desktop.jpg" height="340" alt="Toppen av siden på desktop" />
+  <img src=".github/media/mobile.jpg" height="340" alt="Toppen av siden på mobil" />
 </p>
 
 ## Kom i gang
@@ -27,7 +27,12 @@ Siden kjører på <http://localhost:5173>.
 
 Alt av tekst, datoer, adresser og lenker ligger i
 [`src/config.js`](src/config.js). Ingen streng er hardkodet i en komponent.
-Feltene merket ⚠️ må erstattes før siden deles.
+Søk etter `TODO` for felt som må fylles inn før siden deles.
+
+Adressene ligger i lista `venues`. Hver post blir ett lokasjonskort med eget
+kart og egen veibeskrivelse. En tredje adresse er en ny post der, ikke en ny
+komponent; husk å telle `code` videre og å flytte svarkortets `SK 03` i
+[`src/components/Rsvp.jsx`](src/components/Rsvp.jsx).
 
 ## Struktur
 
@@ -41,8 +46,9 @@ src/
   styles/        base, sky, hero, sections
 ```
 
-Siden har to seksjoner, begge et `<Panel>` (et boardingkort): **Hvor & når** og
-**Svar**. Hver fil forklarer sine egne valg i toppen.
+Hver seksjon er et `<Panel>` (et boardingkort). `VenueCard` er kortet som
+brukes én gang per adresse; det setter sammen `VenueMap` (kartet) og feltene.
+Svarkortet er `Rsvp`. Hver fil forklarer sine egne valg i toppen.
 
 ## Publisering
 
@@ -56,4 +62,6 @@ i `index.html` oppdateres.
 
 ---
 
-Flyet, himmelen og fargene er en hyllest til _Porco Rosso_ © 1992 Studio Ghibli.
+Flyet, himmelen og fargene er en hyllest til _Porco Rosso_ (Studio Ghibli,
+1992). Alt som er tegnet på siden er laget for anledningen; ingen merker eller
+bilder fra filmen er i bruk.

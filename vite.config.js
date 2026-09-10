@@ -7,9 +7,8 @@ export default defineConfig({
   base: '/PorcoRosso/',
   plugins: [react()],
   server: {
-    // Vite ignores $PORT and always grabs 5173, which collides with a dev
-    // server already running by hand. Honouring it lets a second server take an
-    // assigned port instead.
+    // Vite ignores $PORT and always grabs 5173, colliding with a server already
+    // started by hand.
     port: process.env.PORT ? Number(process.env.PORT) : undefined,
   },
 })

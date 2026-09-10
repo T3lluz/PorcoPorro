@@ -1,21 +1,14 @@
-/*
-  The hero, and the parallax beat that opens the page.
+/* The hero, and the parallax beat that opens the page.
 
-  .hero-pin is exactly twice the hero's height and .hero is sticky inside it, so
-  the sky holds still for one viewport of scrolling while <main>, pulled back up
-  by one hero (see base.css), slides its cloud panels over the top. At one
-  viewport the pin runs out and the page scrolls normally.
+   .hero-pin is twice the hero and .hero is sticky inside it, so the sky holds
+   still for one viewport while <main> slides its passes over the top.
 
-  Everything in here clears out on --fall, and clears out early: the hero is
-  still physically there for a whole viewport after it has stopped being the
-  picture, and the gaps between the boarding passes are real open sky, so
-  anything still painted at 40% of a viewport would surface again between the
-  cards. Hence the steep multipliers below.
+   Everything here clears out on --fall, and clears out early: the hero is still
+   in the document for a full viewport after it stops being the picture, and the
+   gaps between passes are real sky, so anything still painted would surface
+   again between cards. Hence the steep multipliers.
 
-  --plane-w drives the rig. Plane plus towed banner is 2.405x the width of the
-  plane, so --plane-w is capped at 40vw to keep the banner on screen at every
-  width. It still reaches the intended 620px above 1550px.
-*/
+   Plane plus banner is 2.405x the plane, so --plane-w caps at 40vw. */
 
 .hero-pin {
   position: relative;
@@ -23,13 +16,11 @@
   height: calc(var(--hero-h) * 2);
 }
 
+/* Idle loops are measured in --plane-w, not px: 22px of bob is 3% of a 620px
+   plane and 17% of a 126px one, and at 17% the hull hits the lettering. */
 .hero {
   --plane-w: clamp(240px, 40vw, 620px);
   --rig-w: calc(var(--plane-w) * 2.405);
-  /* The idle loops are measured in --plane-w, not pixels: 22px of bob is 3% of
-     a 620px plane on a monitor and 17% of a 126px one on a phone, and at 17%
-     the hull swings down onto the lettering. Tied to the width they read as the
-     same motion at every size. */
   --bob: clamp(6px, calc(var(--plane-w) * 0.036), 22px);
   --drift-x: clamp(5px, calc(var(--plane-w) * 0.029), 18px);
 
@@ -48,35 +39,29 @@
   pointer-events: none;
 }
 
-/* The prop-wash belongs to the aeroplane, so it leaves with it. */
+/* Hinted because --fall changes every scroll frame: unhinted, the animated
+   curls underneath repaint on each one. */
 .hero-wind {
   position: absolute;
   inset: 0;
   z-index: 2;
   opacity: calc(1 - var(--fall, 0) * 2);
-  /* --fall changes on every scroll frame, so this opacity does too. Hinted, it
-     is a compositor fade over a layer rasterised once; unhinted, the animated
-     curls underneath are repainted on every frame of the opening scroll. */
   will-change: opacity;
 }
 
 /* --- plane ---------------------------------------------------------------- */
-/* Arrives from stage right on load, then hands over to the idle loops inside. */
+
+/* Arrives from stage right on load, then hands over to the idle loops inside.
+   Climbs out of frame on --fall rather than --sy, so it stops the moment the
+   hero lets go. `translate` composes with the arrival `transform`. */
 .plane-rig {
   position: absolute;
   z-index: 3;
   top: 11%;
   left: 50%;
   width: var(--rig-w);
-  aspect-ratio: 2.405 / 0.4521; /* = plane-side.png, 1024 x 463 */
+  aspect-ratio: 2.405 / 0.4521; /* plane-side.png is 1024 x 463 */
   margin-left: calc(var(--rig-w) / -2);
-  /* The camera drops away from the plane while the hero is pinned, so it
-     climbs out of frame rather than being caught by the passes coming up at it.
-     A viewport and a quarter of climb over one --fall, faded out over the first
-     third, so the sky above the first card is empty before that card is near
-     the top of the frame. --fall rather than --sy, so the climb stops the
-     moment the hero lets go. `translate` composes with the `transform` below
-     instead of overwriting it. */
   translate: 0 calc(var(--fall, 0) * -110svh);
   opacity: calc(1 - var(--fall, 0) * 2.2);
   will-change: translate, opacity;
@@ -93,6 +78,7 @@
   }
 }
 
+/* Three loops on mismatched periods, so the idle never visibly repeats. */
 .plane-drift,
 .plane-bob,
 .plane-tilt {
@@ -109,8 +95,7 @@
   animation: plane-bob 9s ease-in-out infinite;
 }
 
-/* Rotate about the plane itself, not the middle of the towed rig, so the banner
-   sweeps behind it instead of see-sawing. */
+/* About the plane, not the middle of the towed rig, or the banner see-saws. */
 .plane-tilt {
   transform-origin: calc(var(--plane-w) * 0.5) 50%;
   animation: plane-tilt 11s ease-in-out infinite;
@@ -150,31 +135,24 @@
   left: 0;
   top: 0;
   width: var(--plane-w);
-  height: auto; /* the viewBox carries the 1024:463 ratio */
+  height: auto; /* the viewBox carries the ratio */
   overflow: visible;
   filter: drop-shadow(0 18px 26px rgba(20, 80, 150, 0.28));
 }
 
-/* --- the propeller -------------------------------------------------------- */
-/* Two nested groups, and the nesting does the work. The inner one turns; the
-   outer squashes the result to 30% width, which is the foreshortening: a
-   propeller disc seen from the side is nearly edge-on, so the blade tips trace
-   a tall narrow ellipse rather than a circle. That is also why the blades are
-   drawn three times too wide.
+/* --- propeller ------------------------------------------------------------ */
 
-   It has to be two elements. On one, `transform: scaleX()` alongside an
-   animated `rotate` composes the wrong way round, since CSS applies the
-   individual transform properties before `transform`: the blade is flattened to
-   a sliver first and only then swung, throwing a long spike across the picture
-   at every angle but vertical.
+/* Two nested groups: the inner one turns, the outer squashes to 30% width for
+   the foreshortening. It cannot be one element, because CSS applies the
+   individual transform properties before `transform`, so a scaleX alongside an
+   animated rotate flattens the blade first and then swings the sliver, throwing
+   a spike across the picture at every angle but vertical.
 
-   Reduced motion falls out for free: with the animation off `rotate` is zero,
-   the blades stand upright, and the squash still applies, which is the painted
-   artwork exactly.
+   Reduced motion is free: rotate is 0, the blades stand upright, and the squash
+   still applies, which is the painted artwork.
 
-   0.26s a turn is about four revolutions a second. With two blades the pattern
-   repeats every half turn, so a frame at 60Hz advances a little over a quarter
-   of that: fast enough to blur, slow enough never to strobe backwards. */
+   0.26s a turn is ~4 rev/s. Two blades repeat every half turn, so a 60Hz frame
+   advances just over a quarter of the pattern: blurs, never strobes backwards. */
 .prop-disc {
   transform-box: view-box;
   transform-origin: 233px 133px;
@@ -202,10 +180,10 @@
   fill: url(#prop-wash);
 }
 
-/* --- the towed banner ----------------------------------------------------- */
-/* The nose points left, so the banner tows behind it to the right. A towed
-   banner lags the aircraft, so it gets its own slower swing about the tow point
-   rather than rotating rigidly with the hull. */
+/* --- towed banner --------------------------------------------------------- */
+
+/* Its own slower swing about the tow point, so it lags the hull instead of
+   rotating rigidly with it. */
 .banner-sway {
   position: absolute;
   left: calc(var(--plane-w) * 0.955);
@@ -245,7 +223,7 @@
   filter: drop-shadow(0 12px 18px rgba(20, 80, 150, 0.18));
 }
 
-/* tow rope and the two bridle legs onto the pole */
+/* tow rope and the two bridle legs */
 .banner-rope {
   fill: none;
   stroke: var(--rosso-deep);
@@ -279,10 +257,10 @@
 }
 
 /* --- hero type ------------------------------------------------------------ */
-/* Sinks a little slower than the page falls, so the passes rise past it, and is
-   fully gone by the time the first card is a quarter of the way up the frame.
-   The hero stays put until the pin runs out, so otherwise the names would
-   surface again in the open sky between two cards. */
+
+/* Both properties move every scroll frame and the text carries a 38px shadow,
+   so this is the most expensive repaint on the page. Hinted, it rasterises once
+   and then slides and fades. */
 .hero-type {
   position: relative;
   z-index: 6;
@@ -290,10 +268,6 @@
   color: var(--ink);
   translate: 0 calc(var(--fall, 0) * 150px);
   opacity: calc(1 - var(--fall, 0) * 2.2);
-  /* Both move on every scroll frame, and the text under them carries a 38px
-     shadow, so repainting it per frame is the most expensive thing the hero
-     does. Hinted, the lettering is rasterised once and then slid and faded by
-     the compositor. */
   will-change: translate, opacity;
   text-shadow: 0 0 38px rgba(255, 255, 255, 0.6);
 }
@@ -306,8 +280,8 @@
   line-height: 0.84;
 }
 
-/* Two ceilings, not one: the vw clamp sizes it to the page and the svh cap
-   keeps the whole block clear of the rig on a short, wide window. */
+/* Two ceilings: vw sizes it to the page, svh keeps it clear of the rig on a
+   short wide window. */
 .hn-name {
   font-size: min(clamp(52px, 12vw, 152px), 13.5svh);
   letter-spacing: 0.012em;
@@ -317,8 +291,6 @@
   font-style: italic;
 }
 
-/* The ampersand is the hinge between the two names: small, crimson, the only
-   warm mark in the lettering. */
 .hn-amp {
   font-style: italic;
   font-size: min(clamp(24px, 4.4vw, 56px), 5.2svh);
@@ -337,14 +309,14 @@
   font-weight: 500;
   font-size: clamp(12px, 1.7vw, 18px);
   letter-spacing: 0.4em;
-  text-indent: 0.4em; /* the trailing letter-space would push it off centre */
+  text-indent: 0.4em; /* the trailing letter-space pushes it off centre */
   text-transform: uppercase;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   color: var(--ink);
 }
 
-/* Shrinkable, not fixed: on a narrow phone the date has to win the row. */
+/* Shrinkable: on a narrow phone the date has to win the row. */
 .stamp-rule {
   flex: 0 1 clamp(20px, 9vw, 128px);
   min-width: 0;
@@ -362,13 +334,13 @@
 }
 
 /* --- scroll cue ----------------------------------------------------------- */
+
+/* 26px icon in a 44px tap target; the negative margin centres the box. */
 .scroll-cue {
   position: absolute;
   left: 50%;
   bottom: max(14px, env(safe-area-inset-bottom));
   z-index: 6;
-  /* 26px of icon in a 44px box, the minimum comfortable tap target, with the
-     negative margin centring the box rather than the glyph. */
   padding: 9px;
   margin-left: -22px;
   color: var(--ink-2);
@@ -386,36 +358,29 @@
   }
 }
 
-/* The wash is the smear of a turning disc. Standing still it is a grey smudge
-   over the nose, so it goes. */
+/* The wash is the smear of a turning disc; standing still it is a smudge. */
 @media (prefers-reduced-motion: reduce) {
   .prop-wash {
     display: none;
   }
 }
 
-/* --- phone ---------------------------------------------------------------- */
+/* --- responsive ----------------------------------------------------------- */
+
 @media (max-width: 700px) {
+  /* Portrait, the desktop layout is a plane at the top of an empty column with
+     a name 400px below it. The hero becomes a band instead: padding clears the
+     rig and the cue, and the type centres in what is left. */
   .hero {
     --plane-w: clamp(126px, 37vw, 260px);
 
-    /* On a wide screen the rig sits high, the lettering sits on the floor of
-       the hero, and the sky between them is the picture. Turned portrait, the
-       same two things become a plane at the top of an almost empty column and a
-       name four hundred pixels below it.
-
-       So the hero becomes a band: padding clears the rig above and the scroll
-       cue below, and the type block is centred in what is left, sitting under
-       the plane as one group. */
     align-content: center;
     padding-top: 30svh;
     padding-bottom: 14svh;
   }
 
-  /* Sized to fit the screen, not to run off it. 31vw sets five characters of
-     Cormorant across roughly 80% of the screen, which leaves a real margin
-     either side; the svh cap keeps them off the stamp on a short phone. The
-     names are the point of the page and must not be cropped. */
+  /* 31vw sets five characters of Cormorant across ~80% of the screen; the svh
+     cap keeps them off the stamp on a short phone. The names must not crop. */
   .hn-name {
     white-space: nowrap;
     font-size: min(31vw, 17svh);
@@ -427,8 +392,8 @@
     margin-block: clamp(2px, 0.8svh, 8px);
   }
 
-  /* The names are set at line-height 0.84, so the descender hangs well below
-     its own line box. A flat 20px puts the date inside the tail of the g. */
+  /* line-height 0.84 hangs the descender well below its line box, so a flat
+     20px would put the date inside the tail of the g. */
   .hero-stamp {
     margin-top: clamp(24px, 4.6svh, 44px);
     font-size: 13px;
@@ -441,23 +406,19 @@
     font-size: 16px;
   }
 
-  /* Down a little to meet it, so the gap closes from both ends, but not so far
-     that the bob reaches the names. See the padding above. */
+  /* Down to meet the type, but not so far that the bob reaches the names. */
   .plane-rig {
     top: 12%;
   }
 
-  /* The viewBox is unchanged but it is now a third of the size on screen, so
-     the lettering has to grow inside it to stay legible. */
+  /* Same viewBox at a third of the size, so the lettering grows inside it. */
   .banner-text {
     font-size: 74px;
     letter-spacing: 3px;
   }
 }
 
-/* A short phone runs out of hero before the lettering does: at 30svh of padding
-   the place line lands on top of the scroll cue. Take the room back off the
-   padding and lift the rig to keep the group spaced rather than stacked. */
+/* A short phone runs out of hero: at 30svh the place line lands on the cue. */
 @media (max-width: 700px) and (max-height: 620px) {
   .hero {
     padding-top: 24svh;
@@ -477,20 +438,16 @@
   }
 }
 
-/* A portrait tablet fits neither layout above: too wide for the phone rule that
-   groups rig and lettering into one block, too tall for the desktop
-   arrangement, which at 768x1024 leaves 370px of empty sky between them. Drop
-   the rig into the upper quarter so the space above and below it is roughly
-   equal. */
+/* Portrait tablet fits neither: too wide for the phone rule, too tall for the
+   desktop one, which leaves 370px of empty sky at 768x1024. */
 @media (min-width: 701px) and (orientation: portrait) {
   .plane-rig {
     top: 24%;
   }
 }
 
-/* A short, wide window is the tight case: the rig is sized off the width and
-   the lettering off the height, so they meet in the middle. Pull the rig smaller
-   and higher rather than shrinking the names further. */
+/* Short and wide: the rig is sized off width and the type off height, so they
+   meet in the middle. Shrink the rig rather than the names. */
 @media (min-width: 701px) and (max-height: 700px) {
   .hero {
     --plane-w: clamp(200px, 30vw, 400px);
@@ -501,14 +458,12 @@
   }
 }
 
-/* A phone on its side has almost no height. Lift the rig clear of the type and
-   drop the cue: there is no room for a hint that the page scrolls when the
-   whole hero is one thumb-flick tall. */
+/* Phone on its side: no vertical room to group anything, and no room for a hint
+   that the page scrolls. */
 @media (orientation: landscape) and (max-height: 540px) {
   .hero {
     --plane-w: clamp(150px, 22vw, 300px);
-    /* Back to the bottom: turned sideways there is no vertical room to group
-       anything, and the portrait rule above would push the names off-screen. */
+
     align-content: end;
     padding-top: 0;
     padding-bottom: 26px;

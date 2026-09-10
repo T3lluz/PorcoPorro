@@ -1,24 +1,44 @@
-/* ---------------------------------------------------------------------------
-   Everything that rides on a boarding pass, plus the ground it all lands on.
---------------------------------------------------------------------------- */
+/* Everything on a boarding pass, plus the footer it all lands on. */
 
-/* --- Hvor ----------------------------------------------------------------- */
-/* The date and the church are the two things a guest opens this page to find,
-   and on a card that also holds a map and a button they were being read last.
-   Scoped to this pass rather than pushed into the shared .pass-title, because
-   the RSVP card's heading is an instruction and wants to stay quieter than
-   the thing it is instructing you about. */
-#hvor .pass-title {
+/* --- location cards ------------------------------------------------------- */
+
+/* Scoped, not on .pass-title: the RSVP heading is an instruction and stays
+   quieter than a place name. */
+.venue .pass-title {
   font-size: clamp(31px, 4vw, 46px);
   font-weight: 600;
   line-height: 1.02;
-  margin-bottom: 15px;
+  margin-bottom: 14px;
 }
 
-.venue-name {
-  margin-bottom: 5px;
+/* Date and time as two labelled fields, the way a real pass prints them. flex
+   and not grid: a grid holds both columns at the widest value on the page, and
+   the two cards do not share a width. */
+.venue-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 38px;
+  margin-bottom: 15px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.venue-field dt {
+  margin-bottom: 2px;
+  font-family: var(--ui);
+  font-weight: 500;
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--sky-1);
+}
+
+.venue-field dd {
+  font-family: var(--display);
   font-size: clamp(20px, 2.3vw, 25px);
   font-weight: 600;
+  line-height: 1.08;
+  color: var(--ink);
 }
 
 .venue-address {
@@ -29,6 +49,10 @@
   color: var(--ink);
 }
 
+/* --- map ------------------------------------------------------------------ */
+
+/* contain:strict stops the card's per-frame transform dragging the map raster
+   with it. Size containment is safe because the height is fixed here. */
 .map-frame {
   position: relative;
   margin-top: 18px;
@@ -37,12 +61,6 @@
   height: clamp(150px, 22vw, 185px);
   background: var(--cloud-2);
   box-shadow: inset 0 0 0 1px var(--line);
-  /* Walled off from the card it sits in. A live map embed is the most
-     expensive element on the page, and the card around it is transformed on
-     every scroll frame. Containment promises the browser that nothing in here
-     changes the size or paint of anything outside it, so the card's transform
-     does not drag the map's raster along with it. The height is fixed above,
-     which is what makes size containment safe to include. */
   contain: strict;
 }
 
@@ -50,14 +68,11 @@
   width: 100%;
   height: 100%;
   border: 0;
-  /* enough tint to sit in the palette without becoming unreadable */
   filter: saturate(0.75) hue-rotate(-8deg);
   pointer-events: none;
 }
 
-/* The map is a picture. This sits over the embed and eats every click, drag and
-   two-finger scroll before it can pan, zoom or trap the page scroll on a phone.
-   «Veibeskrivelse» underneath is the interactive part. */
+/* Eats clicks, drags and two-finger scroll before they reach the embed. */
 .map-shield {
   position: absolute;
   inset: 0;
@@ -107,14 +122,10 @@
   margin-top: 16px;
 }
 
-/* --- Svar ----------------------------------------------------------------- */
-/* One mark, one sentence, one button, centred.
+/* --- RSVP ----------------------------------------------------------------- */
 
-   The last card falls hardest and sits lowest, so it gets a deeper shadow than
-   the other one, but it keeps the hairline ring: without a defined edge a white
-   card dissolves into any cloud that drifts behind it (see .pass in base.css).
-   This rule outranks the phone override there, so it restates the phone shadow
-   itself further down. */
+/* Falls hardest and sits lowest, so a deeper shadow. Outranks the phone
+   override in base.css, hence the restatement further down. */
 .rsvp .pass {
   --drift: 74px;
   --sway: 2deg;
@@ -145,7 +156,6 @@
   color: var(--ink-2);
 }
 
-/* The one piece of urgency on the card, so it is crimson rather than grey. */
 .rsvp-deadline {
   font-family: var(--ui);
   font-weight: 500;
@@ -155,30 +165,16 @@
   color: var(--rosso);
 }
 
-/* --- the ground ----------------------------------------------------------- */
-/* The end of the fall. Only the type inside moves, settling a beat late against
-   the drop (see .footer-inner) so the last stretch reads as ground coming up to
-   meet the lens. The horizon edge itself never moves: a gap between it and the
-   sea would show sky through the floor.
+/* --- footer --------------------------------------------------------------- */
 
-   Below <main> in stacking order, not above it. The haze reaches a long way up
-   out of the footer, and at a higher z-index it would wash out the bottom of
-   the last boarding pass. The ground goes behind the things falling onto it. */
+/* Below <main>, not above: the haze reaches far up out of here and would wash
+   out the bottom of the last pass. margin-top drops --card-rise because the
+   passes are drawn that much higher than they are laid out. */
 .footer {
-  /* The band of air above the water, and the only transition between sky and
-     sea. It is drawn by an absolutely-positioned ::before that reaches a whole
-     --haze-h above the wave, up out of the footer and into the open sky: the
-     drifting clouds fade into it and it cools into water colour. */
   --haze-h: clamp(180px, 26vh, 340px);
 
   position: relative;
   z-index: 1;
-  /* --ground-gap is the open sky between the last boarding pass and the top of
-     the footer. Less --card-rise, because the passes above are drawn that much
-     higher than they are laid out once the hero is behind you (see .pass-outer
-     in base.css). Taking it off here shortens the document by the same amount,
-     so the ground stays exactly --ground-gap below the last card and the page
-     does not end in a screenful of nothing. */
   margin-top: calc(var(--ground-gap) - var(--card-rise));
   min-height: clamp(200px, 24vw, 380px);
   display: flex;
@@ -192,39 +188,15 @@
   position: relative;
 }
 
-/* The haze.
-
-   A real horizon on a bright day is a band, not an edge: the air pales, cools
-   into water colour, and only then does the water start. Without it the sky
-   meets the sea head-on, which is a seam rather than a horizon.
-
-   It is the sky's own colour thinned, not white: against bare blue a white
-   gradient reads as fog with a visible top edge. The alpha ramp is slow at the
-   start and steep only at the end, which is how haze accumulates, and the stops
-   are placed off --haze-h rather than as percentages of the box, because the
-   box is --haze-h plus the wave. Percentages would move that boundary every
-   time the wave was resized.
-
-   It reaches well past the top of the footer on purpose, so the sky-to-sea
-   colour change happens in open air rather than at a seam.
-
-   It PALES all the way down and never darkens. It used to close on a pair of
-   mid-blue stops just above the wave, on the theory that the air should cool
-   into the water before reaching it. On screen that read as a bar of dirty
-   grey-blue: darker than the sky above it and greyer than the sea below, so it
-   matched neither and looked like something laid over the picture rather than
-   part of it. Distance takes contrast out of a horizon, it does not add it, so
-   the air keeps thinning to a pale cool blue and the wave underneath supplies
-   the dark. The meeting of the two is meant to be crisp; that is what a
-   waterline looks like. */
+/* The haze band between sky and sea. Stops are placed off --haze-h, not as
+   percentages: the box is --haze-h plus the wave, so percentages would move the
+   waterline whenever the wave was resized. It only ever pales; closing on
+   mid-blue read as a grey bar matching neither sky nor water. */
 .horizon::before {
   content: '';
   position: absolute;
   left: 0;
   right: 0;
-  /* Bottom edge parked exactly on the bottom of the wave, top edge one haze
-     above the horizon, so the last stop lands on the waterline rather than
-     somewhere arbitrary inside the footer. */
   bottom: calc(100% - var(--edge-h));
   height: calc(var(--haze-h) + var(--edge-h));
   z-index: 0;
@@ -242,6 +214,7 @@
   );
 }
 
+/* Never moves: a gap under it would show sky through the floor. */
 .horizon-edge {
   position: relative;
   z-index: 1;
@@ -257,7 +230,7 @@
   z-index: 1;
   background: var(--sea);
   color: #fff;
-  padding: 44px 0 max(40px, env(safe-area-inset-bottom));
+  padding: 56px 0 max(50px, env(safe-area-inset-bottom));
 }
 
 .footer-inner {
@@ -266,29 +239,12 @@
   translate: 0 calc(var(--s, 0) * -16px);
 }
 
-/* A centred closing mark: the couple and the date, then the plane's badge and
-   the film credit, stacked and centred so the footer ends the page on one
-   deliberate note rather than two labels adrift in the water.
-
-   Two pairs, not four lines. No `gap`, because an even one spaces them as four
-   and the eye then has to work out which belongs with which: the spacing is set
-   per item below so that the couple and their date sit almost touching and the
-   badge stands well clear of them. */
+/* No `gap`: an even one groups the three children wrong. Set per item below. */
 .signoff {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-}
-
-/* Held clear of the pair above it, which is where the grouping comes from. The
-   number is large because it also absorbs the space the date gave up. */
-.porco-logo {
-  width: clamp(150px, 20vw, 232px);
-  height: auto;
-  margin: 44px 0 14px;
-  /* Lifts the red badge off the sea a touch so it sits in the air, not on it. */
-  filter: drop-shadow(0 6px 14px rgba(9, 40, 58, 0.35));
 }
 
 .signoff-couple {
@@ -299,11 +255,7 @@
   color: #fff;
 }
 
-/* Tucked right under the names, because it is the second half of the same
-   thought. The margin is stated rather than left to fall out of the layout: the
-   base `p + p` rule puts 0.8em between consecutive paragraphs, which here was
-   pushing the date further from the couple than from the badge and grouping it
-   with the wrong pair. */
+/* Stated, or the base `p + p` rule breaks the pair apart. */
 .signoff-date {
   margin-top: 3px;
   font-family: var(--display);
@@ -313,26 +265,34 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
-/* The one line nobody came here to read, so it gets out of the way of the two
-   above it. */
-.signoff-credit {
-  font-family: var(--ui);
-  font-size: 9px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
+.signoff-rule {
+  width: clamp(58px, 9vw, 96px);
+  height: 1px;
+  margin-top: 30px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.55),
+    transparent
+  );
 }
 
 /* --- responsive ----------------------------------------------------------- */
+
 @media (max-width: 700px) {
-  /* The vw terms bottom out here, so the two lines that matter are set
-     outright rather than left at their floor. */
-  #hvor .pass-title {
+  /* The vw terms bottom out here, so set them outright. */
+  .venue .pass-title {
     font-size: 33px;
     margin-bottom: 13px;
   }
 
-  .venue-name {
+  .venue-meta {
+    gap: 9px 24px;
+    margin-bottom: 13px;
+    padding-bottom: 12px;
+  }
+
+  .venue-field dd {
     font-size: 21px;
   }
 
@@ -346,11 +306,8 @@
     border-radius: 10px;
   }
 
-  /* No tint on the embed. A filter over an iframe is a full compositing pass
-     over live, independently-painted content, redone whenever anything about
-     the frame moves, and the map is already the heaviest element on the page.
-     The rounded frame and the crimson pin are what place it in the palette
-     anyway, not eight degrees of hue rotation. */
+  /* A filter over an iframe is a full compositing pass over live content,
+     redone whenever the frame moves. The map is already the heaviest element. */
   .map-frame iframe {
     filter: none;
   }
@@ -373,30 +330,19 @@
   }
 
   .sea {
-    padding: 34px 0 max(30px, env(safe-area-inset-bottom));
+    padding: 42px 0 max(38px, env(safe-area-inset-bottom));
   }
 
-  /* The badge carries the footer on a phone, where there is no width for the
-     type to do it, so it keeps its share of the screen instead of shrinking
-     with everything else. */
-  .porco-logo {
-    width: min(58vw, 240px);
-    margin: 32px 0 10px;
-    filter: drop-shadow(0 4px 10px rgba(9, 40, 58, 0.32));
-  }
-
-  .signoff-credit {
-    font-size: 8.5px;
-    letter-spacing: 0.11em;
+  .signoff-rule {
+    margin-top: 24px;
   }
 }
 
+/* A button that is not full width at this size is a button people miss. */
 @media (max-width: 560px) {
-  /* A button that is not full width at this size is a button people miss. */
   .map-actions .btn,
   .rsvp-card .btn {
     width: 100%;
     justify-content: center;
   }
 }
-

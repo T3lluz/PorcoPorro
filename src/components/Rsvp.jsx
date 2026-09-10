@@ -2,13 +2,15 @@ import { FileText, ExternalLink } from 'lucide-react'
 import { rsvp } from '../config.js'
 import Panel from './Panel.jsx'
 
+/* One mark, one sentence, one button, centred. */
+
 export default function Rsvp() {
   return (
     <Panel
       id="svar"
       eyebrow="Svar"
       title="Gi oss beskjed"
-      code="SK 02"
+      code="SK 03"
       tilt={1.6}
       className="rsvp"
     >

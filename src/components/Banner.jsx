@@ -2,40 +2,31 @@ import { couple } from '../config.js'
 import usePrefersReducedMotion from '../lib/usePrefersReducedMotion.js'
 
 /*
-  The towed banner. The geometry is generated rather than hand-drawn, because
-  what makes a towed banner read as cloth is a rule, not a shape:
-
-    - the leading edge is held by a rigid pole, so it barely moves;
-    - the disturbance travels away from the tow, down the length of the cloth:
-      a travelling wave, not a flap in place;
-    - amplitude grows toward the free trailing edge;
-    - as each crest passes, the cloth twists edge-on and its silhouette narrows.
-
-  All four fall out of one wave sampled at FRAMES phases. Cloth, pole, both
-  bridle ropes and the invisible centreline the lettering rides are sampled from
-  that same wave at the same phases, which is why the letters ripple with the
-  cloth rather than sitting on top of it.
+  The towed banner, generated rather than drawn, from one travelling wave:
+  amplitude ramps toward the free trailing edge, and the silhouette narrows as
+  each crest turns the cloth edge-on. Cloth, pole, both bridle ropes and the
+  centreline the lettering rides are sampled from that wave at the same phases,
+  so the letters ripple with the cloth instead of sitting on it.
 */
 
 const X0 = 230 // leading edge (the pole)
 const X1 = 880 // free trailing edge
-const MID = 130 // the cloth's rest centreline
+const MID = 130 // rest centreline
 const H = 54 // half-height at rest
 const LAMBDA = 520 // one wavelength, in viewBox units
 const K = (Math.PI * 2) / LAMBDA
-const A_NEAR = 2 // amplitude at the pole, near enough to nothing
+const A_NEAR = 2 // amplitude at the pole
 const A_FAR = 27 // amplitude at the free end
 const STEPS = 24 // samples along the cloth
 const FRAMES = 10 // phase snapshots per cycle
 const DUR = '3.6s'
 
-// Where the tow rope from the tail meets the two bridle legs.
+// Where the tow rope meets the two bridle legs.
 const KNOT = { x: 170, y: 126 }
 
 const XS = Array.from({ length: STEPS + 1 }, (_, i) => X0 + ((X1 - X0) * i) / STEPS)
 
-// Amplitude ramps super-linearly, so the last third of the banner does most of
-// the moving, which is where the eye expects it.
+// Super-linear, so the last third does most of the moving.
 const amp = (x) => {
   const u = (x - X0) / (X1 - X0)
   return A_NEAR + (A_FAR - A_NEAR) * u ** 1.7
@@ -48,7 +39,6 @@ function sample(t) {
   return XS.map((x) => {
     const phase = K * x - t
     const y = MID + amp(x) * Math.sin(phase)
-    // silhouette narrows as the cloth turns edge-on under each crest
     const half = H * (0.84 + 0.16 * Math.cos(phase))
     return { x: r(x), top: r(y - half), bot: r(y + half), mid: r(y) }
   })
@@ -112,7 +102,7 @@ export default function Banner() {
         </path>
       </defs>
 
-      {/* tow rope from the tail, then two bridle legs onto the pole */}
+      {/* tow rope, then the two bridle legs onto the pole */}
       <path className="banner-rope" d={`M0 112C56 110 118 116 ${KNOT.x} ${KNOT.y}`} />
       <path className="banner-rope" d={bridleTop(rest)}>
         {!still && <Wave to={bridleTop} />}
@@ -121,12 +111,10 @@ export default function Banner() {
         {!still && <Wave to={bridleBot} />}
       </path>
 
-      {/* the cloth: one path, filled and edged in the same pass */}
       <path className="banner-cloth" d={cloth(rest)}>
         {!still && <Wave to={cloth} />}
       </path>
 
-      {/* the rigid leading pole */}
       <path className="banner-pole" d={pole(rest)}>
         {!still && <Wave to={pole} />}
       </path>

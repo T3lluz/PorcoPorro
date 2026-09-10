@@ -3,24 +3,12 @@ import { Cloud } from './CloudSprite.jsx'
 import WindSwirl from './WindSwirl.jsx'
 
 /*
-  The sky behind everything, in three pieces:
+  The sky behind everything. Layers are ~3 viewports tall and hung above the
+  fold, because climbing that fast for a page needs more sky than a screenful.
 
-  .sky-wash   scrolls with the document. The deep-blue vertical wash, anchored
-              to the top of the page so the blue pales away as you descend.
-  .sky-drift  fixed. Carries the far and mid cloud layers plus a few faint wind
-              curls, so the whole page has weather and not just the hero.
-  .drift-far  each rises against --sy at its own rate. The ground below moves at
-  .drift-mid  the full rate of the page, so a sky that only creeps reads as a
-              loose background rather than as distance.
-
-  Each layer is close to three viewports tall, hung above the fold and reaching
-  well below it, because moving that fast for the length of a page needs more
-  sky than a screenful.
-
-  Scatter: `top` is the cloud's top edge as a percentage of the layer, and `x`
-  is a phase rather than a position (see Cloud in CloudSprite.jsx). The numbers
-  step through the golden ratio, which never drops a new point near an old one
-  and never leaves a gap, so the field stays evenly covered at every moment.
+  `top` is a percentage of the layer, `x` a phase rather than a position (see
+  Cloud in CloudSprite.jsx). Both step through the golden ratio, so the scatter
+  never clumps and never leaves a gap.
 */
 
 const far = [
@@ -62,8 +50,7 @@ const mid = [
 ]
 
 export default function SkyBackdrop() {
-  // Each layer is handed --sy directly, and nothing else on the page reads it,
-  // so a scroll costs these two subtrees and nothing more.
+  // Nothing else reads --sy, so a scroll costs these two subtrees and no more.
   const farLayer = useCamera('sy')
   const midLayer = useCamera('sy')
 
@@ -84,17 +71,10 @@ export default function SkyBackdrop() {
             <Cloud key={`mid-${i}`} layer="mid" {...c} />
           ))}
 
-          {/* The high wind, last in the layer. Two of them: this is the sky
-              behind the whole page rather than air off a propeller, so it wants
-              to be noticed once a screenful, not constantly.
-
-              It crosses roughly six times faster than the mid clouds, which is
-              the ratio that makes a pale curl read as wind rather than as
-              another, thinner cloud. Both are stated in viewport widths, so the
-              relationship holds on a phone too. Tuned by shortening the
-              duration, not by lengthening the travel: a curl that crossed
-              further in the same time would spend most of its cycle off the
-              side of the screen. */}
+          {/* The high wind. Only two, and roughly six times faster than the mid
+              clouds; below that ratio a pale curl reads as another thin cloud.
+              Tune with the duration, not the travel: a longer crossing spends
+              most of its cycle off the side of the screen. */}
           <WindSwirl w="220px" top="42%" left="-16%" dur="6.7s" delay="-2.3s" travel="95vw" rise="-28px" op={0.22} />
           <WindSwirl w="170px" top="66%" left="14%" dur="6.1s" delay="-3.7s" travel="88vw" rise="-20px" op={0.18} fy={-1} />
         </div>

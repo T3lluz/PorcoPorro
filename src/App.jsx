@@ -1,22 +1,19 @@
+import { Fragment } from 'react'
+import { venues } from './config.js'
 import { useCamera } from './lib/parallax.js'
 import CloudSprite from './components/CloudSprite.jsx'
 import Footer from './components/Footer.jsx'
 import Hero from './components/Hero.jsx'
 import Rsvp from './components/Rsvp.jsx'
 import SkyBackdrop from './components/SkyBackdrop.jsx'
-import WhereWhen from './components/WhereWhen.jsx'
+import VenueCard from './components/VenueCard.jsx'
 
 /*
-  One scrolling page of open sky: the plane and its banner up top, everything
-  practical below on cloud panels.
+  One scrolling page: plane and banner up top, one boarding pass per address in
+  `venues`, then the RSVP.
 
-  .hero-pin is twice the height of the hero and <main> is pulled back up over it
-  by exactly one hero, so the first screenful of scrolling slides the panels up
-  over a stationary sky. Once the hero is covered it releases and the page
-  scrolls normally.
-
-  <main> carries --lift for the passes inside it; nothing else reads it. See
-  lib/parallax.js for why that matters.
+  <main> carries --lift for the passes inside it and nothing else reads it. See
+  lib/parallax.js and `main` in base.css.
 */
 
 export default function App() {
@@ -33,8 +30,12 @@ export default function App() {
         </div>
 
         <main ref={stage}>
-          <WhereWhen />
-          <div className="gap" aria-hidden="true" />
+          {venues.map((venue) => (
+            <Fragment key={venue.id}>
+              <VenueCard venue={venue} />
+              <div className="gap" aria-hidden="true" />
+            </Fragment>
+          ))}
 
           <Rsvp />
         </main>

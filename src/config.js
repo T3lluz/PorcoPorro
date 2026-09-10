@@ -1,13 +1,10 @@
-// Alt innhold på siden bor her. Endre tekst, tider og lenker her, ikke i
-// komponentene.
-//
-//   ⚠️ = plassholder som må erstattes før siden deles.
+// Alt innhold på siden. Endre tekst, tider og lenker her, ikke i komponentene.
+// TODO-merkede felt må fylles inn før siden deles.
 
 export const couple = {
   one: 'Susan',
   two: 'Skage',
-  // Vises på banneret bak flyet. Hold det kort.
-  banner: 'SUSAN & SKAGE',
+  banner: 'SUSAN & SKAGE', // står på banneret bak flyet, så hold det kort
 }
 
 export const wedding = {
@@ -16,27 +13,42 @@ export const wedding = {
   place: 'St. Paulus kirke, Oslo',
 }
 
-export const venue = {
-  name: 'St. Paulus kirke',
-  address: 'Akersveien 5, 0177 Oslo', // ⚠️ dobbeltsjekk
-  lat: 59.9186, // ⚠️ dobbeltsjekk
-  lng: 10.7452, // ⚠️ dobbeltsjekk
-}
+// Ett lokasjonskort per post, i rekkefølgen de står. En tredje adresse er en ny
+// post her, ikke en ny komponent. `code` er stubnummeret og må telle videre;
+// svarkortet er SK 03. `time` er bare klokkeslettet, kortet setter «Klokken»
+// foran. `tilt` veksler fortegn, ellers heller stabelen.
+export const venues = [
+  {
+    id: 'hvor',
+    code: 'SK 01',
+    eyebrow: 'Vielsen',
+    name: 'St. Paulus kirke',
+    time: '13.00',
+    address: 'Thorvald Meyers gate 31, 0555 Oslo',
+    lat: 59.92636,
+    lng: 10.75834,
+    tilt: 1.2,
+  },
+  {
+    id: 'fest',
+    code: 'SK 02',
+    eyebrow: 'Festen',
+    name: 'Vespa og Humla',
+    time: 'Lorem ipsum', // TODO: klokkeslett
+    address: 'Københavngata 2, 0553 Oslo',
+    lat: 59.92477,
+    lng: 10.76288,
+    tilt: -1.1,
+  },
+]
 
-// Siden lenker til et Google-skjema i stedet for å bygge det inn.
-// IDen er delen av skjemaets URL mellom `/d/e/` og `/viewform`:
-// åpne skjemaet → Send → fanen `< >`.
-const FORM_ID = '1FAIpQLSfVEK1IYehIc0w_YYGv1gDRxS78U_AbbL57ifmhEHGpMT2A7w' // ⚠️
+// IDen er delen av skjemaets URL mellom /d/e/ og /viewform.
+const FORM_ID = '1FAIpQLSfVEK1IYehIc0w_YYGv1gDRxS78U_AbbL57ifmhEHGpMT2A7w' // TODO
 
 export const rsvp = {
   openUrl: `https://docs.google.com/forms/d/e/${FORM_ID}/viewform`,
-  deadlineLabel: 'Svar innen Lorem ipsum', // ⚠️
+  deadlineLabel: 'Svar innen Lorem ipsum', // TODO: frist
   blurb:
     'Vi trenger å vite hvor mange vi skal dekke på til, og om det er noe dere ' +
     'ikke tåler. Skjemaet tar under ett minutt.',
 }
-
-export const contacts = [
-  { role: 'Toastmaster', name: 'Ola Nordmann', phone: '+47 400 00 000' }, // ⚠️
-  { role: 'Forlover', name: 'Kari Nordmann', phone: '+47 400 00 001' }, // ⚠️
-]

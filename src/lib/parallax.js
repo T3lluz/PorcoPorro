@@ -1,33 +1,24 @@
-import { useEffect, useRef } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 
 /*
-  The falling camera.
+  One rAF-throttled scroll pass publishes numbers as custom properties; CSS
+  decides what they mean. Nothing here animates anything itself.
 
-  One rAF-throttled scroll pass measures where things are and publishes a
-  handful of numbers; CSS decides what they mean. Nothing here animates anything
-  itself, which keeps the motion vocabulary in the stylesheets.
+    --sy    scroll offset in px. Each cloud layer reads it with its own rate.
+    --fall  the same over the first viewport only, 0 to 1.
+    --lift  --fall eased out, 1 - (1 - f)². Slope is 0 at f = 1, so the passes
+            stop climbing without a visible change of gear.
+    --s     per element: 0 centred, -1 below the frame, +1 above.
+    --c     per element: 1 - |s|.
 
-  The numbers, all optional at every point of use:
+  Each value goes on the shallowest element whose subtree reads it, never on
+  :root. Custom properties inherit, so a write to :root invalidates style for
+  the whole document sixty times a second, map iframe included.
 
-    --sy    how far the page has fallen, in px. The sky layers read it, each
-            with its own coefficient, so far clouds creep and near ones rush.
-    --fall  the same over the first viewport only, 0 to 1. The hero lettering
-            sinks and fades on this.
-    --lift  --fall eased out, 1 - (1 - f)². The boarding passes ride up on it so
-            they climb faster than the page for as long as the hero is in the
-            way. Its slope at f = 1 is zero, so the extra speed bleeds away as
-            the hero lets go; a linear ramp would visibly change gear.
-    --s     per element: 0 dead centre, -1 below the frame, +1 above. Multiply
-            by an angle and a card tips towards you on the way up.
-    --c     per element: 1 - |s|, how centred it is. Drives the slight swell as
-            a pass crosses the lens.
-
-  Where these get written is the performance story. They used to go on :root,
-  and custom properties inherit, so every write invalidated style for every
-  element in the document, sixty times a second, on a page with a live map embed
-  in it. Each value now goes on the smallest element whose subtree reads it:
-  --sy on the two cloud layers, --fall on .hero, --lift on <main>. Nothing
-  outside those subtrees is disturbed by a scroll.
+  Registering ticks synchronously and the hooks are layout effects, so the first
+  values land before the first paint. Left on requestAnimationFrame they arrived
+  a frame late, and a reload part-way down the page painted one frame with the
+  sky at its top position and the passes unlifted before snapping into place.
 */
 
 const items = new Set() // elements wanting --s / --c
@@ -37,7 +28,6 @@ let listening = false
 
 const clamp01 = (n) => (n < 0 ? 0 : n > 1 ? 1 : n)
 
-/** Someone who has asked for less motion gets a camera that holds still. */
 export const stillCamera = () =>
   globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 
@@ -45,17 +35,15 @@ function tick() {
   queued = false
   const vh = globalThis.innerHeight || 1
 
-  // Read every rect before writing a single property. Interleaving reads and
-  // writes would invalidate layout on each pass and force a reflow per element.
+  // Every read before any write, or each write forces a reflow for the next.
   const reads = []
   for (const el of items) {
     const { top, height } = el.getBoundingClientRect()
     reads.push([el, top, height])
   }
 
-  // A visitor who has asked for no motion gets none. Leaving these unwritten is
-  // what keeps the sky still and the hero unpinned: every rule that reads them
-  // falls back to 0.
+  // Leaving these unwritten is what holds the sky still under reduced motion:
+  // every rule that reads them falls back to 0.
   if (!stillCamera()) {
     const y = globalThis.scrollY
     const fall = clamp01(y / vh)
@@ -68,9 +56,8 @@ function tick() {
     for (const [el, cam] of cams) {
       for (const name of cam.names) {
         const next = value[name]
-        // Nothing is written unless it actually changed. --fall and --lift stop
-        // moving after the first viewport and --sy stops when you stop, so most
-        // frames of a long scroll touch one element instead of three.
+        // --fall and --lift stop moving after one viewport, so most frames of a
+        // long scroll touch one element instead of three.
         if (cam.last[name] === next) continue
         cam.last[name] = next
         el.style.setProperty(`--${name}`, next)
@@ -106,17 +93,16 @@ function listen() {
 }
 
 /**
- * Have the camera write the named values on this element, and only this
- * element. Pick the shallowest node whose subtree needs them: that subtree is
- * exactly what a scroll will cost.
+ * Write the named values on this element only. Pick the shallowest node whose
+ * subtree needs them: that subtree is what a scroll costs.
  * @param {Element} el
  * @param {...('sy'|'fall'|'lift')} names
- * @returns {() => void} a stop function, so it can be returned from useEffect.
+ * @returns {() => void} stop function, for the layout effect below.
  */
 export function watch(el, ...names) {
   cams.set(el, { names, last: {} })
   listen()
-  schedule()
+  tick()
 
   return () => {
     cams.delete(el)
@@ -128,11 +114,10 @@ export function watch(el, ...names) {
 /** Ref-flavoured `watch`. */
 export function useCamera(...names) {
   const ref = useRef(null)
-  // The rest array is a fresh object on every render, so key the effect on the
-  // names themselves. They are literals at every call site.
+  // The rest array is a new object every render, so key the effect on the names.
   const key = names.join(',')
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = ref.current
     if (!el) return
     return watch(el, ...key.split(','))
@@ -141,11 +126,11 @@ export function useCamera(...names) {
   return ref
 }
 
-/** @returns {() => void} an unregister function. */
+/** @returns {() => void} unregister function. */
 export function register(el) {
   items.add(el)
   listen()
-  schedule()
+  tick()
 
   return () => {
     items.delete(el)
@@ -154,11 +139,11 @@ export function register(el) {
   }
 }
 
-/** Ref-flavoured `register`, for components that only need the one element. */
+/** Ref-flavoured `register`, for components needing only the one element. */
 export default function useParallax() {
   const ref = useRef(null)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = ref.current
     if (!el || stillCamera()) return
     return register(el)

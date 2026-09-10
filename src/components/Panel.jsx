@@ -1,12 +1,8 @@
 import useParallax from '../lib/parallax.js'
 
 /*
-  A boarding pass: a stub down the left with the section name set vertically, a
-  column of punched holes, and the content on the larger half.
-
-  Each card gets a small base `tilt`; the camera adds --s on top as the card
-  rises through the frame, so the passes read as loose paper falling past a
-  lens. See lib/parallax.js and .pass in base.css.
+  A boarding pass: stub down the left, content on the larger half. `tilt` is the
+  base lean; the camera adds --s on top. See .pass in base.css.
 */
 
 export default function Panel({

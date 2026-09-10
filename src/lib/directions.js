@@ -1,19 +1,15 @@
-/*
-  «Veibeskrivelse» skal åpne kartet folk faktisk bruker: Apple Maps på
-  iPhone/iPad/Mac, Google Maps ellers. Begge URL-ene er universelle. På mobil
-  tar app-en over, på desktop åpner de nettversjonen.
-*/
+// Åpner kartet folk faktisk bruker: Apple Maps på Apple, Google Maps ellers.
+// Begge URL-ene tar app-en på mobil og nettversjonen på desktop.
 
 const isApple = () => {
+  // iPadOS 13+ melder seg som Macintosh, så Mac og iPad deler denne grenen.
   const ua = globalThis.navigator?.userAgent ?? ''
-  // iPadOS 13+ rapporterer seg som «Macintosh», så Mac og iPad havner i samme
-  // gren. Begge har Apple Maps som standard.
   return /iPhone|iPad|iPod|Macintosh/.test(ua)
 }
 
 /**
  * @param {{ address: string, lat: number, lng: number }} venue
- * @returns {string} en lenke som åpner standardkartet med kjørerute dit.
+ * @returns {string} kjørerute i standardkartet.
  */
 export default function directionsUrl({ address, lat, lng }) {
   const dest = encodeURIComponent(address)

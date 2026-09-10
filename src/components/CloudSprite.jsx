@@ -1,14 +1,9 @@
 /**
- * The cloud geometry and the wind's stroke gradient, inlined once per page.
- * Every cloud on the site is drawn with <use href="#cloud-a" />, so there is
- * exactly one copy of the shapes no matter how many clouds are in the sky.
+ * Cloud geometry and the wind gradient, inlined once per page. Every cloud is a
+ * <use href="#cloud-a" />, so the shapes exist once however many are in the sky.
  *
- * Each cloud is a silhouette (<g id="shape-*">) painted twice: once flat with a
- * shared vertical gradient, then again with blurred shadow and highlight blobs
- * masked back inside that same silhouette. The second pass is what stops them
- * reading as flat vector blobs.
- *
- * viewBoxes: cloud-a 320x130, cloud-b 220x90, cloud-c 420x100.
+ * Each cloud is a silhouette painted twice: flat, then blurred shadow and
+ * highlight blobs masked back inside the same silhouette.
  */
 export default function CloudSprite() {
   return (
@@ -38,10 +33,8 @@ export default function CloudSprite() {
           <stop offset="1" stopColor="#d7eaf9" />
         </linearGradient>
 
-        {/* The wind strokes use this rather than flat white, so each one dies
-            away along its own length: nothing at the tail, full strength at the
-            curl in front. A stroke of even weight end to end reads as a drawn
-            line, not as moving air. objectBoundingBox, so it fits each path. */}
+        {/* Fades each wind stroke along its own length: nothing at the tail,
+            full strength at the curl. objectBoundingBox, so it fits any path. */}
         <linearGradient id="wind-fade" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0" stopColor="#fff" stopOpacity="0" />
           <stop offset=".22" stopColor="#fff" stopOpacity=".12" />
@@ -274,7 +267,6 @@ export default function CloudSprite() {
   )
 }
 
-/** viewBox strings, so callers never have to remember them. */
 const CLOUD_BOX = {
   'cloud-a': '0 0 320 130',
   'cloud-b': '0 0 220 90',
@@ -282,13 +274,9 @@ const CLOUD_BOX = {
 }
 
 /**
- * One cloud. `shape` picks the silhouette; `fx`/`fy` flip and squash it so the
- * three shapes never visibly repeat.
- *
- * `top` is where its top edge goes, as a percentage of the layer. `x` is not a
- * position but a phase: the sky streams one way at a fixed rate (@keyframes fly
- * in sky.css), so where a cloud sits horizontally is where it is in that
- * crossing, set as a negative delay on the animation.
+ * One cloud. `fx`/`fy` flip and squash the silhouette so three shapes never
+ * visibly repeat. `top` is a percentage of the layer; `x` is a phase, not a
+ * position, applied as a negative delay on @keyframes fly (sky.css).
  */
 export function Cloud({ shape, layer, w, top, x, dur, delay, travel, fx = 1, fy = 1 }) {
   return (

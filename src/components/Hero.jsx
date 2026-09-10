@@ -5,15 +5,11 @@ import Plane from './Plane.jsx'
 import WindSwirl from './WindSwirl.jsx'
 
 /*
-  Open sky. No navigation bar; the page is one scroll.
-
-  The hero is pinned (.hero-pin in hero.css) while the boarding passes below
-  slide up over it. During that the plane climbs and the lettering sinks and
-  fades, both driven by --fall, so the first flick of the wheel reads as the
+  Pinned while the passes slide up over it (.hero-pin in hero.css). The plane
+  climbs and the lettering sinks on --fall, so the opening scroll reads as the
   camera dropping away rather than the page moving up.
 
-  --fall is written here on the header, not on :root: everything that reads it
-  is inside this element. See lib/parallax.js.
+  --fall goes on this header, not :root: everything reading it is inside here.
 */
 
 export default function Hero() {
@@ -23,9 +19,8 @@ export default function Hero() {
     <header className="hero" ref={sky}>
       <div className="hero-stage" aria-hidden="true">
         <div className="hero-wind">
-          {/* The prop-wash. Faster than the high wind outside the hero, because
-              this is air coming off a propeller. All four enter from the left
-              and pass the plane on their way out, so they read as one airstream
+          {/* Prop-wash: faster than the high wind outside the hero, and all
+              four enter left and pass the plane, so they read as one airstream
               at four heights. */}
           <WindSwirl w="clamp(190px, 24vw, 320px)" top="16%" left="-18%" dur="4.3s" delay="-1.3s" travel="62vw" rise="-30px" op={0.52} />
           <WindSwirl w="clamp(150px, 19vw, 250px)" top="27%" left="-24%" dur="5.2s" delay="-3.9s" travel="70vw" rise="-22px" op={0.4} fy={-1} />

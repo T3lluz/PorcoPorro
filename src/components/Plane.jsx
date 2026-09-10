@@ -2,29 +2,22 @@ import planeSide from '../assets/plane-side.png'
 import Banner from './Banner.jsx'
 
 /*
-  The rig arrives from stage right on load (.plane-rig), then settles into three
-  transforms on mismatched periods (14s drift, 9s bob, 11s tilt) so the loop
-  never visibly repeats. The banner hangs off .banner-sway rather than riding
-  .plane-tilt rigidly, so it lags the aircraft it is tied to.
+  An <svg> with an <image> in it, not a bare <img>, because the propeller has to
+  turn. The artwork has the blades painted in and standing still, so they are
+  masked out and redrawn underneath as SVG on a spin. Everything stays in the
+  artwork's coordinate system (1024 x 463), so the hub holds at 233,133 whatever
+  --plane-w is.
 
-  The plane is an <image> inside an <svg> rather than a bare <img> because the
-  propeller has to turn: the artwork has the blades painted into it, standing
-  still. They are masked out and drawn again underneath as SVG on a spin. Both
-  live in the artwork's own coordinate system (1024 x 463), so the hub stays at
-  233,133 whatever --plane-w is and the propeller cannot drift off the nose.
-
-  The numbers are measured off the file: the painted blades occupy x 225-241,
-  y 18-244, and the amber spinner cone between them sits at y 116-154. The two
-  mask rectangles take the blades and leave the cone, which is a solid of
-  revolution and looks identical spinning or not.
+  Mask numbers measured off the file: painted blades at x 225-241, y 18-244,
+  amber spinner cone between them at y 116-154. The rects take the blades and
+  leave the cone, which looks the same spinning or not.
 */
 
 const HUB_X = 233
 const HUB_Y = 133
 
-/* One blade, tip at the top, root at the hub. Drawn about three times wider
-   than it should look, because the group is squashed to 30% horizontally to
-   foreshorten the disc. See .prop-blades in hero.css. */
+/* One blade, tip up, root at the hub. Drawn ~3x too wide because the group is
+   squashed to 30% to foreshorten the disc. See .prop-blades in hero.css. */
 const BLADE = `
   M233 20
   C243 52 250 88 252 118
@@ -52,9 +45,8 @@ export default function Plane() {
                   <rect x="217" y="154" width="24" height="96" />
                 </mask>
 
-                {/* Lit from above, in the viewBox rather than in the blade, so
-                    the highlight stays at the top of the disc as the blades turn
-                    through it instead of riding round with them. */}
+                {/* userSpaceOnUse, so the highlight stays at the top of the
+                    disc instead of riding round with the blades. */}
                 <linearGradient
                   id="prop-shade"
                   gradientUnits="userSpaceOnUse"
@@ -69,8 +61,7 @@ export default function Plane() {
                   <stop offset="1" stopColor="#4a4750" />
                 </linearGradient>
 
-                {/* Soft-edged: a flat ellipse at any opacity reads as a grey
-                    lens laid on the sky rather than as air being beaten. */}
+                {/* Soft-edged: a flat ellipse reads as a grey lens on the sky. */}
                 <radialGradient id="prop-wash">
                   <stop offset="0" stopColor="#eef3fb" stopOpacity=".5" />
                   <stop offset=".55" stopColor="#dfe7f5" stopOpacity=".28" />
@@ -85,8 +76,7 @@ export default function Plane() {
                 mask="url(#plane-prop-cut)"
               />
 
-              {/* the air the blades are beating: the disc you see at speed,
-                  with the blades flickering through it */}
+              {/* the disc you see at speed, blades flickering through it */}
               <ellipse
                 className="prop-wash"
                 cx={HUB_X}
@@ -95,12 +85,8 @@ export default function Plane() {
                 ry="116"
               />
 
-              {/* Two groups, not one: the outer disc squashes what the inner
-                  blades have already done. As one element it cannot work, since
-                  CSS composes the individual transform properties before
-                  `transform`, so a `rotate` alongside a `scaleX` squashes the
-                  blade first and then swings the sliver round, throwing two long
-                  spikes across the picture at every angle but vertical. */}
+              {/* Two groups, not one: the outer squashes what the inner has
+                  already rotated. See .prop-disc in hero.css. */}
               <g className="prop-disc">
                 <g className="prop-blades">
                   <path className="prop-blade" d={BLADE} />

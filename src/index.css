@@ -3,16 +3,59 @@
 @import './styles/hero.css';
 @import './styles/sections.css';
 
-/*
-  Tokens. The page is weather: blue sky is the ground, white belongs to the
-  clouds, and the only warm colour anywhere is the aeroplane. Daylight has no
-  dark mode, so this is light only, on purpose.
-*/
+/* Fallback faces for the webfonts, so the swap on load is not a visible jump.
+
+   Each is pinned to font-weight 400. Georgia ships a real bold, so a heading at
+   font-weight 600 was resolving to Georgia Bold while Cormorant loaded: 1043px
+   against Cormorant 600's 796px for the same string, which is what made the
+   page flash bold. A family holding only a 400 face has no bold to pick, and
+   font-synthesis-weight on body stops the browser faking one instead.
+
+   size-adjust is measured, not guessed: each value is the ratio of the
+   webfont's set width to its stand-in, so the text does not resize either. */
+@font-face {
+  font-family: 'Cormorant fallback';
+  src: local('Georgia'), local('Times New Roman'), local('Times');
+  font-weight: 400;
+  size-adjust: 86.5%;
+}
+
+@font-face {
+  font-family: 'Cormorant fallback';
+  src: local('Georgia Italic'), local('Times New Roman Italic'), local('Georgia');
+  font-style: italic;
+  font-weight: 400;
+  size-adjust: 86.5%;
+}
+
+@font-face {
+  font-family: 'Lora fallback';
+  src: local('Georgia'), local('Times New Roman'), local('Times');
+  font-weight: 400;
+  size-adjust: 105%;
+}
+
+@font-face {
+  font-family: 'Lora fallback';
+  src: local('Georgia Italic'), local('Times New Roman Italic'), local('Georgia');
+  font-style: italic;
+  font-weight: 400;
+  size-adjust: 105%;
+}
+
+@font-face {
+  font-family: 'Zen Maru fallback';
+  src: local('Segoe UI'), local('Avenir Next'), local('Helvetica Neue'),
+    local('Arial');
+  font-weight: 400;
+  size-adjust: 101.5%;
+}
+
+/* Tokens, reset, base type. Light only; the page is a daylit sky. */
 :root {
   color-scheme: light;
 
-  /* sky: the first pair is the horizontal base gradient, the other two the
-     vertical wash that deepens the top of the page. */
+  /* sky */
   --sky-seam-left: #82dbfd;
   --sky-seam-right: #4aaef9;
   --sky-high: #47a8f2;
@@ -23,14 +66,8 @@
   /* clouds */
   --cloud-2: #e6f2f8;
 
-  /* The aeroplane, the only warm colour on the site — so it is sampled from the
-     aeroplane rather than picked. The logo in the footer prints its body in
-     #cd261c and the plane sits at #cb2e0d, both a few degrees off pure red; the
-     old #ce3419 was the same weight but eight degrees round towards orange,
-     which is enough that the button and the badge below it read as two
-     different reds on the same page. Matched now, and the tints move with it. */
+  /* Sampled off plane-side.png (#cb2e0d) so buttons and plane are one red. */
   --rosso: #cb281b;
-  --rosso-lit: #e5503b;
   --rosso-deep: #9a1e12;
 
   /* ink and paper */
@@ -39,63 +76,34 @@
   --line: #d5e9f0;
   --panel: #ffffff;
 
-  /* Open sky between the last boarding pass and the top of the footer. The
-     horizon haze reaches up out of the footer into it, so this decides how much
-     clear blue there is before the ground starts. */
+  /* One family per role, each followed by its metric-matched stand-in above.
+     Loaded in index.html, keep the lists in step. */
+  --display: 'Cormorant Garamond', 'Cormorant fallback', Georgia, serif;
+  --ui: 'Zen Maru Gothic', 'Zen Maru fallback', system-ui, sans-serif;
+  --body: 'Lora', 'Lora fallback', Georgia, serif;
+
+  /* Open sky between the passes, and between the last pass and the footer. */
+  --gap-sky: 150px;
   --ground-gap: clamp(210px, 28vh, 400px);
 
-  /* One family per role. Loaded in index.html; keep the two lists in step. */
-  --display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
-  --ui: 'Zen Maru Gothic', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
-  --body: 'Lora', Georgia, 'Times New Roman', serif;
-
-  /* Real sky between the cards. They are meant to read as separate things
-     falling past a lens, so the gap has to be big enough that the sky behind is
-     the subject for a beat before the next card arrives. */
-  --gap-sky: 150px;
-
-  /* Open sky between the fold and the top edge of the first card at rest. See
-     `main` in base.css for what this offsets.
-
-     Its floor is --drift on .pass. The card is not drawn where its layout box
-     is: the camera translates it by `--s * --drift`, and at rest --s is -1
-     because the card is entirely below the frame, so it is drawn a whole
-     --drift above its own box before you touch anything (58px on desktop, 30px
-     on a phone). Set this under that and the card's edge is already on screen
-     at scroll zero, which is the one thing this offset exists to prevent.
-
-     What shows below the fold at rest is --lead-sky minus --drift. If --drift
-     on .pass grows, this has to grow with it. */
+  /* Floor is --drift on .pass (58px desktop, 30px phone). At rest --s is -1, so
+     a card is drawn a whole --drift above its own box; set this under that and
+     its edge shows at scroll zero. */
   --lead-sky: 96px;
 
-  /* How much extra the boarding passes climb, over and above the scroll, while
-     the hero is still in front of them. Named for the cards rather than just
-     `--rise` because every .wind carries a --rise of its own, and a token on
-     :root with that name would be inherited into their keyframes.
-
-     The first card cannot start any higher than it does (see --lead-sky), so
-     the only way to reach it sooner is for it to come up faster than the page.
-     It rides --lift, 0 at rest and 1 by the end of the first viewport, so over
-     that stretch the passes travel one viewport of scrolling plus this.
-
-     After the first viewport it is a constant offset; .footer subtracts it back
-     out of its own top margin so the ground stays exactly as far below the last
-     card as it was. Change one, change the other. */
+  /* Extra climb on the passes while the hero still covers them, on top of the
+     scroll. .footer subtracts it from its own top margin, so change both. */
   --card-rise: 30svh;
 
   --wrap: 700px;
   --pad: 44px;
 
-  /* One hero. The pin container is twice this and <main> is pulled back up by
-     exactly this, so the two always agree. No floor: a hero taller than the
-     window puts the lettering below the fold. The hero is the window. */
+  /* .hero-pin is twice this and <main> is pulled up by exactly this. */
   --hero-h: 100vh;
 }
 
-/* svh rather than vh, so a toolbar sliding back in cannot cover the bottom of
-   the hero. Guarded: a custom property holds unparsed tokens, so in a browser
-   that does not know svh the declaration would be accepted here and then fail at
-   every point of use, taking the page layout with it. */
+/* Guarded: a custom property holds unparsed tokens, so without @supports a
+   browser lacking svh would accept this and then fail at every point of use. */
 @supports (height: 100svh) {
   :root {
     --hero-h: 100svh;
@@ -103,6 +111,7 @@
 }
 
 /* --- reset ---------------------------------------------------------------- */
+
 *,
 *::before,
 *::after {
@@ -128,6 +137,10 @@ body {
   line-height: 1.68;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
+  /* Weight only. Every webfont here ships the weights it is asked for, so a
+     faked bold can only ever be a fallback embolding itself mid-load. Italic
+     synthesis stays on, since the fallback families lean on it. */
+  font-synthesis-weight: none;
 }
 
 img,
@@ -157,6 +170,7 @@ ul {
 }
 
 /* --- base type ------------------------------------------------------------ */
+
 h1,
 h2,
 h3 {
@@ -181,33 +195,34 @@ p + p {
   margin-top: 0.8em;
 }
 
-.eyebrow {
-  font-family: var(--ui);
-  font-weight: 500;
-  font-size: 11px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--ink-2);
-}
-
 .tabular {
   font-variant-numeric: tabular-nums;
 }
 
-/* --- phone ---------------------------------------------------------------- */
+/* clip-path, not display:none, which would drop it from the a11y tree too. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- responsive ----------------------------------------------------------- */
+
 @media (max-width: 700px) {
   :root {
     --gap-sky: 96px;
     --lead-sky: 52px;
     --card-rise: 25svh;
     --ground-gap: 200px;
-    /* Narrower cards, so the sky they fall through is still visible either side
-       of them: the card is an object in front of the page, and it stops reading
-       as that the moment it touches both edges.
-
-       env() on both sides, because a notch is only ever on one of them and the
-       page is centred, so budgeting for both keeps anything from landing under
-       the cutout when the phone is turned. */
+    /* Sky either side of the cards, so they still read as objects in front of
+       the page. env() on both sides: the page is centred, so budgeting for one
+       notch leaves the other edge under the cutout when the phone turns. */
     --pad: calc(
       52px + env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px)
     );
@@ -219,8 +234,7 @@ p + p {
   }
 }
 
-/* Still narrower than the screen, just not by as much: below 400px the card has
-   to keep enough width to set a readable line. */
+/* Below 400px the card needs the width back to set a readable line. */
 @media (max-width: 400px) {
   :root {
     --pad: calc(
@@ -229,7 +243,6 @@ p + p {
   }
 }
 
-/* --- motion budget -------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
